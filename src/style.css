@@ -1,0 +1,29 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: monospace, system-ui, sans-serif;
+}
+
+.mainContent::-webkit-scrollbar{
+  display: none;
+}
+
+.mainContent {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+:root {
+  --bg-color: #201f2c;
+  --btn-green: #51b351;
+  background-color: #201f2c;
+  color: white;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.hide-overflow {
+  overflow: hidden;
+}
