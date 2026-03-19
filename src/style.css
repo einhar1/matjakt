@@ -16,14 +16,30 @@ html, body {
 }
 
 :root {
-  --bg-color: #201f2c;
+  background-color: #ebebeb;
+  /*--bg-color: #201f2c;
   --btn-green: #51b351;
   background-color: #201f2c;
   color: white;
   height: 100%;
   overflow-x: hidden;
+  */
 }
 
 .hide-overflow {
+  /*
   overflow: hidden;
+  */
+}
+
+.box {
+  background-color: white;
+  border-radius: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.box-padding {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
