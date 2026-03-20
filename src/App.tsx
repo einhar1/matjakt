@@ -6,6 +6,8 @@ import { DetailsView } from "./views/DetailsView"
 import { HomeView } from "./views/HomeView"
 import { SearchView } from "./views/SearchView";
 
+import { supabase } from './utils/supabase'
+
 
 
 export type AppRenderProps = {
