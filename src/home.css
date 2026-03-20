@@ -1,0 +1,113 @@
+
+
+.home-wrapper {
+    min-height: 100vh;
+}
+
+.home-container {
+    max-width: 900px;
+    margin: 0 auto;
+    /* padding: 20px; */
+}
+
+.home-hero {
+    text-align: center;
+    padding: 60px 20px;
+    margin: 40px 0;
+    background: linear-gradient(135deg, rgb(240, 253, 244) 0%, rgb(224, 242, 254) 100%);
+    border-radius: 24px;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.badge {
+    background: white;
+    border: 1px solid var(--border-subtle);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.home-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 20px 0;
+    color: #111827;
+    letter-spacing: -0.03em;
+}
+
+.highlight-text {
+    color: var(--accent-color);
+}
+
+.home-hero p {
+    font-size: 1.15rem;
+    color: rgb(75, 85, 99);
+    max-width: 600px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+
+.home-offers h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.home-offers-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.home-offer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+}
+
+.home-offer-card:hover {
+    border-color: var(--accent-color)
+}
+
+.home-offer-store {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgb(243, 244, 246);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.home-offer-brand {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.home-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.home-price-promo {font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--discount-red);
+}
+
+.home-price-old {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
