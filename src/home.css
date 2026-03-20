@@ -57,16 +57,10 @@
     line-height: 1.6;
 }
 
-
 .home-offers h2 {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 16px;
-}
-
-.home-offers-grid {
-    display: grid;
-    gap: 16px;
 }
 
 .home-offer-card {
@@ -110,4 +104,32 @@
     font-size: 0.9rem;
     color: var(--text-muted);
     text-decoration: line-through;
+}
+
+/* from https://codepen.io/koltong/pen/JjKPwgg */
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  background: rgb(220, 252, 231);
+  padding: 6px 12px;
+  border-radius: 100px;
+  max-width: 100px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
 }

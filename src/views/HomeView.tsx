@@ -35,9 +35,14 @@ function HomeView(props: HomeViewProps) {
   function renderPrices(offer: OfferItem) {
     if (offer.currentPrice.promo_price) {
       return (
-        <span className='home-price-promo'>
-          {offer.currentPrice.promo_price} kr
-        </span>
+        <>
+          <span className='home-price-promo'>
+            {offer.currentPrice.promo_price} kr
+          </span>
+          <span className='home-price-old'>
+            {offer.currentPrice.price} kr
+          </span>
+        </>
       );
     }
     return (
@@ -63,6 +68,7 @@ function HomeView(props: HomeViewProps) {
         <div className='home-offer-prices'>
           {renderPrices(offer)}
         </div>
+        <button className='home-offer-btn'>Lägg till i matkasse</button>
       </div>
     )
   }
@@ -91,11 +97,20 @@ function HomeView(props: HomeViewProps) {
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
           </p>
         </section>
+
         <section className="home-offers">
-          <h2>Veckans klipp</h2>
-          <div className="home-offers-grid">
-            {props.offers.map(renderOfferCard)}
+          <div className="section-header">
+            <h2>Veckans klipp</h2>
+            <span className='badge live-indicator'>
+              <span className='dot'></span> Live Data
+            </span>
+            <div className="carousel">
+              {props.offers.map(renderOfferCard)}
+            </div>
           </div>
+        </section>
+        <section className='start'>
+          <button className='start-btn'></button>
         </section>
       </div>
     </div>
