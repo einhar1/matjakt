@@ -18,7 +18,7 @@ function App(props: AppRenderProps) {
     return createHashRouter([
       {
         path: "/",
-        element: <HomeView/>,
+        element: <HomeView offers={[]}/>, /* Temporärt tills vi fixar props */
       },
       {
         path: "/search",
