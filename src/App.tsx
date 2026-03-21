@@ -7,6 +7,7 @@ import { HomeView } from "./views/HomeView"
 import { SearchView } from "./views/SearchView";
 
 import { supabase } from './utils/supabase'
+import { mockOffers } from './mockdata';
 
 
 
@@ -20,7 +21,7 @@ function App(props: AppRenderProps) {
     return createHashRouter([
       {
         path: "/",
-        element: <HomeView offers={[]}/>, /* Temporärt tills vi fixar props */
+        element: <HomeView offers={mockOffers}/>, /* Temporärt tills vi fixar props */
       },
       {
         path: "/search",

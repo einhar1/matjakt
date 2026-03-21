@@ -52,6 +52,8 @@ function HomeView(props: HomeViewProps) {
     );
   }
 
+  const carouselItems = [...props.offers, ...props.offers];
+
   function renderOfferCard(offer: OfferItem) {
     return (
       <div
@@ -104,8 +106,10 @@ function HomeView(props: HomeViewProps) {
             <span className='badge live-indicator'>
               <span className='dot'></span> Live Data
             </span>
-            <div className="carousel">
-              {props.offers.map(renderOfferCard)}
+            <div className='carousel-view'>
+              <div className='carousel-track'>
+                {carouselItems.map(renderOfferCard)}
+              </div>
             </div>
           </div>
         </section>

@@ -1,5 +1,4 @@
 
-
 .home-wrapper {
     min-height: 100vh;
 }
@@ -132,4 +131,45 @@
   0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
   70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+/* Carousel css from https://blog.logto.io/css-only-infinite-scroll */
+.carousel-view {
+  width: 100%;
+  overflow: hidden;
+  padding: 8px 0 20px 0;
+  mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+}
+
+.carousel-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: scrolling 240s linear infinite;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+.carousel-track .home-offer-card {
+  min-width: 200px;
+  max-width: 200px;
+  flex-shrink: 0;
+  transition: transform 0.5s ease;
+  cursor: pointer;
+}
+
+.carousel-track .home-offer-card:hover {
+  transform: scale(1.01);
+  /* box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19); */
+}
+
+@keyframes scrolling {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
