@@ -1,7 +1,9 @@
 
+import { useState } from 'react';
 import '../home.css'
 import '../style.css'
 import type { Product, CurrentPrice, Store } from '../types/database';
+import { NavbarView } from './NavbarView.tsx';
 
 export type OfferItem = {
   product: Product;
@@ -11,26 +13,29 @@ export type OfferItem = {
 
 export type HomeViewProps = {
   offers: OfferItem[];
-  // onSearch: (query: string) => void;
+  onSearch: (query: string) => void;
+  onLoginClick: () => void;
+  onCartClick: () => void;
+  cartItemCount?: number;
 }
 
 function HomeView(props: HomeViewProps) {
 
-  // function handleSearchClick() {
-  //   const input = document.getElementById("seed-search-input") as HTMLInputElement;
-  //   if (input) {
-  //     props.onSearch(input.value);
-  //   };
-  // }
+  const [showAll, setShowAll] = useState(false);
 
-  // function handleSearchKeyDownACB(e: React.KeyboardEvent<HTMLInputElement>) {
-  //   if (e.key === 'Enter') {
-  //     const input = e.currentTarget;
-  //     props.onSearch(input.value);
-  //     // Clears focus after enterd
-  //     input.blur();
-  //   }
-  // }
+  function handleOpenModal() {
+    setShowAll(true);
+  }
+
+  function handleCloseModal() {
+    setShowAll(false)
+  }
+
+  function handleOverlayClick(e: React.MouseEvent) {
+    if (e.target === e.currentTarget) {
+      setShowAll(false)
+    }
+  }
 
   function renderPrices(offer: OfferItem) {
     if (offer.currentPrice.promo_price) {
@@ -75,20 +80,35 @@ function HomeView(props: HomeViewProps) {
     )
   }
 
+  function renderModalOfferCard(offer: OfferItem, index: number) {
+    return (
+      <div
+        key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
+        className='home-offer-card'
+      >
+        <span className='home-offer-store'>
+          {offer.store.store_name}
+        </span>
+        <h3>{offer.product.name}</h3>
+        {offer.product.brand && (
+          <p className='home-offer-brand'>{offer.product.brand}</p>
+        )}
+        <div className='home-offer-prices'>
+          {renderPrices(offer)}
+        </div>
+        <button className='home-offer-btn'>Lägg till i matkasse</button>
+      </div>
+    )
+  }
+
   return (
     <div className="home-wrapper">
-      {/* <header className="home-search-bar">
-        <input className="search-form">
-          <CiSearch className="search-icon" size={24} />
-          <input 
-            type="text" 
-            placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
-            // onKeyDown={handleSearchKeyDownACB}
-            className="search-input"
-          />
-          <button type="submit" className="search-button" onClick={handleSearchClick}>Sök</button>
-        </input>
-      </header> */}
+      <NavbarView 
+      onSearch={props.onSearch}
+      onLoginClick={props.onLoginClick}
+      onCartClick={props.onCartClick}
+      cartItemCount={props.cartItemCount} 
+      />
 
       <div className="home-container">
         <section className="home-hero">
@@ -103,9 +123,15 @@ function HomeView(props: HomeViewProps) {
         <section className="home-offers">
           <div className="section-header">
             <h2>Veckans klipp</h2>
-            <span className='badge live-indicator'>
-              <span className='dot'></span> Live Data
-            </span>
+            <div className='section-header-row'>
+              <span className='badge live-indicator'>
+                <span className='dot'></span> 
+                Live Data
+              </span>
+              <button className='view-all-btn' onClick={handleOpenModal}>
+                  Visa alla →
+              </button>
+            </div>
             <div className='carousel-view'>
               <div className='carousel-track'>
                 {carouselItems.map(renderOfferCard)}
@@ -117,6 +143,21 @@ function HomeView(props: HomeViewProps) {
           <button className='start-btn'></button>
         </section>
       </div>
+
+      {showAll && (
+        <div className='modal-overlay' onClick={handleOverlayClick}>
+          <div className='modal-content'>
+            <button className='modal-close-btn' onClick={handleCloseModal}>
+              ← Back to home
+            </button>
+            <div className='modal-header'>
+              <h2>Veckans klipp</h2>
+            </div>
+            <div className='modal-grid'>
+              {props.offers.map(renderModalOfferCard)}
+            </div>
+        </div>
+      </div>)}
     </div>
   );
 }
