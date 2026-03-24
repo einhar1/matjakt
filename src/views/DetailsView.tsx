@@ -27,6 +27,7 @@ ChartJS.register(
 );
 import { supabase } from "../utils/supabase";
 import { useParams } from "react-router-dom";
+import { LocationModal } from "../components/LocationModal";
 
 type Product = {
   product_id: string,
@@ -45,6 +46,10 @@ export type DetailsViewProps = {
 function DetailsView(props: DetailsViewProps) {
   const { productId } = useParams<{ productId: string}>();
   const [product, setProduct] = useState<Product | null>(null);
+  const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
+  const [factExpanded, setFactExpanded] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
 
 
   useEffect(() => {
@@ -108,31 +113,37 @@ function DetailsView(props: DetailsViewProps) {
               <div className="head-container box-padding">
                 <img className="box" src="src/assets/gevalia.webp" alt="gevalia"/>
                 <div className="main-info-container">
-                  <div className="main-info-box box">
+                  <div className="main-info-box">
                     <h1>{product?.name}</h1>
                     <h3>{product?.brand}. {product?.pack_size}.</h3>
                     <p>Genomsnittspris: <span><b>{product.meanPrice}kr</b></span></p>
                     <button>Lägg i varukorg</button>
                   </div>
-                  <div className="box">
+                  <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
                     <h3>Ingredienser</h3>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                      et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-                    </p>
+                    {ingredientsExpanded && (
+                      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
+                        et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
+                      </p>
+                    )}
                   </div>
-                  <div className="box">
+                  <div className="clickable-section" onClick={() => setFactExpanded(!factExpanded)}>
                     <h3>Produktfakta</h3>
-                    <p><b>Land:</b> {product.country_of_origin}</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                      et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-                      lorem
-                    </p>
+                    {factExpanded && (
+                      <>
+                        <p><b>Land:</b> {product.country_of_origin}</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
+                          et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
+                          lorem
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-            <div className="box box-padding">
-              <button>Butiker nära dig</button>
+            <div className="box box-padding store-prices-box">
+              <button className="location-btn" onClick={() => setShowLocationModal(true)}>Välj område</button>
               <Bar data={storeData} options={storeOptions}/>
             </div>
             <div className="box box-padding">
@@ -142,9 +153,19 @@ function DetailsView(props: DetailsViewProps) {
           )
           : <div className="details-container"></div>
         }
+        <LocationModal 
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onLocationSelect={(location) => {
+            setSelectedLocation(location);
+            console.log('Selected location:', location);
+            // Here you can add logic to update the store prices based on the selected location
+          }}
+        />
     </div>
   );
 }
+
 
 const storeData: ChartData<'bar'> = {
   labels: [
@@ -156,7 +177,7 @@ const storeData: ChartData<'bar'> = {
     {
       label: 'Pris (kr)',
       data: [55, 57, 60, 60, 60, 60, 65, 65, 80, 80],
-      backgroundColor: "rgb(228, 64, 64)",
+      backgroundColor: "#16a34a",
     },
   ],
 };

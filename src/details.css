@@ -20,3 +20,71 @@
 .main-info-container h1 {
     margin-top: 0;
 }
+
+.main-info-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+
+.clickable-section {
+    background: var(--bg-card);
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    margin: 8px 0;
+    transition: background-color 0.2s;
+    transition: transform 0.2s, border-color 0.2s;
+    user-select: none;
+}
+
+.clickable-section:hover {
+    border-color: var(--accent-hover);
+}
+
+.clickable-section h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.clickable-section h3::before {
+    content: '▶ ';
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.2s;
+    font-size: 12px;
+}
+
+.clickable-section:has(> h3:hover) h3::before {
+    color: #e44040;
+}
+
+.clickable-section p {
+    margin: 12px 0 0 0;
+}
+
+.store-prices-box {
+    position: relative;
+}
+
+.location-btn {
+    position: absolute;
+    right: 0;
+    padding: 10px 16px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.location-btn:hover {
+    background: var(--accent-hover);
+}
