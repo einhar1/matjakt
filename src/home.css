@@ -108,7 +108,6 @@
   max-width: 200px;
   flex-shrink: 0;
   transition: transform 0.5s ease;
-  cursor: pointer;
 }
 
 .carousel-track .offer-card:hover {
@@ -201,4 +200,10 @@
 .modal-grid .offer-card {
   flex: 1 1 200px;
   max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  .home-hero {
+    border-radius: 0;
+  }
 }
