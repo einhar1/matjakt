@@ -56,55 +56,6 @@
     line-height: 1.6;
 }
 
-.home-offers h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.home-offer-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
-}
-
-.home-offer-card:hover {
-    border-color: var(--accent-color)
-}
-
-.home-offer-store {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: rgb(243, 244, 246);
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-.home-offer-brand {
-    margin: 0 0 12px;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.home-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.home-price-promo {font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--discount-red);
-}
-
-.home-price-old {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    text-decoration: line-through;
-}
-
 /* from https://codepen.io/koltong/pen/JjKPwgg */
 .live-indicator {
   display: flex;
@@ -152,7 +103,7 @@
   animation-play-state: paused;
 }
 
-.carousel-track .home-offer-card {
+.carousel-track .offer-card {
   min-width: 200px;
   max-width: 200px;
   flex-shrink: 0;
@@ -160,7 +111,7 @@
   cursor: pointer;
 }
 
-.carousel-track .home-offer-card:hover {
+.carousel-track .offer-card:hover {
   transform: translateY(-2px)
   /* box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19); */
 }
@@ -180,24 +131,6 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
-}
-
-.home-offer-btn {
-  width: 100%;
-  margin: 12px 0 0 0;
-  padding: 10px 16px;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s
-}
-
-.home-offer-btn:hover {
-  background: var(--accent-hover);
 }
 
 /* Modal for view all */
@@ -265,7 +198,7 @@
   gap: 10px;
 }
 
-.modal-grid .home-offer-card {
+.modal-grid .offer-card {
   flex: 1 1 200px;
   max-width: 100%;
 }

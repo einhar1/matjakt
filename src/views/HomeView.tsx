@@ -2,14 +2,8 @@
 import { useState } from 'react';
 import '../home.css'
 import '../style.css'
-import type { Product, CurrentPrice, Store } from '../types/database';
 import { NavbarView } from './NavbarView.tsx';
-
-export type OfferItem = {
-  product: Product;
-  store: Store;
-  currentPrice: CurrentPrice;
-}
+import { OfferCard, type OfferItem } from '../components/OfferCard';
 
 export type HomeViewProps = {
   offers: OfferItem[];
@@ -37,69 +31,7 @@ function HomeView(props: HomeViewProps) {
     }
   }
 
-  function renderPrices(offer: OfferItem) {
-    if (offer.currentPrice.promo_price) {
-      return (
-        <>
-          <span className='home-price-promo'>
-            {offer.currentPrice.promo_price} kr
-          </span>
-          <span className='home-price-old'>
-            {offer.currentPrice.price} kr
-          </span>
-        </>
-      );
-    }
-    return (
-      <span className='home-price'>
-        {offer.currentPrice.price} kr
-      </span>
-    );
-  }
-
   const carouselItems = [...props.offers, ...props.offers];
-
-  function renderOfferCard(offer: OfferItem) {
-    return (
-      <div
-        key={`${offer.currentPrice.store_id}-${offer.currentPrice.product_key}`}
-        className='home-offer-card'
-      >
-        <span className='home-offer-store'>
-          {offer.store.store_name}
-        </span>
-        <h3>{offer.product.name}</h3>
-        {offer.product.brand && (
-          <p className='home-offer-brand'>{offer.product.brand}</p>
-        )}
-        <div className='home-offer-prices'>
-          {renderPrices(offer)}
-        </div>
-        <button className='home-offer-btn'>Lägg till i matkasse</button>
-      </div>
-    )
-  }
-
-  function renderModalOfferCard(offer: OfferItem, index: number) {
-    return (
-      <div
-        key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
-        className='home-offer-card'
-      >
-        <span className='home-offer-store'>
-          {offer.store.store_name}
-        </span>
-        <h3>{offer.product.name}</h3>
-        {offer.product.brand && (
-          <p className='home-offer-brand'>{offer.product.brand}</p>
-        )}
-        <div className='home-offer-prices'>
-          {renderPrices(offer)}
-        </div>
-        <button className='home-offer-btn'>Lägg till i matkasse</button>
-      </div>
-    )
-  }
 
   return (
     <div className="home-wrapper">
@@ -134,7 +66,12 @@ function HomeView(props: HomeViewProps) {
             </div>
             <div className='carousel-view'>
               <div className='carousel-track'>
-                {carouselItems.map(renderOfferCard)}
+                {carouselItems.map((offer, index) => (
+                  <OfferCard 
+                    key={`carousel-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
+                    offer={offer} 
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -154,7 +91,12 @@ function HomeView(props: HomeViewProps) {
               <h2>Veckans klipp</h2>
             </div>
             <div className='modal-grid'>
-              {props.offers.map(renderModalOfferCard)}
+              {props.offers.map((offer, index) => (
+                <OfferCard
+                  key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
+                  offer={offer} 
+                />
+              ))}
             </div>
         </div>
       </div>)}
