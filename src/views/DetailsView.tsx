@@ -14,6 +14,7 @@ import {
   type ChartOptions,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { useEffect, useState } from "react";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -24,51 +25,123 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import { supabase } from "../utils/supabase";
+import { useParams } from "react-router-dom";
+
+type Product = {
+  product_id: string,
+  product_key: string,
+  name: string,
+  brand: string,
+  pack_size: string,
+  country_of_origin: string,
+  meanPrice: string,
+}
 
 export type DetailsViewProps = {
 
 }
 
 function DetailsView(props: DetailsViewProps) {
+  const { productId } = useParams<{ productId: string}>();
+  const [product, setProduct] = useState<Product | null>(null);
+
+
+  useEffect(() => {
+    async function fetchData() {
+      const productResponse = await supabase
+        .from("products")
+        .select("product_id, product_key, name, brand, pack_size, country_of_origin")
+        .eq("product_id", productId)
+        .single();
+      
+
+      if (productResponse.error) {
+        console.error(productResponse.error)
+        setProduct(null);
+      } else {
+
+        const storeResponse = await supabase
+          .from("current_prices")
+          .select("store_id, product_key, price, unit_price, currency, available")
+          .eq("product_key", productResponse.data.product_key);
+        
+        if (storeResponse.error) {
+          console.log(storeResponse.error);
+        }
+        else {
+
+          let sumPrices = 0;
+          storeResponse.data.forEach(storeData => {
+            if (storeData.available && !!storeData.price && storeData.product_key === productResponse.data.product_key) {
+              sumPrices += storeData.price;
+            }
+          });
+          
+          const meanPrice = (sumPrices / storeResponse.data.length).toFixed(2);
+
+          const newProduct: Product = {
+            product_id: productResponse.data.product_id,
+            product_key: productResponse.data.product_key,
+            name: productResponse.data.name,
+            brand: productResponse.data.brand,
+            pack_size: productResponse.data.pack_size,
+            country_of_origin: productResponse.data.country_of_origin,
+            meanPrice: meanPrice,
+          }
+
+          setProduct(newProduct);
+          console.log("FINISHED");
+        }
+      }
+    }
+
+    fetchData()
+  }, [productId]);
+
+
   return (
     <div className="details-wrapper">
-      <div className="details-container">
+        {
+          !!product ? (
+            <div className="details-container">
+              <div className="head-container box-padding">
+                <img className="box" src="src/assets/gevalia.webp" alt="gevalia"/>
+                <div className="main-info-container">
+                  <div className="main-info-box box">
+                    <h1>{product?.name}</h1>
+                    <h3>{product?.brand}. {product?.pack_size}.</h3>
+                    <p>Genomsnittspris: <span><b>{product.meanPrice}kr</b></span></p>
+                    <button>Lägg i varukorg</button>
+                  </div>
+                  <div className="box">
+                    <h3>Ingredienser</h3>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
+                      et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
+                    </p>
+                  </div>
+                  <div className="box">
+                    <h3>Produktfakta</h3>
+                    <p><b>Land:</b> {product.country_of_origin}</p>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
+                      et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
+                      lorem
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-        <div className="head-container box-padding">
-          <img className="box" src="src/assets/gevalia.webp" alt="gevalia"/>
-          <div className="main-info-container">
-            <div className="main-info-box box">
-              <h1>Bryggkaffe Mellanrost</h1>
-              <h3>Gevalia. 450 g.</h3>
-              <p>Genomsnittspris: <span><b>75kr</b></span></p>
-              <button>Lägg i varukorg</button>
+            <div className="box box-padding">
+              <button>Butiker nära dig</button>
+              <Bar data={storeData} options={storeOptions}/>
             </div>
-            <div className="box">
-              <h3>Ingredienser</h3>
-              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-              </p>
-            </div>
-            <div className="box">
-              <h3>Produktfakta</h3>
-              <p><b>Land:</b> Indien</p>
-              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-                lorem
-              </p>
+            <div className="box box-padding">
+              <Line data={priceHistoryData} options={priceHistoryOptions}/>
             </div>
           </div>
-        </div>
-
-        <div className="box box-padding">
-          <button>Butiker nära dig</button>
-          <Bar data={storeData} options={storeOptions}/>
-        </div>
-        <div className="box box-padding">
-          <Line data={priceHistoryData} options={priceHistoryOptions}/>
-        </div>
-        
-      </div>
+          )
+          : <div className="details-container"></div>
+        }
     </div>
   );
 }

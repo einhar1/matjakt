@@ -44,7 +44,7 @@ function App(props: AppRenderProps) {
         element: <CheckoutView/>
       },
       {
-        path: "/details",
+        path: "/details/:productId",
         element: <DetailsView/>
       },
     ]);
