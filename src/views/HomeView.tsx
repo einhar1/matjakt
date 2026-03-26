@@ -5,6 +5,7 @@ import '../style.css'
 import { NavbarView } from './NavbarView.tsx';
 import { OfferCard, type OfferItem } from '../components/OfferCard';
 import { PostalCodeInput } from '../components/PostalCodeInput';
+import { userModel } from '../models/userModel.ts';
 
 export type HomeViewProps = {
   offers: OfferItem[];
@@ -92,7 +93,7 @@ function HomeView(props: HomeViewProps) {
               ← Back to home
             </button>
             <div className='modal-header'>
-              <h2>Veckans klipp</h2>
+              <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
             </div>
             <div className='modal-grid'>
               {props.offers.map((offer, index) => (
