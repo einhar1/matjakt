@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { postalCodeModel } from '../models/postalCodeModel'
 import { userModel } from '../models/userModel';
+import '../postcodeInput.css'
 
 type PostalCodeInputProps = {
     initialValue?: string;

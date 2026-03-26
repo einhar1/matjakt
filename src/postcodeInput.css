@@ -1,0 +1,85 @@
+
+.hero-postal-code {
+  margin-top: 32px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.postal-code-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.postal-code-input label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.postal-code-row {
+  display: flex;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.postal-code-row:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+}
+
+.postal-code-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  font-size: 16px;
+  outline: none;
+  color: var(--text-main);
+  min-width: 0;
+}
+
+.postal-code-row input::placeholder {
+  color: #9ca3af;
+}
+
+.postal-code-save-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.postal-code-save-btn:hover {
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.postal-code-error {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
