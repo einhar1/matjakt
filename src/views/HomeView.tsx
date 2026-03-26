@@ -4,6 +4,7 @@ import '../home.css'
 import '../style.css'
 import { NavbarView } from './NavbarView.tsx';
 import { OfferCard, type OfferItem } from '../components/OfferCard';
+import { PostalCodeInput } from '../components/PostalCodeInput';
 
 export type HomeViewProps = {
   offers: OfferItem[];
@@ -50,6 +51,9 @@ function HomeView(props: HomeViewProps) {
             Automatiserad insamling från <strong>ICA, Coop, Willys och Hemköp</strong>. 
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
           </p>
+          <div className='hero-postal-code'>
+            <PostalCodeInput/>
+          </div>
         </section>
 
         <section className="home-offers">
