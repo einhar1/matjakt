@@ -83,9 +83,9 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: box-shadow 0.2s;
 }
 
 .offer-btn:hover {
-    background: var(--accent-hover);
+    box-shadow: 0 5px 8px 0 var(--accent-hover);
 }

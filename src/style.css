@@ -11,7 +11,8 @@ html, body {
   --text-muted: #6b7280;
   --border-subtle: #e5e7eb;
   --accent-color: #16a34a;
-  --accent-hover: #15803d;
+  --accent-hover: rgba(22, 163, 74, 0.2);
+  /* --accent-hover: #15803d; */
   --discount-red: #ef4444;
   background-color: var(--bg-main);
 }
