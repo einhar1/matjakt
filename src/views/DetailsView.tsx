@@ -28,6 +28,7 @@ ChartJS.register(
 import { supabase } from "../utils/supabase";
 import { useParams } from "react-router-dom";
 import { LocationModal } from "../components/LocationModal";
+import { useQuery } from "@tanstack/react-query";
 
 type Product = {
   product_id: string,
@@ -36,6 +37,7 @@ type Product = {
   brand: string,
   pack_size: string,
   country_of_origin: string,
+  product_image_url: string,
   meanPrice: string,
 }
 
@@ -45,65 +47,61 @@ export type DetailsViewProps = {
 
 function DetailsView(props: DetailsViewProps) {
   const { productId } = useParams<{ productId: string}>();
-  const [product, setProduct] = useState<Product | null>(null);
   const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
 
 
-  useEffect(() => {
-    async function fetchData() {
-      const productResponse = await supabase
+  const productQuery = useQuery({
+    queryKey: ["product", productId],
+    queryFn: async () => {
+      // 1. fetch product
+      const { data: product, error: productError } = await supabase
         .from("products")
-        .select("product_id, product_key, name, brand, pack_size, country_of_origin")
+        .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients")
         .eq("product_id", productId)
         .single();
+
+      if (productError) throw productError;
+
+      const { data: prices, error: priceError } = await supabase
+        .from("current_prices")
+        .select("store_id, product_key, price, unit_price, currency, available")
+        .eq("product_key", product.product_key);    
       
+      if (priceError) throw priceError;
+      
+      // 3. compute mean
+      const validPrices = prices.filter(
+        p => p.available && p.price != null
+      );
 
-      if (productResponse.error) {
-        console.error(productResponse.error)
-        setProduct(null);
-      } else {
+      const meanPrice =
+        validPrices.length > 0
+          ? (
+              validPrices.reduce((sum, p) => sum + p.price, 0) /
+              validPrices.length
+            ).toFixed(2)
+          : "0.00";
 
-        const storeResponse = await supabase
-          .from("current_prices")
-          .select("store_id, product_key, price, unit_price, currency, available")
-          .eq("product_key", productResponse.data.product_key);
-        
-        if (storeResponse.error) {
-          console.log(storeResponse.error);
-        }
-        else {
+      return {
+        ...product,
+        meanPrice,
+      }    
+    },
+    enabled: !!productId,
+  })
 
-          let sumPrices = 0;
-          storeResponse.data.forEach(storeData => {
-            if (storeData.available && !!storeData.price && storeData.product_key === productResponse.data.product_key) {
-              sumPrices += storeData.price;
-            }
-          });
-          
-          const meanPrice = (sumPrices / storeResponse.data.length).toFixed(2);
+  if (productQuery.isLoading) {
+    return <div>Loading...</div>;
+  }
 
-          const newProduct: Product = {
-            product_id: productResponse.data.product_id,
-            product_key: productResponse.data.product_key,
-            name: productResponse.data.name,
-            brand: productResponse.data.brand,
-            pack_size: productResponse.data.pack_size,
-            country_of_origin: productResponse.data.country_of_origin,
-            meanPrice: meanPrice,
-          }
+  if (productQuery.isError) {
+    return <div>Error loading product</div>;
+  }
 
-          setProduct(newProduct);
-          console.log("FINISHED");
-        }
-      }
-    }
-
-    fetchData()
-  }, [productId]);
-
+  const product = productQuery.data;
 
   return (
     <div className="details-wrapper">
@@ -111,7 +109,7 @@ function DetailsView(props: DetailsViewProps) {
           !!product ? (
             <div className="details-container">
               <div className="head-container box-padding">
-                <img className="box" src="src/assets/gevalia.webp" alt="gevalia"/>
+                <img className="box" src={product.product_image_url} alt="product-image"/>
                 <div className="main-info-container">
                   <div className="main-info-box">
                     <h1>{product?.name}</h1>
@@ -122,20 +120,15 @@ function DetailsView(props: DetailsViewProps) {
                   <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
                     <h3>Ingredienser</h3>
                     {ingredientsExpanded && (
-                      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                        et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-                      </p>
+                      <p>{product.ingredients}</p>
                     )}
                   </div>
                   <div className="clickable-section" onClick={() => setFactExpanded(!factExpanded)}>
                     <h3>Produktfakta</h3>
                     {factExpanded && (
                       <>
-                        <p><b>Land:</b> {product.country_of_origin}</p>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, 
-                          et nihil officia cupiditate voluptas esse blanditiis magni molestias non quo
-                          lorem
-                        </p>
+                        <p>{product.product_information}</p>
+                        {product.country_of_origin ? <p><b>Land:</b> {product.country_of_origin}</p> : ""}
                       </>
                     )}
                   </div>
