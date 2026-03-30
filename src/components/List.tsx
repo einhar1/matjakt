@@ -1,53 +1,84 @@
-
-
-import useSWR from 'swr' /* https://swr.vercel.app/ */
+import useSWR from 'swr' 
 import { supabase } from '../utils/supabase';
-import { type Product } from '../types/database'
+import { OfferCard, type OfferItem } from './OfferCard.tsx'
+import '../search.css'
 
 export type ListProps = {
     searchTerm: string;
 }
 
-async function fetchProducts([_key, term]: [string, string]): Promise<Product[]> {
+async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[]> {
     const { data, error } = await supabase
         .from("products")
-        .select("product_id, product_key, name, brand")
-        .ilike("name", `%${term}`)
-        .limit(10) /* TODO: Remove */
+        .select(`
+            *,
+            current_prices (
+                *,
+                stores (*)
+            )
+        `)
+        .textSearch("name", term, { 
+            type: 'websearch',
+            config: 'swedish'
+        })
+        .limit(10)
 
     if (error) {
         throw new Error(error.message);
     }
 
-    return data as Product[];
+    const validOffers: OfferItem[] = [];
+
+    data?.forEach(product => {
+        if (product.current_prices && product.current_prices.length > 0) {
+            const priceData = product.current_prices[0];
+
+            validOffers.push({
+                product: product,
+                currentPrice: priceData,
+                store: priceData.stores
+            })
+        }
+    })
+
+    return validOffers;
 }
 
 export function List(props: ListProps) {
-
     const {
         isLoading,
         error,
         data,
-    } = useSWR<Product[], Error>(
+    } = useSWR<OfferItem[], Error>(
         props.searchTerm ? ['products', props.searchTerm] : null,
         fetchProducts
     );
 
     let content
-    if (isLoading) content = <p>Loading...</p>
+    if (isLoading) content = <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>Laddar produkter...</p>
     else if (error) content = <p>{error.message}</p>
     else if (data) content =(
         <>
-            <ul className='search-results-list'>
-                {data.map((product) => (
-                    <li key={product.product_key} className='search-result-item'>
-                        <h4>{product.name}</h4>
-                        <p>{product.brand}</p>
-                    </li>
+            <div className='search-results-header'>
+                Produkter <span>• visar {data.length} träffar</span>
+            </div>
+            
+            <div className='search-results-grid'>
+                {data.map((offer, index) => (
+                    <OfferCard
+                        key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
+                        offer={offer}
+                    />
                 ))}
-            </ul>
+            </div>
+
+            {data.length > 0 && (
+                <div className="search-all-results-bar">
+                    <span className="search-all-results-link">Visa alla resultat</span>
+                </div>
+            )}
         </>
     )
 
-    return content
+    return content || null;
 }

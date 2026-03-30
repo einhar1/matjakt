@@ -7,7 +7,7 @@ import "../navbar.css"
 import { useState, useEffect, useRef } from "react";
 import { useDebounce } from '../hooks/useDebounce'
 import { Modal } from '../components/Modal'
-import { List } from '../components/List'
+import { List } from '../components/List.tsx'
 
 export type navbarViewProps = {
 	// username: string | null;

@@ -7,6 +7,20 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+.offer-card h3 {
+    margin: 0 0 4px 0;
+}
+
+.offer-image {
+    height: 180px;
+    background-color: #e5e7eb;
+    background-image: linear-gradient(135deg, #f3f4f6 25%, #e5e7eb 25%, #e5e7eb 50%, #f3f4f6 50%, #f3f4f6 75%, #e5e7eb 75%, #e5e7eb 100%);
+    background-size: 20px 20px;
+    position: relative;
+    width: 100%;
 }
 
 .offer-card:hover {
@@ -14,13 +28,19 @@
 }
 
 .offer-store {
-    font-size: 11px;
+    position: absolute;
+    bottom: -10px;
+    left: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    font-size: 12px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--text-main);
     background: rgb(243, 244, 246);
     padding: 3px 8px;
     border-radius: 4px;
     align-self: flex-start;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .offer-card h3 {
@@ -88,4 +108,11 @@
 
 .offer-btn:hover {
     box-shadow: 0 5px 8px 0 var(--accent-hover);
+}
+
+.offer-content {
+    padding: 24px 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }

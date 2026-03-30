@@ -54,7 +54,7 @@ function HomeView(props: HomeViewProps) {
 
         <section className="home-offers">
           <div className="section-header">
-            <h2>Veckans klipp</h2>
+            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
             <div className='section-header-row'>
               <span className='badge live-indicator'>
                 <span className='dot'></span> 
