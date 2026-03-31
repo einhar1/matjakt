@@ -6,6 +6,7 @@ import { NavbarView } from './NavbarView.tsx';
 import { OfferCard, type OfferItem } from '../components/OfferCard';
 import { PostalCodeInput } from '../components/PostalCodeInput';
 import { userModel } from '../models/userModel.ts';
+import { Modal } from '../components/Modal.tsx'
 
 export type HomeViewProps = {
   offers: OfferItem[];
@@ -25,12 +26,6 @@ function HomeView(props: HomeViewProps) {
 
   function handleCloseModal() {
     setShowAll(false)
-  }
-
-  function handleOverlayClick(e: React.MouseEvent) {
-    if (e.target === e.currentTarget) {
-      setShowAll(false)
-    }
   }
 
   const carouselItems = [...props.offers, ...props.offers];
@@ -59,7 +54,7 @@ function HomeView(props: HomeViewProps) {
 
         <section className="home-offers">
           <div className="section-header">
-            <h2>Veckans klipp</h2>
+            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
             <div className='section-header-row'>
               <span className='badge live-indicator'>
                 <span className='dot'></span> 
@@ -86,25 +81,27 @@ function HomeView(props: HomeViewProps) {
         </section>
       </div>
 
-      {showAll && (
-        <div className='modal-overlay' onClick={handleOverlayClick}>
-          <div className='modal-content'>
-            <button className='modal-close-btn' onClick={handleCloseModal}>
-              ← Back to home
-            </button>
-            <div className='modal-header'>
-              <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
-            </div>
-            <div className='modal-grid'>
-              {props.offers.map((offer, index) => (
-                <OfferCard
-                  key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
-                  offer={offer} 
-                />
-              ))}
-            </div>
-        </div>
-      </div>)}
+      <Modal
+        isOpen={showAll}
+        onClose={handleCloseModal}
+      >
+        <>
+          <button className='modal-close-btn' onClick={handleCloseModal}>
+            ← Back to home
+          </button>
+          <div className='modal-header'>
+            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
+          </div>
+          <div className='modal-grid'>
+            {props.offers.map((offer, index) => (
+              <OfferCard
+                key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
+                offer={offer} 
+              />
+            ))}
+          </div>
+        </>
+      </Modal>
     </div>
   );
 }

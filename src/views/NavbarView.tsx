@@ -4,7 +4,10 @@ import { FaUserCircle, FaShoppingCart } from "react-icons/fa";
 import "../style.css"
 import "../navbar.css"
 // import { UserAvatar } from "../components/UserAvatar.tsx";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useDebounce } from '../hooks/useDebounce'
+import { Modal } from '../components/Modal'
+import { List } from '../components/List.tsx'
 
 export type navbarViewProps = {
 	// username: string | null;
@@ -22,6 +25,16 @@ export type navbarViewProps = {
 
 export function NavbarView(props: navbarViewProps) {
 	const [searchQuery, setSearchQuery] = useState<string>("");
+	const debouncedQuery = useDebounce(searchQuery, 500)
+	const isSearchModalOpen = Boolean(debouncedQuery)
+
+	const modalInputRef = useRef<HTMLInputElement>(null)
+
+	useEffect (() => {
+		if (isSearchModalOpen && modalInputRef.current) {
+			modalInputRef.current.focus();
+		}
+	}, [isSearchModalOpen]);
 
 	// function logoClickACB() {
 	// 	props.onLogoClick();
@@ -41,8 +54,8 @@ export function NavbarView(props: navbarViewProps) {
 	// 	window.location.hash = "#/profile";
 	// }
 
-	function handleSearchClick() {
-		props.onSearch(searchQuery);
+	function handleSearchChange(evt: React.ChangeEvent<HTMLInputElement>) {
+		setSearchQuery(evt.target.value)
 	}
 
 	function handleSearchKeyDownACB(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -50,6 +63,14 @@ export function NavbarView(props: navbarViewProps) {
 			props.onSearch(searchQuery);
 			e.currentTarget.blur();
 		}
+	}
+
+	function handleSearchClick() {
+		props.onSearch(searchQuery);
+	}
+
+	function handleCloseSearchModal() {
+		setSearchQuery('');
 	}
 
 	function handleLoginClick() {
@@ -64,10 +85,11 @@ export function NavbarView(props: navbarViewProps) {
 		<div className={`header`}>
 			<div className="header-top-row">
 				<h1 className="logo-text">
-					COOP kopia
+					Din morsa
 				</h1>
 				<div className="navbar-search">
 					<input 
+						/* TODO: id krävs */
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
 						value={searchQuery}
@@ -75,8 +97,11 @@ export function NavbarView(props: navbarViewProps) {
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
-					<button className="navbar-search-btn" onClick={handleSearchClick}>Sök</button>
+					<button className="navbar-search-btn" onClick={handleSearchClick}>
+						Sök
+					</button>
 				</div>
+
 				<div className="navbar-actions">
 					<button className="navbar-login-btn" onClick={handleLoginClick}>
 						<FaUserCircle size={18} />
@@ -86,14 +111,18 @@ export function NavbarView(props: navbarViewProps) {
 						<FaShoppingCart size={18} />
 						<span>Matkasse</span>
 						{props.cartItemCount !== undefined && props.cartItemCount > 0 && (
-							<span className="cart-badge">{props.cartItemCount}</span>
+							<span className="cart-badge">
+								{props.cartItemCount}
+							</span>
 						)}
 					</button>
 				</div>
 			</div>
+
 			<div className="header-search-row">
 				<div className="navbar-search navbar-search-mobile">
 					<input 
+						/* TODO: id krävs */
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
 						value={searchQuery}
@@ -104,6 +133,21 @@ export function NavbarView(props: navbarViewProps) {
 					<button className="navbar-search-btn" onClick={handleSearchClick}>Sök</button>
 				</div>
 			</div>
+
+			<Modal isOpen={isSearchModalOpen} onClose={handleCloseSearchModal}>
+				<div className="search-modal-input-wrapper">
+					<input
+						ref={modalInputRef}
+						type="text"
+						value={searchQuery}
+						onChange={handleSearchChange}
+						onKeyDown={handleSearchKeyDownACB}
+						placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
+						className="search-modal-input"
+					/>
+				</div>
+				<List searchTerm={debouncedQuery} />
+			</Modal>
 			{/* User authentication section, not ready yet
 			{
 				props.username ? (

@@ -47,23 +47,28 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
 
   return (
     <div className='offer-card'>
-      <span className='offer-store'>
-        {offer.store.store_name}
-      </span>
-      <h3>{offer.product.name}</h3>
-      {offer.product.brand && (
-        <p className='offer-brand'>{offer.product.brand}</p>
-      )}
-      <div className='offer-prices'>
-        {renderPrices()}
-      </div>
-      <button 
-        className='offer-btn'
-        /* TODO: ändra vid implementation av AddToCart: */
-        onClick={() => onAddToCart && onAddToCart(offer)}
-      >
-        Lägg till i matkasse
-      </button>
+        <div className='offer-image'>
+            <span className='offer-store'>
+                {offer.store.store_name}
+            </span>
+        </div>
+        
+        <div className='offer-content'>
+            <h3>{offer.product.name}</h3>
+            {offer.product.brand && (
+                <p className='offer-brand'>{offer.product.brand}</p>
+            )}
+            <div className='offer-prices'>
+                {renderPrices()}
+            </div>
+            <button 
+                className='offer-btn'
+                /* TODO: ändra vid implementation av AddToCart: */
+                onClick={() => onAddToCart && onAddToCart(offer)}
+            >
+                Lägg till i matkasse
+            </button>
+        </div>
     </div>
   );
 }
