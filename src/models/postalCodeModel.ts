@@ -5,6 +5,8 @@ type JsonLocation = {
     city: string;
     municipality: string;
     county: string;
+    longitude: number;
+    latitude: number;
 }
 
 type PostalDataDict = {
@@ -16,6 +18,8 @@ export type PostalCodeEntry = {
     city: string;
     municipality: string;
     county: string;
+    longitude: number;
+    latitude: number;
 }
 
 export const postalCodeModel = {
@@ -29,7 +33,9 @@ export const postalCodeModel = {
             postalCode: code,
             city: entry.city,
             municipality: entry.municipality,
-            county: entry.county
+            county: entry.county,
+            longitude: entry.longitude,
+            latitude: entry.latitude
         }));
     }
 };

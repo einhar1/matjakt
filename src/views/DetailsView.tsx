@@ -27,8 +27,9 @@ ChartJS.register(
 );
 import { supabase } from "../utils/supabase";
 import { useParams } from "react-router-dom";
-import { LocationModal } from "../components/LocationModal";
+import { LocationModal, type LocationResult } from "../components/LocationModal";
 import { useQuery } from "@tanstack/react-query";
+import { type userModelType } from '../models/userModel';
 
 type Product = {
   product_id: string,
@@ -42,7 +43,7 @@ type Product = {
 }
 
 export type DetailsViewProps = {
-
+  userModel: userModelType,
 }
 
 function DetailsView(props: DetailsViewProps) {
@@ -50,8 +51,7 @@ function DetailsView(props: DetailsViewProps) {
   const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
-  
+  const userModel = props.userModel;
 
   const productQuery = useQuery({
     queryKey: ["product", productId],
@@ -162,6 +162,10 @@ function DetailsView(props: DetailsViewProps) {
     },
   };
 
+  function onLocationSelectACB(location: LocationResult) {
+    userModel.setLocation(location.lng, location.lat);
+  }
+ 
   return (
     <div className="details-wrapper">
         {
@@ -215,11 +219,7 @@ function DetailsView(props: DetailsViewProps) {
         <LocationModal 
           isOpen={showLocationModal}
           onClose={() => setShowLocationModal(false)}
-          onLocationSelect={(location) => {
-            setSelectedLocation(location);
-            console.log('Selected location:', location);
-            // Here you can add logic to update the store prices based on the selected location
-          }}
+          onLocationSelect={onLocationSelectACB}
         />
     </div>
   );

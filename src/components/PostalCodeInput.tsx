@@ -30,9 +30,9 @@ export function PostalCodeInput(props: PostalCodeInputProps) {
             return;
         }
 
-        userModel.setLocation(normalizedCode, results[0].city, results[0].county)
+        userModel.setLocation(results[0].longitude, results[0].latitude, normalizedCode, results[0].city, results[0].county)
 
-        console.log('user: ',userModel.postalCode, ' | ',userModel.city, ' | ',userModel.county)
+        console.log('user: ',userModel.postalCode, ' | ',userModel.city, ' | ',userModel.county, ' | ', userModel.longitude, ' | ', userModel.latitude)
     }
 
     return (

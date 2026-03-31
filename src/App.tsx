@@ -8,6 +8,7 @@ import { SearchView } from "./views/SearchView";
 
 import { supabase } from './utils/supabase'
 import { HomePresenter } from "./presenters/HomePresenter";
+import { userModel } from "./models/userModel";
 
 
 
@@ -45,7 +46,7 @@ function App(props: AppRenderProps) {
       },
       {
         path: "/details/:productId",
-        element: <DetailsView/>
+        element: <DetailsView userModel={userModel}/>
       },
     ]);
   }
