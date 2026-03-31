@@ -51,7 +51,7 @@ function DetailsView(props: DetailsViewProps) {
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
-
+  
 
   const productQuery = useQuery({
     queryKey: ["product", productId],
@@ -65,16 +65,23 @@ function DetailsView(props: DetailsViewProps) {
 
       if (productError) throw productError;
 
-      const { data: prices, error: priceError } = await supabase
+      const { data: storeData, error: storeError } = await supabase
         .from("current_prices")
-        .select("store_id, product_key, price, unit_price, currency, available")
-        .eq("product_key", product.product_key);    
-      
-      if (priceError) throw priceError;
+        .select(`
+          store_id,
+          price,
+          available,
+          stores (
+            store_name
+          )
+        `)
+        .eq("product_key", product.product_key);  
+
+      if (storeError) throw storeError;
       
       // 3. compute mean
-      const validPrices = prices.filter(
-        p => p.available && p.price != null
+      const validPrices = storeData.filter(
+        s => s.available && s.price != null
       );
 
       const meanPrice =
@@ -84,10 +91,23 @@ function DetailsView(props: DetailsViewProps) {
               validPrices.length
             ).toFixed(2)
           : "0.00";
+      
+      const priceAndStoreData = [];
+      for (const item of storeData) {
+        priceAndStoreData.push(
+          {
+            store_id: item.store_id,
+            price: item.price,
+            available: item.available,
+            store_name: item.stores.store_name,
+          }
+        );
+      }
 
       return {
-        ...product,
-        meanPrice,
+        product: {...product, meanPrice},
+        storeData: priceAndStoreData,
+      
       }    
     },
     enabled: !!productId,
@@ -101,7 +121,46 @@ function DetailsView(props: DetailsViewProps) {
     return <div>Error loading product</div>;
   }
 
-  const product = productQuery.data;
+  const data = productQuery.data;
+  const product = data?.product;
+
+  const storeData = data?.storeData;
+  const storeNames = storeData?.map(item => item.store_name);
+  const storePrices = storeData?.map(item => item.price) as any[];
+  const minPrice = Math.min(...storePrices) as number;
+  const maxPrice = Math.max(...storePrices) as number;
+  const chartMinPrice = minPrice - Math.round(minPrice * 0.03);
+  const chartMaxPrice = maxPrice + Math.round(maxPrice * 0.03);
+  const storeChartData: ChartData<'bar'> = {
+    labels: storeNames,
+    datasets: [
+      {
+        label: 'Pris (kr)',
+        data: storePrices,
+        backgroundColor: "#16a34a",
+      },
+    ],
+  };
+
+  const storeOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        min: chartMinPrice,
+        max: chartMaxPrice,
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Butikspriser',
+      },
+    },
+  };
 
   return (
     <div className="details-wrapper">
@@ -117,27 +176,34 @@ function DetailsView(props: DetailsViewProps) {
                     <p>Genomsnittspris: <span><b>{product.meanPrice}kr</b></span></p>
                     <button>Lägg i varukorg</button>
                   </div>
-                  <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
-                    <h3>Ingredienser</h3>
-                    {ingredientsExpanded && (
-                      <p>{product.ingredients}</p>
-                    )}
-                  </div>
-                  <div className="clickable-section" onClick={() => setFactExpanded(!factExpanded)}>
-                    <h3>Produktfakta</h3>
-                    {factExpanded && (
-                      <>
-                        <p>{product.product_information}</p>
-                        {product.country_of_origin ? <p><b>Land:</b> {product.country_of_origin}</p> : ""}
-                      </>
-                    )}
-                  </div>
+                  {!!product.ingredients ?
+                    <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
+                      <h3>Ingredienser</h3>
+                      {ingredientsExpanded && (
+                        <p>{product.ingredients}</p>
+                      )}
+                    </div>
+                    : ""
+                  }
+                  {!!product.product_information ?
+                    <div className="clickable-section" onClick={() => setFactExpanded(!factExpanded)}>
+                      <h3>Produktfakta</h3>
+                      {factExpanded && (
+                        <>
+                          <p>{product.product_information}</p>
+                          {product.country_of_origin ? <p><b>Land:</b> {product.country_of_origin}</p> : ""}
+                        </>
+                      )}
+                    </div>
+                    : ""
+                  }
+
                 </div>
               </div>
 
             <div className="box box-padding store-prices-box">
               <button className="location-btn" onClick={() => setShowLocationModal(true)}>Välj område</button>
-              <Bar data={storeData} options={storeOptions}/>
+              <Bar data={storeChartData} options={storeOptions}/>
             </div>
             <div className="box box-padding">
               <Line data={priceHistoryData} options={priceHistoryOptions}/>
@@ -160,7 +226,7 @@ function DetailsView(props: DetailsViewProps) {
 }
 
 
-const storeData: ChartData<'bar'> = {
+const storeData2: ChartData<'bar'> = {
   labels: [
     'ICA Nära Stabby', 'ICA Kvantum Jätten', 'ICA Supermarket Fyren', 'ICA Supermarket Höör', 
     'ICA Kvantum Stenungsund', 'ICA Supermarket Skåre', 'ICA Kvantum Farsta', 'ICA Kvantum Knivsta',
@@ -175,25 +241,6 @@ const storeData: ChartData<'bar'> = {
   ],
 };
 
-const storeOptions: ChartOptions<'bar'> = {
-  responsive: true,
-  indexAxis: 'y',
-  scales: {
-    x: {
-      min: 50,
-      max: 100,
-    }
-  },
-  plugins: {
-    legend: {
-      position: 'top',
-    },
-    title: {
-      display: true,
-      text: 'Butikspriser',
-    },
-  },
-};
 
 const priceHistoryData: ChartData<'line'> = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
