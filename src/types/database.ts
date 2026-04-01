@@ -53,6 +53,7 @@ export type Product = {
   brand: string | null;
   pack_size: string | null;
   country_of_origin: string | null;
+  product_image_url: string | null;
   unit: string | null;
   product_type: string | null;
   is_alcohol: boolean | null;
