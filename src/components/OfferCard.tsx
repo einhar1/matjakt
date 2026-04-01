@@ -47,7 +47,10 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
 
   return (
     <div className='offer-card'>
-        <div className='offer-image'>
+        <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`}>
+            {offer.product.product_image_url && (
+                <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
+            )}
             <span className='offer-store'>
                 {offer.store.store_name}
             </span>
