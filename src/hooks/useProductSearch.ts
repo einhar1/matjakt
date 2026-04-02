@@ -11,12 +11,10 @@ export type ListProps = {
 https://dev.to/reclusivecoder/skip-elasticsearch-build-blazing-fast-full-text-search-right-in-supabase-58pf */
 
 async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[]> {
-
-    console.log('fetching products from search...')
     
     const sanitized = term.trim().substring(0,100);
 
-    if (!sanitized || term === '') return [];
+    if (!sanitized || sanitized === '') return [];
 
     const { data: products, error: searchError } = await supabase
         .rpc("search_products", {
@@ -30,6 +28,8 @@ async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[
     if (!products?.length) return []
 
     const productKeys = products.map((p: any) => p.product_key)
+
+    console.log('fetching products from search...')
 
     const { data: prices, error: priceError } = await supabase
         .from('current_prices')
