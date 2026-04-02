@@ -3,10 +3,7 @@ import { ProfileView } from "./views/ProfileView";
 import { AccountView } from "./views/AccountView"
 import { CheckoutView } from "./views/CheckoutView"
 import { DetailsView } from "./views/DetailsView"
-import { HomeView } from "./views/HomeView"
 import { SearchView } from "./views/SearchView";
-
-import { supabase } from './utils/supabase'
 import { HomePresenter } from "./presenters/HomePresenter";
 import { userModel } from "./models/userModel";
 
