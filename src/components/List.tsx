@@ -1,65 +1,36 @@
-import useSWR from 'swr' 
-import { supabase } from '../utils/supabase';
-import { OfferCard, type OfferItem } from './OfferCard.tsx'
+import { useNavigate } from "react-router-dom";
+import { OfferCard } from './OfferCard.tsx'
 import '../search.css'
+import { useProductSearch } from "../hooks/useProductSearch.ts";
 
 export type ListProps = {
     searchTerm: string;
-}
-
-async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[]> {
-    const { data, error } = await supabase
-        .from("products")
-        .select(`
-            *,
-            current_prices (
-                *,
-                stores (*)
-            )
-        `)
-        .textSearch("name", term, { 
-            type: 'websearch',
-            config: 'swedish'
-        })
-        .limit(10)
-
-    if (error) {
-        throw new Error(error.message);
-    }
-
-    const validOffers: OfferItem[] = [];
-
-    data?.forEach(product => {
-        if (product.current_prices && product.current_prices.length > 0) {
-            const priceData = product.current_prices[0];
-
-            validOffers.push({
-                product: product,
-                currentPrice: priceData,
-                store: priceData.stores
-            })
-        }
-    })
-
-    return validOffers;
+    searchQuery?: string;
 }
 
 export function List(props: ListProps) {
+
+    const navigate = useNavigate()
+
+    function handleShowAll() {
+        if (props.searchQuery) {
+            const params = new URLSearchParams({ q: props.searchQuery })
+            navigate('/search?' + params)
+        }
+    }
+    
     const {
         isLoading,
         error,
         data,
-    } = useSWR<OfferItem[], Error>(
-        props.searchTerm ? ['products', props.searchTerm] : null,
-        fetchProducts
-    );
+    } = useProductSearch(props.searchTerm)
 
     let content
     if (isLoading) content = <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>Laddar produkter...</p>
     else if (error) content = <p>{error.message}</p>
     else if (data) content =(
         <>
-            <div className='search-results-header'>
+            <div className='search-results-header' /* style = {{margin: '8px 2px'}} */>
                 Produkter <span>• visar {data.length} träffar</span>
             </div>
             
@@ -72,9 +43,9 @@ export function List(props: ListProps) {
                 ))}
             </div>
 
-            {data.length > 0 && (
+            {data.length > 8 && (
                 <div className="search-all-results-bar">
-                    <span className="search-all-results-link">Visa alla resultat</span>
+                    <span className="search-all-results-link" onClick={handleShowAll}>Visa alla resultat</span>
                 </div>
             )}
         </>

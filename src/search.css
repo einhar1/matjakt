@@ -1,10 +1,20 @@
+.search-wrapper {
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* .search-results {
+    display: flex;
+    justify-content: center;
+} */
 
 .search-results-header {
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 0 24px;
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: 24px;
     color: var(--text-main);
-    padding: 0 8px;
 }
 
 .search-results-header span {
@@ -13,10 +23,29 @@
 }
 
 .search-results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding-bottom: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 40px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* TODO: Fix grid css. */
+.search-results-grid .offer-card {
+    flex: 1 1 200px;
+    max-width: 100%;
+}
+
+@media (max-width: 740px) {
+    .search-results-header {
+        margin: 16px auto;
+        padding: 0 16px;
+    }
+    
+    .search-results-grid {
+        padding: 0 16px 40px 16px;
+    }
 }
 
 .search-all-results-bar {

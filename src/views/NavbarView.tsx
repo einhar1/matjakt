@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDebounce } from '../hooks/useDebounce'
 import { Modal } from '../components/Modal'
 import { List } from '../components/List.tsx'
+import { useNavigate } from "react-router-dom";
 
 export type navbarViewProps = {
 	// username: string | null;
@@ -29,6 +30,7 @@ export function NavbarView(props: navbarViewProps) {
 	const isSearchModalOpen = Boolean(debouncedQuery)
 
 	const modalInputRef = useRef<HTMLInputElement>(null)
+	const navigate = useNavigate()
 
 	useEffect (() => {
 		if (isSearchModalOpen && modalInputRef.current) {
@@ -36,9 +38,9 @@ export function NavbarView(props: navbarViewProps) {
 		}
 	}, [isSearchModalOpen]);
 
-	// function logoClickACB() {
-	// 	props.onLogoClick();
-	// }
+	function logoClickACB() {
+		navigate('/')
+	}
 
 	// function signOutClickACB() {
 	// 	props.onSignOutClick();
@@ -55,6 +57,7 @@ export function NavbarView(props: navbarViewProps) {
 	// }
 
 	function handleSearchChange(evt: React.ChangeEvent<HTMLInputElement>) {
+		console.log(searchQuery)
 		setSearchQuery(evt.target.value)
 	}
 
@@ -84,8 +87,8 @@ export function NavbarView(props: navbarViewProps) {
 	return (
 		<div className={`header`}>
 			<div className="header-top-row">
-				<h1 className="logo-text">
-					Din morsa
+				<h1 className="logo-text" onClick={logoClickACB}>
+					{'你的母親'}
 				</h1>
 				<div className="navbar-search">
 					<input 
@@ -146,7 +149,7 @@ export function NavbarView(props: navbarViewProps) {
 						className="search-modal-input"
 					/>
 				</div>
-				<List searchTerm={debouncedQuery} />
+				<List searchTerm={debouncedQuery} searchQuery={searchQuery} />
 			</Modal>
 			{/* User authentication section, not ready yet
 			{
