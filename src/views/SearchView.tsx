@@ -1,21 +1,10 @@
 import '../style.css'
 import '../search.css'
-import { NavbarView } from './NavbarView.tsx';
 import { OfferCard } from '../components/OfferCard.tsx';
 import { useProductSearch } from '../hooks/useProductSearch.ts'
 import { useSearchParams } from 'react-router-dom';
 
-
-
-export type SearchViewProps = {
-    onSearch: (query: string) => void;
-    onLoginClick: () => void;
-    onCartClick: () => void;
-    cartItemCount?: number;
-    searchTerm: string;
-}
-
-function SearchView(props: SearchViewProps) { 
+function SearchView() {
     const [searchParams] = useSearchParams()
     const queryFromUrl = searchParams.get('q') || ''
     const { data, isLoading, error } = useProductSearch(queryFromUrl)
@@ -42,17 +31,7 @@ function SearchView(props: SearchViewProps) {
 
     return (
     <div className="search-wrapper">
-        <NavbarView 
-        onSearch={props.onSearch}
-        onLoginClick={props.onLoginClick}
-        onCartClick={props.onCartClick}
-        cartItemCount={props.cartItemCount} 
-        />
-
-        {/* <div className='search-results'> */}
-            {content}
-        {/* </div> */}
-        
+        {content}
     </div>
     )
 }

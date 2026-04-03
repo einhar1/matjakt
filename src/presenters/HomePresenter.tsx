@@ -8,9 +8,6 @@ export function HomePresenter() {
     return (
         <HomeView
         offers={mockOffers}
-        onSearch={function onSearch(){}}
-        onLoginClick={function onLoginClick(){}}
-        onCartClick={function onCartClick(){}}
         />
     )
 }

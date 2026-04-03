@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import '../home.css'
 import '../style.css'
-import { NavbarView } from './NavbarView.tsx';
 import { OfferCard, type OfferItem } from '../components/OfferCard';
 import { PostalCodeInput } from '../components/PostalCodeInput';
 import { userModel } from '../models/userModel.ts';
@@ -10,14 +9,9 @@ import { Modal } from '../components/Modal.tsx'
 
 export type HomeViewProps = {
   offers: OfferItem[];
-  onSearch: (query: string) => void;
-  onLoginClick: () => void;
-  onCartClick: () => void;
-  cartItemCount?: number;
 }
 
 function HomeView(props: HomeViewProps) {
-
   const [showAll, setShowAll] = useState(false);
 
   function handleOpenModal() {
@@ -32,13 +26,6 @@ function HomeView(props: HomeViewProps) {
 
   return (
     <div className="home-wrapper">
-      <NavbarView 
-      onSearch={props.onSearch}
-      onLoginClick={props.onLoginClick}
-      onCartClick={props.onCartClick}
-      cartItemCount={props.cartItemCount} 
-      />
-
       <div className="home-container">
         <section className="home-hero">
           <div className="badge">Data driven grocery optimization</div>
