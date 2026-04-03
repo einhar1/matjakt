@@ -1,4 +1,4 @@
-
+import '../modal.css'
 import { type ReactNode } from 'react';
 
 export type ModalProps = {
