@@ -4,22 +4,29 @@ import '../home.css'
 import '../style.css'
 import { OfferCard, type OfferItem } from '../components/OfferCard';
 import { PostalCodeInput } from '../components/PostalCodeInput';
-import { userModel } from '../models/userModel.ts';
+import { userModel, type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
+import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
 
 export type HomeViewProps = {
   offers: OfferItem[];
+  userModel: userModelType
 }
 
 function HomeView(props: HomeViewProps) {
   const [showAll, setShowAll] = useState(false);
-
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const userModel = props.userModel;
   function handleOpenModal() {
     setShowAll(true);
   }
 
   function handleCloseModal() {
     setShowAll(false)
+  }
+
+  function onLocationSelectACB(location: LocationResult) {
+    userModel.setLocation(location.lng, location.lat);
   }
 
   const carouselItems = [...props.offers, ...props.offers];
@@ -34,9 +41,7 @@ function HomeView(props: HomeViewProps) {
             Automatiserad insamling från <strong>ICA, Coop, Willys och Hemköp</strong>. 
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
           </p>
-          <div className='hero-postal-code'>
-            <PostalCodeInput/>
-          </div>
+          <button className="location-btn-home" onClick={() => setShowLocationModal(true)}>Välj område</button>
         </section>
 
         <section className="home-offers">
@@ -89,6 +94,13 @@ function HomeView(props: HomeViewProps) {
           </div>
         </>
       </Modal>
+      <LocationModal 
+        isOpen={showLocationModal}
+        maxDistance={userModel.maxDistance}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSelect={onLocationSelectACB}
+        onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
+      />
     </div>
   );
 }

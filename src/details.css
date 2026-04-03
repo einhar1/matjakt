@@ -13,8 +13,15 @@
     column-gap: 20px;
 }
 
-.head-container img{
+.product-img-wrapper img{
+    display: flex;
+    max-height: 400px;
+    margin: 0 auto;
+}
+
+.product-img-wrapper{
     width: 100%;
+    max-height: 400px;
 }
 
 .main-info-container h1 {

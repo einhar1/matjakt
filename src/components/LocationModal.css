@@ -87,6 +87,54 @@
     cursor: not-allowed;
 }
 
+.postal-code-input-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.max-distance-slider {
+    margin-top: 20px;
+}
+
+.max-distance-slider label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.max-distance-slider input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--border-subtle);
+    border-radius: 3px;
+    outline: none;
+}
+
+.max-distance-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.max-distance-slider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
 .search-section {
     position: relative;
 }

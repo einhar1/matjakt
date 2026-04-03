@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "../style.css";
 import "./LocationModal.css";
 import { PostalCodeInput } from "./PostalCodeInput";
@@ -7,19 +7,25 @@ export type LocationResult = {
   lat: number;
   lng: number;
   name: string;
+  maxDistance: number;
 }
 
 export function LocationModal({ 
   isOpen, 
+  maxDistance,
   onClose, 
-  onLocationSelect 
+  onLocationSelect, 
+  onMaxDistanceSet
 }: { 
   isOpen: boolean; 
+  maxDistance: number,
   onClose: () => void; 
   onLocationSelect: (location: LocationResult) => void; 
+  onMaxDistanceSet: (distance: number) => void;
 }) {
 
   const [isLoading, setIsLoading] = useState(false);
+  const [localMaxDistance, setLocalMaxDistance] = useState(maxDistance);
 
 
 
@@ -35,7 +41,8 @@ export function LocationModal({
         const location: LocationResult = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-          name: 'Din nuvarande plats'
+          name: 'Din nuvarande plats',
+          maxDistance: maxDistance
         };
         console.log(location);
         onLocationSelect(location);
@@ -68,7 +75,22 @@ export function LocationModal({
           >
             {isLoading ? 'Hämtar plats...' : 'Använd min nuvarande plats'}
           </button>
-          <PostalCodeInput/>
+          <div className="postal-code-input-wrapper">
+            <PostalCodeInput/>
+          </div>
+          <div className="max-distance-slider">
+            <label htmlFor="maxDistance">Max avstånd: {localMaxDistance} km</label>
+            <input 
+              type="range" 
+              id="maxDistance" 
+              min="1" 
+              max="300" 
+              value={localMaxDistance} 
+              onChange={(e) => setLocalMaxDistance(Number(e.target.value))} 
+              onMouseUp={(e) => onMaxDistanceSet(localMaxDistance)}
+              onTouchEnd={(e) => onMaxDistanceSet(localMaxDistance)}
+            />
+          </div>
         </div>
       </div>
     </div>

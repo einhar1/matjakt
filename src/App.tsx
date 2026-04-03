@@ -21,7 +21,7 @@ function App(props: AppRenderProps) {
       {element: <Layout />, children: [
         {
           path: "/",
-          element: <HomePresenter/>,
+          element: <HomePresenter userModel={userModel}/>,
         },
         {
           path: "/search",

@@ -25,11 +25,12 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-import { supabase } from "../utils/supabase";
+import { supabase, coopSupabase } from "../utils/supabase";
 import { useParams } from "react-router-dom";
 import { LocationModal, type LocationResult } from "../components/LocationModal";
 import { useQuery } from "@tanstack/react-query";
 import { type userModelType } from '../models/userModel';
+import { getDistanceKm } from "../utils/distanceFormulas";
 
 type Product = {
   product_id: string,
@@ -57,58 +58,75 @@ function DetailsView(props: DetailsViewProps) {
     queryKey: ["product", productId],
     queryFn: async () => {
       // 1. fetch product
-      const { data: product, error: productError } = await supabase
-        .from("products")
-        .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients")
-        .eq("product_id", productId)
-        .single();
 
-      if (productError) throw productError;
+      for (const db of [supabase, coopSupabase]) {
+        
+        const { data: product, error: productError } = await db
+          .from("products")
+          .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients")
+          .eq("product_id", productId)
+          .single();
 
-      const { data: storeData, error: storeError } = await supabase
-        .from("current_prices")
-        .select(`
-          store_id,
-          price,
-          available,
-          stores (
-            store_name
-          )
-        `)
-        .eq("product_key", product.product_key);  
+        if (productError) {
+          console.log(productError);
+          continue;
+        }
 
-      if (storeError) throw storeError;
-      
-      // 3. compute mean
-      const validPrices = storeData.filter(
-        s => s.available && s.price != null
-      );
+        if (!!product.product_image_url) {
+          product.product_image_url = product.product_image_url.replace(".tiff", ".jpg");
 
-      const meanPrice =
-        validPrices.length > 0
-          ? (
-              validPrices.reduce((sum, p) => sum + p.price, 0) /
-              validPrices.length
-            ).toFixed(2)
-          : "0.00";
-      
-      const priceAndStoreData = [];
-      for (const item of storeData) {
-        priceAndStoreData.push(
-          {
-            store_id: item.store_id,
-            price: item.price,
-            available: item.available,
-            store_name: item.stores.store_name,
-          }
+        }
+        
+
+        const { data: storeData, error: storeError } = await db
+          .from("current_prices")
+          .select(`
+            store_id,
+            price,
+            available,
+            stores (
+              store_name,
+              lat,
+              lon
+            )
+          `)
+          .eq("product_key", product.product_key);  
+
+        if (storeError) throw storeError;
+
+        // 3. compute mean
+        const validPrices = storeData.filter(
+          s => s.available && s.price != null
         );
-      }
 
-      return {
-        product: {...product, meanPrice},
-        storeData: priceAndStoreData,
-      
-      }    
+        const meanPrice =
+          validPrices.length > 0
+            ? (
+                validPrices.reduce((sum, p) => sum + p.price, 0) /
+                validPrices.length
+              ).toFixed(2)
+            : "0.00";
+        
+        const priceAndStoreData = [];
+        for (const item of storeData) {
+          priceAndStoreData.push(
+            {
+              store_id: item.store_id,
+              price: item.price,
+              available: item.available,
+              store_name: item.stores.store_name,
+              latitude: item.stores.lat,
+              longitude: item.stores.lon,
+            }
+          );
+        }
+
+        return {
+          product: {...product, meanPrice},
+          storeData: priceAndStoreData,
+        
+        }    
+      }
     },
     enabled: !!productId,
   })
@@ -123,10 +141,21 @@ function DetailsView(props: DetailsViewProps) {
 
   const data = productQuery.data;
   const product = data?.product;
-
   const storeData = data?.storeData;
-  const storeNames = storeData?.map(item => item.store_name);
-  const storePrices = storeData?.map(item => item.price) as any[];
+
+  let filteredStoreData = storeData;
+
+  const HAS_LOCATION = userModel.latitude !== 0 && userModel.longitude !== 0;
+  if (HAS_LOCATION && !!storeData) {
+
+    filteredStoreData = storeData.filter(store => {
+      const distance = getDistanceKm(userModel.latitude, userModel.longitude, store.latitude, store.longitude);
+      return distance <= userModel.maxDistance;
+    })
+  }
+
+  const storeNames = filteredStoreData?.map(item => item.store_name);
+  const storePrices = filteredStoreData?.map(item => item.price) as any[];
   const minPrice = Math.min(...storePrices) as number;
   const maxPrice = Math.max(...storePrices) as number;
   const chartMinPrice = minPrice - Math.round(minPrice * 0.03);
@@ -165,14 +194,17 @@ function DetailsView(props: DetailsViewProps) {
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
   }
- 
+  
+
   return (
     <div className="details-wrapper">
         {
           !!product ? (
             <div className="details-container">
               <div className="head-container box-padding">
-                <img className="box" src={product.product_image_url} alt="product-image"/>
+                <div className="product-img-wrapper box">
+                  <img src={product.product_image_url} alt="product-image"/>
+                </div>
                 <div className="main-info-container">
                   <div className="main-info-box">
                     <h1>{product?.name}</h1>
@@ -218,29 +250,14 @@ function DetailsView(props: DetailsViewProps) {
         }
         <LocationModal 
           isOpen={showLocationModal}
+          maxDistance={userModel.maxDistance}
           onClose={() => setShowLocationModal(false)}
           onLocationSelect={onLocationSelectACB}
+          onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
         />
     </div>
   );
 }
-
-
-const storeData2: ChartData<'bar'> = {
-  labels: [
-    'ICA Nära Stabby', 'ICA Kvantum Jätten', 'ICA Supermarket Fyren', 'ICA Supermarket Höör', 
-    'ICA Kvantum Stenungsund', 'ICA Supermarket Skåre', 'ICA Kvantum Farsta', 'ICA Kvantum Knivsta',
-    'ICA Kvantum Liljeholmen', 'Maxi ICA Stormarknad Mora'
-  ],
-  datasets: [
-    {
-      label: 'Pris (kr)',
-      data: [55, 57, 60, 60, 60, 60, 65, 65, 80, 80],
-      backgroundColor: "#16a34a",
-    },
-  ],
-};
-
 
 const priceHistoryData: ChartData<'line'> = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
