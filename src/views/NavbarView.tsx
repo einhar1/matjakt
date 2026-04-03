@@ -1,6 +1,7 @@
 /* Från iprog */
 
 import { FaUserCircle, FaShoppingCart } from "react-icons/fa";
+import { CgClose } from 'react-icons/cg'
 import "../style.css"
 import "../navbar.css"
 // import { UserAvatar } from "../components/UserAvatar.tsx";
@@ -138,17 +139,22 @@ export function NavbarView(props: navbarViewProps) {
 			</div>
 
 			<Modal isOpen={isSearchModalOpen} onClose={handleCloseSearchModal}>
-				<div className="search-modal-input-wrapper">
-					<input
-						ref={modalInputRef}
-						type="text"
-						value={searchQuery}
-						onChange={handleSearchChange}
-						onKeyDown={handleSearchKeyDownACB}
-						placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
-						className="search-modal-input"
-					/>
-				</div>
+				<>
+					<div className="search-modal-input-wrapper">
+						<input
+							ref={modalInputRef}
+							type="text"
+							value={searchQuery}
+							onChange={handleSearchChange}
+							onKeyDown={handleSearchKeyDownACB}
+							placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
+							className="search-modal-input"
+						/>
+						<button className="modal-close-btn" onClick={handleCloseSearchModal}>
+							<CgClose/>
+						</button>
+					</div>
+				</>
 				<List searchTerm={debouncedQuery} searchQuery={searchQuery} />
 			</Modal>
 			{/* User authentication section, not ready yet

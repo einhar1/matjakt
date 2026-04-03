@@ -76,6 +76,16 @@
   transform: translateY(-2px);
 }
 
+.search-modal-input-wrapper {
+  margin-top: -24px;
+  padding-top: 24px;
+  position: sticky;
+  position: -webkit-sticky;
+  top: -24px;
+  z-index: 1100;
+  background: var(--bg-main);
+}
+
 .navbar-actions {
   display: flex;
   align-items: center;

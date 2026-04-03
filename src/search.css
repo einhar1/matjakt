@@ -64,6 +64,10 @@
     text-decoration: underline;
     text-underline-offset: 4px;
     cursor: pointer;
+    /* TODO: Fix?
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0px; */
 }
 
 .search-modal-input-wrapper {
