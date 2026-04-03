@@ -95,3 +95,28 @@
 .location-btn:hover {
     background: var(--accent-hover);
 }
+
+.add-to-cart-btn {
+  padding: 10px 20px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart-btn:hover {
+  /* background: var(--accent-hover); */
+  transition: box-shadow 0.2s;
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.add-to-cart-btn:active {
+  background: var(--accent-hover);
+  box-shadow: none;
+  transform: translateY(0);
+}

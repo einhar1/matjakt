@@ -41,7 +41,7 @@ function App(props: AppRenderProps) {
         },
         {
           path: "/checkout",
-          element: <CheckoutView/>
+          element: <CheckoutView userModel={userModel}/>
         },
         {
           path: "/details/:productId",

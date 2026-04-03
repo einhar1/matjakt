@@ -32,7 +32,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type userModelType } from '../models/userModel';
 import { getDistanceKm } from "../utils/distanceFormulas";
 
-type Product = {
+export type Product = {
   product_id: string,
   product_key: string,
   name: string,
@@ -40,7 +40,9 @@ type Product = {
   pack_size: string,
   country_of_origin: string,
   product_image_url: string,
-  meanPrice: string,
+  product_information: string,
+  ingredients: string,
+  avg_price: number,
 }
 
 export type DetailsViewProps = {
@@ -63,7 +65,7 @@ function DetailsView(props: DetailsViewProps) {
         
         const { data: product, error: productError } = await db
           .from("products")
-          .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients")
+          .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients, avg_price")
           .eq("product_id", productId)
           .single();
 
@@ -94,19 +96,6 @@ function DetailsView(props: DetailsViewProps) {
 
         if (storeError) throw storeError;
 
-        // 3. compute mean
-        const validPrices = storeData.filter(
-          s => s.available && s.price != null
-        );
-
-        const meanPrice =
-          validPrices.length > 0
-            ? (
-                validPrices.reduce((sum, p) => sum + p.price, 0) /
-                validPrices.length
-              ).toFixed(2)
-            : "0.00";
-        
         const priceAndStoreData = [];
         for (const item of storeData) {
           priceAndStoreData.push(
@@ -122,7 +111,7 @@ function DetailsView(props: DetailsViewProps) {
         }
 
         return {
-          product: {...product, meanPrice},
+          product: product,
           storeData: priceAndStoreData,
         
         }    
@@ -195,6 +184,9 @@ function DetailsView(props: DetailsViewProps) {
     userModel.setLocation(location.lng, location.lat);
   }
   
+  function addToCartACB(){
+    userModel.addToCart(product as Product);
+  }
 
   return (
     <div className="details-wrapper">
@@ -209,8 +201,10 @@ function DetailsView(props: DetailsViewProps) {
                   <div className="main-info-box">
                     <h1>{product?.name}</h1>
                     <h3>{product?.brand}. {product?.pack_size}.</h3>
-                    <p>Genomsnittspris: <span><b>{product.meanPrice}kr</b></span></p>
-                    <button>Lägg i varukorg</button>
+                    <p>Genomsnittspris: <span><b>{product.avg_price.toFixed(2)}kr</b></span></p>
+                    <button className="add-to-cart-btn" onClick={addToCartACB}>
+                      Lägg i varukorg
+                    </button>
                   </div>
                   {!!product.ingredients ?
                     <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
