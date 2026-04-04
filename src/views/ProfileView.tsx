@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { useNavigate } from 'react-router-dom';
-import { FiMail, FiCalendar, FiLogOut } from 'react-icons/fi';
+import { FiMail, FiCalendar, FiLogOut, FiUser } from 'react-icons/fi';
 import '../profile.css';
 
 function ProfileView() {
@@ -43,6 +43,13 @@ function ProfileView() {
         <section className="profile-section">
           <h2 className="profile-section-title">Kontoinformation</h2>
           <div className="profile-card">
+            <div className="profile-field">
+                <FiUser className="profile-field-icon" />
+                <div>
+                    <span className="profile-field-label">Name</span>
+                    <span className="profile-field-value">{user.user_metadata?.display_name || "Anonymous"}</span>
+                </div>
+            </div>
             <div className="profile-field">
               <FiMail className="profile-field-icon" />
               <div>

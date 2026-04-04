@@ -3,11 +3,13 @@ import { Modal } from './Modal'
 import { supabase } from '../utils/supabase'
 import { FiMail, FiLock } from 'react-icons/fi'
 import '../auth-modal.css'
+import { PiUser } from 'react-icons/pi'
 
 type Props = { isOpen: boolean; onClose: () => void }
 
 export function AuthModal({ isOpen, onClose }: Props) {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +23,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
     const { error } =
       mode === 'login'
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signUp({ email, password, options: { data: {display_name: name}} })
 
     setLoading(false)
     if (error) setError(error.message)
@@ -41,6 +43,19 @@ export function AuthModal({ isOpen, onClose }: Props) {
         </p>
 
         <form className="auth-modal-form" onSubmit={handleSubmit}>
+          {mode === 'signup' && (
+            <div className="auth-input-group">
+              <PiUser className="auth-input-icon" />
+              <input 
+                type="text"
+                className="auth-input"
+                placeholder="Name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required={mode === 'signup'}
+              />
+            </div>
+          )}
           <div className="auth-input-group">
             <FiMail className="auth-input-icon" />
             <input

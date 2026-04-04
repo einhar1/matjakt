@@ -111,7 +111,7 @@ export function NavbarView(props: navbarViewProps) {
 				<div className="navbar-actions">
 					<button className="navbar-login-btn" onClick={handleLoginClick}>
 						<FaUserCircle size={18} />
-						<span>{props.user ? props.user.email : "Logga in"}</span>
+						<span>{props.user ? (props.user.user_metadata?.display_name || props.user.email) : "Logga in"}</span>
 					</button>
 					<button className="navbar-cart-btn" onClick={handleCartClick}>
 						<FaShoppingCart size={18} />
