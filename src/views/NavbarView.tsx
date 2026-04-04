@@ -30,16 +30,23 @@ export type navbarViewProps = {
 export function NavbarView(props: navbarViewProps) {
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const debouncedQuery = useDebounce(searchQuery, 500)
-	const isSearchModalOpen = Boolean(debouncedQuery)
+	const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
 
 	const modalInputRef = useRef<HTMLInputElement>(null)
 	const navigate = useNavigate()
 
 	useEffect (() => {
-		if (isSearchModalOpen && modalInputRef.current) {
+		if (Boolean(debouncedQuery) && !isSearchModalOpen) {
+			console.log(isSearchModalOpen)
+			setIsSearchModalOpen(true);
+		}
+	}, [debouncedQuery]);
+
+	useEffect (() => {
+		if (modalInputRef.current) {
 			modalInputRef.current.focus();
 		}
-	}, [isSearchModalOpen]);
+	}, [isSearchModalOpen])
 
 	function logoClickACB() {
 		navigate('/')
@@ -76,7 +83,7 @@ export function NavbarView(props: navbarViewProps) {
 	}
 
 	function handleCloseSearchModal() {
-		setSearchQuery('');
+		setIsSearchModalOpen(false);
 	}
 
 	function handleLoginClick() {
@@ -96,10 +103,11 @@ export function NavbarView(props: navbarViewProps) {
 				<div className="navbar-search">
 					<input 
 						/* TODO: id krävs */
+						id="desktop"
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
 						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
+						onChange={handleSearchChange}
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
@@ -129,10 +137,11 @@ export function NavbarView(props: navbarViewProps) {
 				<div className="navbar-search navbar-search-mobile">
 					<input 
 						/* TODO: id krävs */
+						id="mobile"
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
 						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
+						onChange={handleSearchChange}
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
@@ -144,6 +153,7 @@ export function NavbarView(props: navbarViewProps) {
 				<>
 					<div className="search-modal-input-wrapper">
 						<input
+							id="modal"
 							ref={modalInputRef}
 							type="text"
 							value={searchQuery}
@@ -157,7 +167,7 @@ export function NavbarView(props: navbarViewProps) {
 						</button>
 					</div>
 				</>
-				<List searchTerm={debouncedQuery} searchQuery={searchQuery} />
+				<List searchTerm={debouncedQuery} searchQuery={searchQuery} closeModal={handleCloseSearchModal} />
 			</Modal>
 			{/* User authentication section, not ready yet
 			{

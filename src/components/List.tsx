@@ -6,6 +6,7 @@ import { useProductSearch } from "../hooks/useProductSearch.ts";
 export type ListProps = {
     searchTerm: string;
     searchQuery?: string;
+    closeModal: () => void;
 }
 
 export function List(props: ListProps) {
@@ -16,6 +17,7 @@ export function List(props: ListProps) {
         if (props.searchQuery) {
             const params = new URLSearchParams({ q: props.searchQuery })
             navigate('/search?' + params)
+            props.closeModal()
         }
     }
     
