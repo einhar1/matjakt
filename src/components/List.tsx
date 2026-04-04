@@ -27,6 +27,9 @@ export function List(props: ListProps) {
         data,
     } = useProductSearch(props.searchTerm)
 
+    // Force 9 items regardless of what SWR has in cache
+    const displayData = data ? data.slice(0, 9) : []
+
     let content
     if (isLoading) content = <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>Laddar produkter...</p>
     else if (error) content = <p>{error.message}</p>
@@ -37,7 +40,7 @@ export function List(props: ListProps) {
             </div>
             
             <div className='search-results-grid'>
-                {data.map((offer, index) => (
+                {displayData.map((offer, index) => (
                     <OfferCard
                         key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
                         offer={offer}

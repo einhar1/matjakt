@@ -1,26 +1,30 @@
-import useSWR from 'swr' 
+import useSWRInfinite from 'swr/infinite'
 import { supabase } from '../utils/supabase';
 import { type OfferItem } from '../components/OfferCard.tsx'
 
-export type ListProps = {
-    searchTerm: string;
-    searchQuery?: string;
-}
-
 /* Built using weighted vectors, inspired by:
-https://dev.to/reclusivecoder/skip-elasticsearch-build-blazing-fast-full-text-search-right-in-supabase-58pf */
+https://dev.to/reclusivecoder/skip-elasticsearch-build-blazing-fast-full-text-search-right-in-supabase-58pf 
 
-async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[]> {
+Get search function in SQL:
+
+SELECT pg_get_functiondef(oid) 
+FROM pg_proc 
+WHERE proname = 'search_products';
+*/
+
+const PAGE_SIZE = 9
+
+async function fetchProducts([_key, term, pageIndex]: [string, string, number]): Promise<OfferItem[]> {
     
     const sanitized = term.trim().substring(0,100);
 
-    if (!sanitized || sanitized === '') return [];
+    if (!sanitized) return [];
 
     const { data: products, error: searchError } = await supabase
         .rpc("search_products", {
             search_term: sanitized,
-            result_limit: 9,
-            result_offset: 0,
+            result_limit: PAGE_SIZE,
+            result_offset: pageIndex * PAGE_SIZE
         })
 
     if (searchError) {
@@ -30,7 +34,7 @@ async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[
 
     const productKeys = products.map((p: any) => p.product_key)
 
-    console.log('fetching products from search...')
+    console.log(`fetching products from search... Page Index: ${pageIndex}`)
 
     const { data: prices, error: priceError } = await supabase
         .from('current_prices')
@@ -63,16 +67,42 @@ async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[
         })
     }
 
+const SWRConfig = {
+    revalidateOnFocus: false,  // don't revalidate when window gets focused
+    dedupingInterval: 120000,  // 120s until new results instead of cache
+    revalidateFirstPage: false // stops Page 0 from refetching on every scroll
+}
+
 export function useProductSearch(searchTerm: string) {
-    
-    const SWRConfig = {
-        revalidateOnFocus: false,  // don't revalidate when window gets focused
-        dedupingInterval: 120000  // 120s until new results instead of cache
+
+    const getKey = (pageIndex: number, previousPageData: any) => {
+        if ((previousPageData && !previousPageData.length) || !searchTerm)  {
+            return null  // reached the end
+        }
+        return ['products', searchTerm, pageIndex]
     }
 
-    return useSWR<OfferItem[], Error>(
-        searchTerm ? ['products', searchTerm] : null,
+    const { data, error, size, setSize, isValidating } = useSWRInfinite<OfferItem[], Error>(
+        getKey,
         fetchProducts,
         SWRConfig
     )
+    
+    const products = data ? data.flat() : []
+    const isLoadingInitial = !data && !error
+    // isLoadingMore is true when we just incremented the size, but the new page hasn't arrived
+    const isLoadingMore = size > 0 && data && typeof data[size - 1] === 'undefined'
+    const isFetching = isLoadingInitial || isLoadingMore || isValidating
+    const hasMore = data ? data[data.length - 1]?.length > 0 : false;
+
+    
+    return {
+        data: products,
+        error,
+        isLoading: isLoadingInitial,
+        isFetching,
+        hasMore,
+        setSize,
+        size
+    }
 }

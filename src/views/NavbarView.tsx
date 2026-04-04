@@ -102,7 +102,6 @@ export function NavbarView(props: navbarViewProps) {
 				</h1>
 				<div className="navbar-search">
 					<input 
-						/* TODO: id krävs */
 						id="desktop"
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
@@ -136,7 +135,6 @@ export function NavbarView(props: navbarViewProps) {
 			<div className="header-search-row">
 				<div className="navbar-search navbar-search-mobile">
 					<input 
-						/* TODO: id krävs */
 						id="mobile"
 						type="text" 
 						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
