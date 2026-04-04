@@ -20,6 +20,7 @@ async function fetchProducts([_key, term]: [string, string]): Promise<OfferItem[
         .rpc("search_products", {
             search_term: sanitized,
             result_limit: 9,
+            result_offset: 0,
         })
 
     if (searchError) {
