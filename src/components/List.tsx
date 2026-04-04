@@ -48,7 +48,7 @@ export function List(props: ListProps) {
                 ))}
             </div>
 
-            {data.length > 8 && (
+            {data.length > 0 && (
                 <div className="search-all-results-bar">
                     <span className="search-all-results-link" onClick={handleShowAll}>Visa alla resultat</span>
                 </div>
