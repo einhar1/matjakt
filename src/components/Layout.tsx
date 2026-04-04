@@ -24,6 +24,7 @@ export function Layout() {
         onSearch={handleSearch}
         onLoginClick={handleLoginClick}
         onCartClick={() => navigate('/checkout')}
+        user={useAuth().user}
       />                                                                                                              
       <AuthModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
       <Outlet />                                                                                                      

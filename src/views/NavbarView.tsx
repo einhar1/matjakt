@@ -10,6 +10,7 @@ import { useDebounce } from '../hooks/useDebounce'
 import { Modal } from '../components/Modal'
 import { List } from '../components/List.tsx'
 import { useNavigate } from "react-router-dom";
+import type { User } from "@supabase/supabase-js";
 
 export type navbarViewProps = {
 	// username: string | null;
@@ -22,6 +23,7 @@ export type navbarViewProps = {
 	onLoginClick: () => void;
 	onCartClick: () => void;
 	cartItemCount?: number;
+	user: User | null;
 }
 
 
@@ -109,7 +111,7 @@ export function NavbarView(props: navbarViewProps) {
 				<div className="navbar-actions">
 					<button className="navbar-login-btn" onClick={handleLoginClick}>
 						<FaUserCircle size={18} />
-						<span>Logga in</span>
+						<span>{props.user ? props.user.email : "Logga in"}</span>
 					</button>
 					<button className="navbar-cart-btn" onClick={handleCartClick}>
 						<FaShoppingCart size={18} />
