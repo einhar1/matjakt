@@ -91,7 +91,7 @@ export function NavbarView(props: navbarViewProps) {
 	}
 
 	function handleCartClick() {
-		props.onCartClick
+		props.onCartClick();
 	}
 
 	return (
