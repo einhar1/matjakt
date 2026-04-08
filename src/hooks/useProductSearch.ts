@@ -1,6 +1,8 @@
 import useSWRInfinite from 'swr/infinite'
 import { supabase } from '../utils/supabase';
 import { type OfferItem } from '../components/OfferCard.tsx'
+import { userModel } from '../models/userModel.ts';
+import type { CurrentPrice, Product, Store } from '../types/database.ts';
 
 /* Built using weighted vectors, inspired by:
 https://dev.to/reclusivecoder/skip-elasticsearch-build-blazing-fast-full-text-search-right-in-supabase-58pf 
@@ -9,10 +11,18 @@ Get search function in SQL:
 
 SELECT pg_get_functiondef(oid) 
 FROM pg_proc 
-WHERE proname = 'search_products';
+WHERE proname = 'search_products_dev';
+
 */
 
-const PAGE_SIZE = 9
+type SearchResultRow = {
+    product: Product;
+    store: Store;
+    current_price: CurrentPrice;
+    relevance: number;
+}
+
+export const PAGE_SIZE = 15
 
 async function fetchProducts([_key, term, pageIndex]: [string, string, number]): Promise<OfferItem[]> {
     
@@ -20,49 +30,34 @@ async function fetchProducts([_key, term, pageIndex]: [string, string, number]):
 
     if (!sanitized) return [];
 
-    const { data: products, error: searchError } = await supabase
-        .rpc("search_products", {
+    const [userLat, userLon] = userModel.getLocation() || [null, null];
+    const maxDistance = userModel.getMaxDistance()*1000;
+
+    console.log(`fetching products from search... Page Index: ${pageIndex}`)
+
+    const { data: results, error: searchError } = await supabase
+        .rpc("search_products_dev", {
             search_term: sanitized,
             result_limit: PAGE_SIZE,
-            result_offset: pageIndex * PAGE_SIZE
+            result_offset: pageIndex * PAGE_SIZE,
+            user_lat: userLat || null,
+            user_lon: userLon || null,
+            max_distance: maxDistance
         })
 
     if (searchError) {
         throw new Error(searchError.message)
     }
-    if (!products?.length) return []
 
-    const productKeys = products.map((p: any) => p.product_key)
-
-    console.log(`fetching products from search... Page Index: ${pageIndex}`)
-
-    const { data: prices, error: priceError } = await supabase
-        .from('current_prices')
-        .select(`
-            *,
-            stores (*)
-        `)
-        .in('product_key', productKeys)
-        .order('price', { ascending: true })
-
-        if (priceError) throw new Error(priceError.message);
-
-        // Billigaste pris per produkt
-        const bestPrice = new Map<string, any>();
-            prices?.forEach((p: any) => {
-                if (!bestPrice.has(p.product_key)) {
-                bestPrice.set(p.product_key, p);
-                }
-        });
-        
-    return products
-        .filter((product: any) => bestPrice.has(product.product_key))
-        .map((product: any) => {
-            const price = bestPrice.get(product.product_key)!;
+    if (!results?.length) return []
+    
+    // TODO: type any
+    return results
+        .map((row: SearchResultRow) => {
             return {
-                product,
-                currentPrice: price,
-                store: price.stores
+                product: row.product,
+                store: row.store,
+                currentPrice: row.current_price
             }
         })
     }
@@ -75,6 +70,7 @@ const SWRConfig = {
 
 export function useProductSearch(searchTerm: string) {
 
+    // TODO: type any
     const getKey = (pageIndex: number, previousPageData: any) => {
         if ((previousPageData && !previousPageData.length) || !searchTerm)  {
             return null  // reached the end

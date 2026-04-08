@@ -79,7 +79,7 @@ export type CurrentPrice = {
   product_key: string;
   run_id: string;
   observed_at: string;  // eller date-objekt
-  price: number | null;
+  price: number;
   promo_price: number | null;
   unit_price: number | null;
   promo_unit_price: number | null;

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { OfferCard } from './OfferCard.tsx'
 import '../search.css'
-import { useProductSearch } from "../hooks/useProductSearch.ts";
+import { useProductSearch, PAGE_SIZE } from "../hooks/useProductSearch.ts";
 
 export type ListProps = {
     searchTerm: string;
@@ -36,7 +36,7 @@ export function List(props: ListProps) {
     else if (data) content =(
         <>
             <div className='search-results-header' /* style = {{margin: '8px 2px'}} */>
-                Produkter <span>• visar {data.length} träffar</span>
+                Produkter <span>• visar {data.length === PAGE_SIZE ? data.length+'+': data.length} träffar</span>
             </div>
             
             <div className='search-results-grid'>

@@ -20,7 +20,7 @@ export const userModel = {
     county: '',
     longitude: 0,
     latitude: 0,
-    maxDistance: 30, // in km
+    maxDistance: 10, // in km
     usesLocation: false,
     cart: [] as Product[],
 
@@ -41,5 +41,15 @@ export const userModel = {
     addToCart(product: Product) {
         console.log("Adding to cart:", product);
         this.cart.push(product);
+    },
+    getLocation(){
+        console.log('user: ', this.latitude, this.longitude)
+        if (this.usesLocation) {
+            return [this.latitude, this.longitude]
+        }
+        return undefined
+    },
+    getMaxDistance() {
+        return this.maxDistance;
     }
 }

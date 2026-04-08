@@ -22,7 +22,6 @@ function getDiscountPercent(original: number, promo: number): number {
 export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
   function renderPrices() {
     if (offer.currentPrice.promo_price) {
-        //@ts-ignore for offer.currentPrice.price
       const pct = getDiscountPercent(offer.currentPrice.price, offer.currentPrice.promo_price);
       return (
         <>
