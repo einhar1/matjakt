@@ -1,24 +1,17 @@
 import { useState } from 'react';
-import { FiLock } from 'react-icons/fi';
 import '../checkout.css';
-import type { userModelType } from '../models/userModel';
+import type { StoreProduct, userModelType } from '../models/userModel';
 import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useQuery } from '@tanstack/react-query';
 import { coopSupabase, supabase } from '../utils/supabase';
 import { LocationModal, type LocationResult } from '../components/LocationModal';
+import type { Product } from './DetailsView';
+
 
 export type CheckoutViewProps = {
   userModel: userModelType
-}
-
-interface CartItem {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-  image: string;
 }
 
 interface storesData {
@@ -29,18 +22,34 @@ interface storesData {
   distance_km: number;
 }
 
+interface storePriceData {
+  product_key: any;
+  store_id: any;
+  price: any;
+  stores: {
+      store_name: any;
+  };
+}
+
 function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
   const cart = props.userModel.cart;
-  const [deliveryMethod, setDeliveryMethod] = useState('home');
+  const [algorithmMethod, setAlgorithmMethod] = useState('average');
+  const [fuelType, setFuelType] = useState('bensin95');
   const [showLocationModal, setShowLocationModal] = useState(false);
-  
+  const [usesAvgPrice, setUsesAvgPrice] = useState(true);
+  const [, forceUpdate] = useState(false);
+
   const storesQuery = useQuery({
     queryKey: ["stores_radius", userModel.latitude, userModel.longitude, userModel.maxDistance],
     queryFn: async () => {
 
       const allStores = [];
+      let distance = userModel.maxDistance
+      if (algorithmMethod === "global" || algorithmMethod === "average") {
+        distance = 3000; // 3000 km should cover all of Sweden
+      }
 
       for (const db of [supabase, coopSupabase]) {
         const { data: stores, error: storesError } = await db.rpc(
@@ -48,7 +57,7 @@ function CheckoutView(props: CheckoutViewProps) {
           {
             user_lat: userModel.latitude,
             user_lon: userModel.longitude,
-            radius_km: userModel.maxDistance,
+            radius_km: distance,
           }
         );
 
@@ -65,25 +74,129 @@ function CheckoutView(props: CheckoutViewProps) {
     enabled: (!!userModel.latitude && !!userModel.longitude && !!userModel.maxDistance),
   })
 
+  const storePricesQuery = useQuery({
+    queryKey: ["storePrices", userModel.cart.map(item => item.product_key), storesQuery.data?.map(store => store.store_id)],
+    queryFn: async () => {
+      
+      if (storesData.length === 0) { return [] };
+      const product_keys = userModel.cart.map(item => item.product_key)
+      const store_ids = storesData.map(store => store.store_id);
+
+      let allStorePrices = [];
+
+      for (const db of [supabase, coopSupabase]) {
+        const { data: storePrices, error: storePricesError } = await db
+          .from("current_prices")
+          .select(`
+            product_key,
+            store_id,
+            price,
+            stores (
+              store_name
+            )
+          `)
+          .in("product_key", product_keys);
+
+        if (storePricesError) {
+          console.log(storePricesError);
+          continue;
+        }
+
+        allStorePrices.push(...storePrices);
+      }
+
+      return allStorePrices as unknown as storePriceData[]; // Force conversion
+    },
+    enabled: userModel.usesLocation
+  });
+
 
   if (storesQuery.isLoading) {
     return <div>Loading...</div>;
   }
-
   if (storesQuery.isError) {
     return <div>Error loading stores</div>;
   }
 
   const storesData = storesQuery.data || [];
+  const storesMap = new Map(storesData.map(store => [store.store_id, store]));
+
+  if (storePricesQuery.isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (storePricesQuery.isError) {
+    return <div>Error loading store price data...</div>;
+  }
+
+  //console.log(storePricesQuery.data)
+  const storePrices = storePricesQuery.data || [];
 
   const shipping = 5.0;
   const subtotal = 2;
   const total = userModel.cart.length > 0 ? cart.map(item => item.avg_price).reduce((a, b) => a + b, 0) : 0;
 
+
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
   }
+  
+  function onCalculateButtonClickACB(event: React.MouseEvent<HTMLButtonElement>) {
+    if (userModel.usesLocation) {
+      if (algorithmMethod === "average") {
+        setUsesAvgPrice(true);
+        forceUpdate(s => !s); // Force re-render to show avg prices
+      }
+      if (algorithmMethod === "area") {
+        const cheapestInArea = findCheapestStores(storePrices, storesMap, userModel.cart, userModel.maxDistance);
+        console.log("Cheapest in area:", cheapestInArea);
+        userModel.setAlgorithmCart(cheapestInArea);
+        setUsesAvgPrice(false);
+        forceUpdate(s => !s); // Force re-render to show updated cart
+      }
+      else if (algorithmMethod === "global") {
+        const cheapestGlobal = findCheapestStores(storePrices, storesMap, userModel.cart);
+        console.log("Cheapest globally:", cheapestGlobal);
+        userModel.setAlgorithmCart(cheapestGlobal);
+        setUsesAvgPrice(false);
+        forceUpdate(s => !s); // Force re-render to show updated cart
+      }
+    }
+  }
 
+  function displayCartItems(items: Product[] | StoreProduct[]) {
+
+    if (usesAvgPrice) {
+      return items.map((item: Product) => (
+      <div key={item.product_id} className="cart-item">
+        <img src={item.product_image_url} alt={item.name} className="item-image" />
+        <div className="item-details">
+          <h3 className="item-name">{item.name}</h3>
+          <p className="item-quantity">1x</p>
+        </div>
+        <div className="item-price">~{item.avg_price.toFixed(2)} kr</div>
+      </div>         
+      ));
+    }
+    else {
+      return (items as StoreProduct[]).map((item) => (
+      <div key={item.product_id} className="cart-item">
+        <img src={item.product_image_url} alt={item.name} className="item-image" />
+        <div className="item-details">
+          <h3 className="item-name">{item.name}</h3>
+          <p className="item-quantity">1x</p>
+          <p className="item-store">{item.store_name}</p>
+          <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
+        </div>
+        <div className="item-price-section">
+          <div className="item-price">{item.price.toFixed(2)} kr</div>
+          <div className="item-savings">
+            {((((item.avg_price - item.price) / item.avg_price) * 100) || 0).toFixed(0)}% lägre pris
+          </div>
+        </div>
+      </div>
+      ));      
+    }
+  }
 
   return (
     <div className="checkout-wrapper">
@@ -93,26 +206,26 @@ function CheckoutView(props: CheckoutViewProps) {
 
           {/* Cart Items */}
           <div className="cart-items">
-            {cart.map((item) => (
-              <div key={item.product_id} className="cart-item">
-                <img src={item.product_image_url} alt={item.name} className="item-image" />
-                <div className="item-details">
-                  <h3 className="item-name">{item.name}</h3>
-                  <p className="item-quantity">1x</p>
-                </div>
-                <div className="item-price">{item.avg_price.toFixed(2)} kr</div>
-              </div>
-            ))}
+            {displayCartItems(usesAvgPrice ? userModel.cart : userModel.algorithmCart)}
           </div>
 
           {/* Order Summary */}
           <div className="order-summary">
             <div className="summary-row">
-              <span className="summary-label">Subtotal</span>
-              <span className="summary-value">{subtotal.toFixed(2)} kr</span>
+              <span className="summary-label">Färdningspris</span>
             </div>
-            <div className="summary-row">
-              <span className="summary-label">Shipping</span>
+            <div className="summary-row fuel-type-row">
+              <select 
+                id="fuel-type"
+                value={fuelType}
+                onChange={(e) => setFuelType(e.target.value)}
+                className="fuel-type-select"
+              >
+                <option value="bensin98">Bensin 98</option>
+                <option value="bensin95">Bensin 95</option>
+                <option value="e85">E85</option>
+                <option value="diesel">Diesel</option>
+              </select>
               <span className="summary-value">{shipping.toFixed(2)} kr</span>
             </div>
             <div className="summary-row total-row">
@@ -129,18 +242,21 @@ function CheckoutView(props: CheckoutViewProps) {
             <label htmlFor="delivery-method" className="delivery-label">Prisalgoritm</label>
             <select 
               id="delivery-method"
-              value={deliveryMethod} 
-              onChange={(e) => setDeliveryMethod(e.target.value)}
+              value={algorithmMethod} 
+              onChange={(e) => setAlgorithmMethod(e.target.value)}
               className="delivery-select"
             >
-              <option value="home">Bästa pris inom område (max {userModel.maxDistance} km)</option>
-              <option value="pickup">Kortaste väg prioritet (max {userModel.maxDistance} km)</option>
-              <option value="express">Bästa pris (hela Sverige)</option>
+              <option value="average">Genomsnittspris</option>
+              <option value="area">Bästa pris inom område (max {userModel.maxDistance} km)</option>
+              <option value="shortest-path">Kortaste väg prioritet (max {userModel.maxDistance} km)</option>
+              <option value="global">Bästa pris (hela Sverige)</option>
             </select>
           </div>
 
           {/* Pay Button */}
-          <button className="pay-button">Beräkna total</button>
+          <button className="calculate-button" onClick={onCalculateButtonClickACB} disabled={!userModel.usesLocation}>
+            Beräkna total
+          </button>
         </div>
         <div className='map-section'>
           <MapView position={[userModel.latitude, userModel.longitude]} usesLocation={userModel.usesLocation} stores={storesData} radius={userModel.maxDistance}/>
@@ -183,8 +299,82 @@ export default function MapView({position, usesLocation, stores, radius} : {posi
   );
 }
 
+  function findCheapestStores(
+    data: storePriceData[], 
+    storesData: Map<number, storesData>, 
+    cart: Product[] = [],
+    range?: number
+  ): StoreProduct[] {
+    
+    const cheapestProducts: Map<string, StoreProduct> = new Map();
+    const cartMap = new Map(cart.map(item => [item.product_key, item]));
+
+    for (const storePrice of data) {
+      // If range is provided, check if store is within range
+      if (range !== undefined) {
+        const store = storesData.get(storePrice.store_id);
+        if (!store || store.distance_km > range) {
+          continue; // Skip stores outside range
+        }
+      }
+
+      const store = storesData.get(storePrice.store_id);
+      if (!store?.store_name || !store.lat || !store.lon || !store.distance_km) {
+        continue;
+      }
+      // If product not in map yet, add it
+      if (!cheapestProducts.has(storePrice.product_key)) {
+        cheapestProducts.set(
+          storePrice.product_key, 
+          {...cartMap.get(storePrice.product_key), 
+            store_name: store?.store_name || "Okänd butik",
+            lat: store?.lat || 0,
+            lon: store?.lon || 0,
+            price: storePrice.price,
+            distance: store?.distance_km || 0,
+
+          } as StoreProduct
+        );
+      } else {
+        // Compare prices and update if cheaper
+        const current = cheapestProducts.get(storePrice.product_key)!;
+        if (storePrice.price < current.price) {
+          cheapestProducts.set(
+            storePrice.product_key, 
+            {...cartMap.get(storePrice.product_key), 
+              store_name: store?.store_name || "Okänd butik",
+              lat: store?.lat || 0,
+              lon: store?.lon || 0,
+              price: storePrice.price,
+              distance: store?.distance_km || 0,
+
+            } as StoreProduct
+          );
+        }
+        // If prices are equal, prefer the one with shorter distance
+        else if (storePrice.price === current.price && store?.distance_km !== undefined && current.distance !== undefined) {
+          if (store.distance_km < current.distance) {
+            cheapestProducts.set(
+              storePrice.product_key, 
+              {...cartMap.get(storePrice.product_key), 
+                store_name: store?.store_name || "Okänd butik",
+                lat: store?.lat || 0,
+                lon: store?.lon || 0,
+                price: storePrice.price,
+                distance: store?.distance_km || 0,
+              } as StoreProduct
+            );
+          }
+        }
+      }
+    }
+
+    return Array.from(cheapestProducts.values());
+  }
+
+
 function StoreMarkers({ stores }: { stores: storesData[] }) {
-  const [zoom, setZoom] = useState(30);
+  const [zoom, setZoom] = useState(12);
 
   useMapEvents({
     zoomend: (e) => {

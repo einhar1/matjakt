@@ -79,14 +79,43 @@
 .item-quantity {
   font-size: 12px;
   color: var(--text-muted);
+  margin: 0 0 6px 0;
+}
+
+.item-store {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
+}
+
+.item-distance {
+  font-size: 11px;
+  color: var(--text-muted);
   margin: 0;
+}
+
+.item-price-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .item-price {
   font-size: 16px;
   font-weight: 600;
   color: var(--text-main);
-  white-space: nowrap;
+}
+
+.item-savings {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-color);
+  background-color: rgba(22, 163, 74, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 
@@ -186,6 +215,44 @@
   padding: 8px;
 }
 
+/* Fuel Type Select in Order Summary */
+.fuel-type-row {
+  align-items: center;
+}
+
+.fuel-type-select {
+  max-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-main);
+  background-color: var(--bg-card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  font-weight: 500;
+  margin-right: 12px;
+}
+
+.fuel-type-select:hover {
+  border-color: var(--accent-color);
+}
+
+.fuel-type-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.fuel-type-select option {
+  color: var(--text-main);
+  background-color: var(--bg-card);
+}
+
 /* Location Button */
 .location-btn-checkout {
   width: 100%;
@@ -211,8 +278,8 @@
   transform: translateY(0);
 }
 
-/* Pay Button */
-.pay-button {
+/* Calculate Button */
+.calculate-button {
   width: 100%;
   padding: 14px 16px;
   background-color: var(--accent-color);
@@ -226,12 +293,20 @@
   margin-bottom: 20px;
 }
 
-.pay-button:hover {
+.calculate-button:hover:not(:disabled) {
+  /* Only show hover effect when NOT disabled */
   box-shadow: 0 5px 8px 0 var(--accent-hover);
   transform: translateY(-2px);
 }
 
-.pay-button:active {
+.calculate-button:disabled {
+  background-color: var(--border-subtle);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.calculate-button:active {
   transform: translateY(0);
 }
 
