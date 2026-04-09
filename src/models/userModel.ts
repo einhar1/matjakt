@@ -1,6 +1,26 @@
 import type { Product } from "../views/DetailsView";
 import { supabase } from "../utils/supabase";
 
+export type StoreProduct = {
+  product_id: string,
+  product_key: string,
+  name: string,
+  brand: string,
+  pack_size: string,
+  country_of_origin: string,
+  product_image_url: string,
+  product_information: string,
+  ingredients: string,
+  avg_price: number,
+  price: number, 
+  store_id: string,
+  store_name: string,
+  lat: number,
+  lon: number,
+  available: boolean, 
+  distance: number, // in km  
+}
+
 export type userModelType = {
     userId: string | null;
     postalCode: string;
@@ -11,12 +31,14 @@ export type userModelType = {
     maxDistance: number; // in km
     usesLocation: boolean;
     cart: Product[];
+    algorithmCart: StoreProduct[];
     setLocation: (longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) => void;
     setMaxDistance: (distance: number) => void;
     addToCart: (product: Product) => void;
     removeFromCart: (productId: string) => void;
-    getLocation: () => number[] | undefined;
-    getMaxDistance: () => number;
+    setAlgorithmCart: (algorithmCart: StoreProduct[]) => void;
+    getLocation?: () => [number, number];
+    getMaxDistance?: () => number;
     // Supabase persistence
     saveToSupabase: () => void;
     loadFromSupabase: (userId: string) => Promise<boolean>;
@@ -32,6 +54,7 @@ export const userModel: userModelType = {
     maxDistance: 10, // in km
     usesLocation: false,
     cart: [] as Product[],
+    algorithmCart: [] as StoreProduct[],
 
     setLocation(longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) {
         if (postalCode) this.postalCode = postalCode;
@@ -54,6 +77,10 @@ export const userModel: userModelType = {
         this.cart = this.cart.filter(p => p.product_id !== productId);
         this.saveToSupabase();
     },
+    setAlgorithmCart(algorithmCart: StoreProduct[]) {
+        console.log("Setting algorithm cart to", algorithmCart);
+        this.algorithmCart = algorithmCart;
+    },
     getLocation(){
         if (this.usesLocation) {
             return [this.latitude, this.longitude]
@@ -63,7 +90,6 @@ export const userModel: userModelType = {
     getMaxDistance() {
         return this.maxDistance;
     },
-
     // Persist current local state to the user's profile row in Supabase
     // Only runs if the user is logged in (userId is set)
     saveToSupabase() {
@@ -118,3 +144,10 @@ export const userModel: userModelType = {
         return hasData;
     },
 }
+
+declare global {
+    interface Window {
+        userModel: typeof userModel;
+    }
+}
+window.userModel = userModel;

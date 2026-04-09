@@ -24,14 +24,11 @@ type SearchResultRow = {
 
 export const PAGE_SIZE = 15
 
-async function fetchProducts([_key, term, pageIndex]: [string, string, number]): Promise<OfferItem[]> {
+async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDistance]: [string, string, number, [number, number], number]): Promise<OfferItem[]> {
     
     const sanitized = term.trim().substring(0,100);
 
     if (!sanitized) return [];
-
-    const [userLat, userLon] = userModel.getLocation() || [null, null];
-    const maxDistance = userModel.getMaxDistance()*1000;
 
     console.log(`fetching products from search... Page Index: ${pageIndex}`)
 
@@ -70,12 +67,15 @@ const SWRConfig = {
 
 export function useProductSearch(searchTerm: string) {
 
+    const [userLat, userLon] = userModel.getLocation() || [null, null];
+    const maxDistance = userModel.getMaxDistance()*1000;
+
     // TODO: type any
     const getKey = (pageIndex: number, previousPageData: any) => {
         if ((previousPageData && !previousPageData.length) || !searchTerm)  {
             return null  // reached the end
         }
-        return ['products', searchTerm, pageIndex]
+        return ['products', searchTerm, pageIndex, [userLat, userLon], maxDistance]
     }
 
     const { data, error, size, setSize, isValidating } = useSWRInfinite<OfferItem[], Error>(

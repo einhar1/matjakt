@@ -144,7 +144,7 @@ function DetailsView(props: DetailsViewProps) {
   }
 
   const storeNames = filteredStoreData?.map(item => item.store_name);
-  const storePrices = filteredStoreData?.map(item => item.price) as any[];
+  const storePrices = filteredStoreData?.map(item => item.price).sort((a, b) => a - b) as any[];
   const minPrice = Math.min(...storePrices) as number;
   const maxPrice = Math.max(...storePrices) as number;
   const chartMinPrice = minPrice - Math.round(minPrice * 0.03);
