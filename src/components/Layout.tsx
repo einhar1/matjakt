@@ -1,13 +1,19 @@
-import { useState } from 'react'                                                                                      
+import { useState } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
-import { NavbarView } from '../views/NavbarView'                                                                      
+import { NavbarView } from '../views/NavbarView'
 import { AuthModal } from './AuthModal'
-import { useAuth } from '../context/AuthContext'                                                                      
-                                                                                                                      
+import { useAuth } from '../context/AuthContext'
+import { useProfileSync } from '../hooks/useProfileSync'
+
 export function Layout() {
-  const [loginOpen, setLoginOpen] = useState(false)                                                                   
-  const { user } = useAuth()                                                                                          
+  const [loginOpen, setLoginOpen] = useState(false)
+  const { user } = useAuth()
   const navigate = useNavigate()
+
+  // Wait for the user's profile to load from Supabase before rendering
+  // This ensures userModel is hydrated before any child component reads it
+  const { loading: profileLoading } = useProfileSync()
+  if (profileLoading) return <div className="profile-loading">Laddar...</div>
                                                                                                                       
   function handleLoginClick() {
     if (user) navigate('/profile')   // already logged in -> go to profile
