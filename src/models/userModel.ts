@@ -81,11 +81,8 @@ export const userModel: userModelType = {
         console.log("Setting algorithm cart to", algorithmCart);
         this.algorithmCart = algorithmCart;
     },
-    getLocation(){
-        if (this.usesLocation) {
-            return [this.latitude, this.longitude]
-        }
-        return undefined
+    getLocation(): [number, number] {
+        return [this.latitude, this.longitude];
     },
     getMaxDistance() {
         return this.maxDistance;
