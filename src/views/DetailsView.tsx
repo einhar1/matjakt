@@ -66,7 +66,7 @@ function DetailsView(props: DetailsViewProps) {
         const { data: product, error: productError } = await db
           .from("products")
           .select("product_id, product_key, name, brand, pack_size, country_of_origin, product_image_url, product_information, ingredients, avg_price")
-          .eq("product_id", productId)
+          .eq("product_key", productId)
           .single();
 
         if (productError) {

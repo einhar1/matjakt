@@ -41,10 +41,11 @@ export function List(props: ListProps) {
             
             <div className='search-results-grid'>
                 {displayData.map((offer, index) => (
-                    <OfferCard
-                        key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
-                        offer={offer}
-                    />
+                    <div key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} onClick={props.closeModal}>
+                        <OfferCard
+                            offer={offer}
+                        />
+                    </div>
                 ))}
             </div>
 

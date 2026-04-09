@@ -1,6 +1,7 @@
 
 /* TODO: Ändra så promos baserar sig på vår data, inte butikens / butikernas egen */
 
+import { useNavigate } from 'react-router-dom';
 import type { Product, CurrentPrice, Store } from '../types/database';
 import './OfferCard.css';
 
@@ -20,6 +21,7 @@ function getDiscountPercent(original: number, promo: number): number {
 }
 
 export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
+  const navigate = useNavigate();
   function renderPrices() {
     if (offer.currentPrice.promo_price) {
       const pct = getDiscountPercent(offer.currentPrice.price, offer.currentPrice.promo_price);
@@ -45,7 +47,7 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
   }
 
   return (
-    <div className='offer-card'>
+    <div className='offer-card' onClick={() => navigate(`/details/${offer.product.product_key}`)} style={{ cursor: 'pointer' }}>
         <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`}>
             {offer.product.product_image_url && (
                 <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
@@ -66,7 +68,7 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
             <button 
                 className='offer-btn'
                 /* TODO: ändra vid implementation av AddToCart: */
-                onClick={() => onAddToCart && onAddToCart(offer)}
+                onClick={(e) => { e.stopPropagation(); onAddToCart && onAddToCart(offer); }}
             >
                 Lägg till i matkasse
             </button>
