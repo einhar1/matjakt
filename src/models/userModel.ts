@@ -37,8 +37,8 @@ export type userModelType = {
     addToCart: (product: Product) => void;
     removeFromCart: (productId: string) => void;
     setAlgorithmCart: (algorithmCart: StoreProduct[]) => void;
-    getLocation?: () => [number, number];
-    getMaxDistance?: () => number;
+    getLocation: () => [number, number];
+    getMaxDistance: () => number;
     // Supabase persistence
     saveToSupabase: () => void;
     loadFromSupabase: (userId: string) => Promise<boolean>;
