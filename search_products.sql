@@ -2,6 +2,8 @@
 CREATE INDEX store_points ON stores USING GIST ((ST_MakePoint(lon, lat)::geography));
 -- DROP INDEX IF EXISTS idx_products_name_trgm_gin;
 CREATE INDEX idx_products_name_trgm_gin ON products USING GIN (lower(name) gin_trgm_ops);
+-- DROP INDEX IF EXISTS idx_products_search_vector;
+CREATE INDEX idx_products_search_vector ON products USING GIN (search_vector);)
 
 CREATE OR REPLACE FUNCTION public.search_products_dev(
   search_term text, 
