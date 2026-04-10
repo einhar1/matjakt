@@ -39,7 +39,7 @@ function SearchView() {
                 Produkter <span>• visar {products.length} träffar</span>
             </div>
 
-            <div className='search-results-grid'>
+            <div className='search-results-grid search-view'>
                 {products.map((offer, index) => (
                     <OfferCard
                         key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}

@@ -39,7 +39,7 @@ export function List(props: ListProps) {
                 Produkter <span>• visar {data.length === PAGE_SIZE ? data.length+'+': data.length} träffar</span>
             </div>
             
-            <div className='search-results-grid'>
+            <div className='search-results-grid modal'>
                 {displayData.map((offer, index) => (
                     <div key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} onClick={props.closeModal}>
                         <OfferCard

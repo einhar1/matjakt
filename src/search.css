@@ -31,10 +31,13 @@
     gap: 10px;
 }
 
-/* TODO: Fix grid css. */
 .search-results-grid .offer-card {
-    flex: 1 1 200px;
-    max-width: 100%;
+    flex: 0 0 200px;
+    max-width: 200px;
+}
+
+.search-results-grid.modal > div {
+    display: contents;
 }
 
 @media (max-width: 740px) {
@@ -46,6 +49,20 @@
     .search-results-grid {
         padding: 0 16px 40px 16px;
     }
+}
+
+@media (max-width: 1050px) {
+    .search-results-grid.search-view .offer-card {
+        flex: 1 1 200px;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 880px) {
+  .search-results-grid.modal > div .offer-card {
+    flex: 1 1 200px;
+    max-width: 100%;
+  }
 }
 
 .search-all-results-bar {
