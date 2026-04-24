@@ -52,7 +52,10 @@ async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDist
     return results
         .map((row: SearchResultRow) => {
             return {
-                product: row.product,
+                product: {
+                    ...row.product,
+                    product_image_url: row.product.product_image_url?.replace(".tiff", ".jpg") // The web can't display TIFFs, so we replace the extension
+                },
                 store: row.store,
                 currentPrice: row.current_price
             }
