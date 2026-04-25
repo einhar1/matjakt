@@ -20,6 +20,7 @@ interface storesData {
   lat: number;
   lon: number;
   distance_km: number;
+  isSelected?: boolean;
 }
 
 interface storePriceData {
@@ -38,7 +39,7 @@ function CheckoutView(props: CheckoutViewProps) {
   const [algorithmMethod, setAlgorithmMethod] = useState('average');
   const [fuelType, setFuelType] = useState('bensin95');
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [usesAvgPrice, setUsesAvgPrice] = useState(true);
+  const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
   const [, forceUpdate] = useState(false);
 
   const storesQuery = useQuery({
@@ -133,40 +134,50 @@ function CheckoutView(props: CheckoutViewProps) {
 
   const shipping = 5.0;
   const subtotal = 2;
-  const total = userModel.cart.length > 0 ? cart.map(item => item.avg_price).reduce((a, b) => a + b, 0) : 0;
-
+  function getTotal() {
+    if (hasCalculatedWithCurAlgo === "average") {
+      return userModel.cart.length > 0 ? cart.map(item => item.avg_price).reduce((a, b) => a + b, 0) + shipping : 0;  
+    }
+    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") { 
+      return userModel.algorithmCart.length > 0 ? userModel.algorithmCart.map(item => item.price).reduce((a, b) => a + b, 0) : 0; 
+    }
+  }
 
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
+  }
+
+  function onAlgorithmChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
+    setAlgorithmMethod(e.target.value);
   }
   
   function onCalculateButtonClickACB(event: React.MouseEvent<HTMLButtonElement>) {
     if (userModel.usesLocation) {
       if (algorithmMethod === "average") {
-        setUsesAvgPrice(true);
+        setHasCalculatedWithCurAlgo("average");
         forceUpdate(s => !s); // Force re-render to show avg prices
       }
       if (algorithmMethod === "area") {
         const cheapestInArea = findCheapestStores(storePrices, storesMap, userModel.cart, userModel.maxDistance);
         console.log("Cheapest in area:", cheapestInArea);
         userModel.setAlgorithmCart(cheapestInArea);
-        setUsesAvgPrice(false);
+        setHasCalculatedWithCurAlgo("area");
         forceUpdate(s => !s); // Force re-render to show updated cart
       }
       else if (algorithmMethod === "global") {
         const cheapestGlobal = findCheapestStores(storePrices, storesMap, userModel.cart);
         console.log("Cheapest globally:", cheapestGlobal);
         userModel.setAlgorithmCart(cheapestGlobal);
-        setUsesAvgPrice(false);
+        setHasCalculatedWithCurAlgo("global");
         forceUpdate(s => !s); // Force re-render to show updated cart
       }
     }
   }
 
-  function displayCartItems(items: Product[] | StoreProduct[]) {
+  function displayCartItems() {
 
-    if (usesAvgPrice) {
-      return items.map((item: Product) => (
+    if (hasCalculatedWithCurAlgo === "average") {
+      return userModel.cart.map((item: Product) => (
       <div key={item.product_id} className="cart-item">
         <img src={item.product_image_url} alt={item.name} className="item-image" />
         <div className="item-details">
@@ -177,8 +188,48 @@ function CheckoutView(props: CheckoutViewProps) {
       </div>         
       ));
     }
+    else if (hasCalculatedWithCurAlgo === "area") {
+      // For "area" algorithm, show all products and mark out-of-range ones
+      const algorithmCartMap = new Map((userModel.algorithmCart).map(item => [item.product_key, item]));
+      
+      return userModel.cart.map((cartItem) => {
+        const algorithmItem = algorithmCartMap.get(cartItem.product_key);
+        
+        if (algorithmItem) {
+          return (
+            <div key={cartItem.product_id} className="cart-item">
+              <img src={algorithmItem.product_image_url} alt={algorithmItem.name} className="item-image" />
+              <div className="item-details">
+                <h3 className="item-name">{algorithmItem.name}</h3>
+                <p className="item-quantity">1x</p>
+                <p className="item-store">{algorithmItem.store_name}</p>
+                <p className="item-distance">{algorithmItem.distance.toFixed(1)} km ifrån</p>
+              </div>
+              <div className="item-price-section">
+                <div className="item-price">{algorithmItem.price.toFixed(2)} kr</div>
+                <div className="item-savings">
+                  {((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0).toFixed(0)}% lägre pris
+                </div>
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div key={cartItem.product_id} className="cart-item out-of-range">
+              <img src={cartItem.product_image_url} alt={cartItem.name} className="item-image" />
+              <div className="item-details">
+                <h3 className="item-name">{cartItem.name}</h3>
+                <p className="item-quantity">1x</p>
+              </div>
+              <div className="item-price">Utanför område</div>
+            </div>
+          );
+        }
+      });
+    }
     else {
-      return (items as StoreProduct[]).map((item) => (
+      // For other algorithms, just display the items from algorithmCart
+      return userModel.algorithmCart.map((item) => (
       <div key={item.product_id} className="cart-item">
         <img src={item.product_image_url} alt={item.name} className="item-image" />
         <div className="item-details">
@@ -194,7 +245,7 @@ function CheckoutView(props: CheckoutViewProps) {
           </div>
         </div>
       </div>
-      ));      
+      ));   
     }
   }
 
@@ -206,7 +257,7 @@ function CheckoutView(props: CheckoutViewProps) {
 
           {/* Cart Items */}
           <div className="cart-items">
-            {displayCartItems(usesAvgPrice ? userModel.cart : userModel.algorithmCart)}
+            {displayCartItems()}
           </div>
 
           {/* Order Summary */}
@@ -230,7 +281,7 @@ function CheckoutView(props: CheckoutViewProps) {
             </div>
             <div className="summary-row total-row">
               <span className="summary-label total-label">Total</span>
-              <span className="summary-value total-value">{total.toFixed(2)} kr</span>
+              <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
             </div>
           </div>
 
@@ -243,7 +294,7 @@ function CheckoutView(props: CheckoutViewProps) {
             <select 
               id="delivery-method"
               value={algorithmMethod} 
-              onChange={(e) => setAlgorithmMethod(e.target.value)}
+              onChange={onAlgorithmChangeACB}
               className="delivery-select"
             >
               <option value="average">Genomsnittspris</option>
@@ -259,7 +310,13 @@ function CheckoutView(props: CheckoutViewProps) {
           </button>
         </div>
         <div className='map-section'>
-          <MapView position={[userModel.latitude, userModel.longitude]} usesLocation={userModel.usesLocation} stores={storesData} radius={userModel.maxDistance}/>
+          <MapView 
+            position={[userModel.latitude, userModel.longitude]} 
+            usesLocation={userModel.usesLocation} stores={storesData} 
+            radius={userModel.maxDistance}
+            hasCalculatedWithCurAlgo={hasCalculatedWithCurAlgo}
+            algorithmCart={userModel.algorithmCart}
+            />
         </div>
         <LocationModal 
           isOpen={showLocationModal}
@@ -273,10 +330,21 @@ function CheckoutView(props: CheckoutViewProps) {
   );
 }
 
-export default function MapView({position, usesLocation, stores, radius} : {position: [number, number], usesLocation: boolean, stores: storesData[], radius: number}) {
+export default function MapView({position, usesLocation, stores, radius, hasCalculatedWithCurAlgo, algorithmCart}: 
+  {position: [number, number], usesLocation: boolean, stores: storesData[], radius: number, hasCalculatedWithCurAlgo: string, algorithmCart: StoreProduct[]}
+) {
   const stockholmPos: [number, number] = [59.3293, 18.0686]; // Stockholm
   if (!usesLocation) {position = stockholmPos};
 
+  if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") {
+    stores = stores.map(store => {
+      const matchingProduct = algorithmCart.find(item => item.store_name === store.store_name);
+      return {
+        ...store,
+        isSelected: !!matchingProduct
+      }
+    });
+  }
 
   return (
     <MapContainer
@@ -385,7 +453,7 @@ function StoreMarkers({ stores }: { stores: storesData[] }) {
   return (
     <>
       {stores.map((store) => {
-        const icon = createGroceryIcon(store.store_name, zoom);
+        const icon = createGroceryIcon(store.store_name, store.isSelected, zoom);
 
         return (
           <Marker
@@ -400,7 +468,9 @@ function StoreMarkers({ stores }: { stores: storesData[] }) {
 }
 
 
-function createGroceryIcon(name: string, zoom: number = 30) {
+function createGroceryIcon(name: string, isSelected: boolean | undefined, zoom: number = 30) {
+
+  const groceryColor = !!isSelected ? "rgba(252, 255, 46, 0.7)" : "rgba(15, 182, 76, 0.6)";
 
   const storeText = `
     <div style="
@@ -431,7 +501,7 @@ function createGroceryIcon(name: string, zoom: number = 30) {
           width="${zoom*2}" 
           height="${zoom*2}" 
           viewBox="0 0 16 16" 
-          fill="rgb(15, 182, 76)"
+          fill="${groceryColor}"
         >
           <path d="M13.35 10.48H4.5l-.24-1.25h9.13a1.24 1.24 0 0 0 1.22-1l.84-4a1.25 1.25 0 0 0-1.22-1.51H3l-.22-1.24H.5v1.25h1.25l1.5 7.84a2 2 0 0 0-1.54 1.93 2.09 2.09 0 0 0 2.16 2 2.08 2.08 0 0 0 2.13-2 2 2 0 0 0-.16-.77h5.49a2 2 0 0 0-.16.77 2.09 2.09 0 0 0 2.16 2 2 2 0 1 0 0-4zM14.23 4l-.84 4H4l-.74-4zM3.87 13.27A.85.85 0 0 1 3 12.5a.85.85 0 0 1 .91-.77.84.84 0 0 1 .9.77.84.84 0 0 1-.94.77zm9.48 0a.85.85 0 0 1-.91-.77.92.92 0 0 1 1.81 0 .85.85 0 0 1-.9.77z" />
         </svg>
