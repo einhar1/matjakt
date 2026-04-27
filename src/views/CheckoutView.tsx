@@ -174,6 +174,12 @@ function CheckoutView(props: CheckoutViewProps) {
     }
   }
 
+  function removeItemACB(productId: string) {
+    userModel.removeFromCart(productId);
+    userModel.setAlgorithmCart(userModel.algorithmCart.filter(item => item.product_id !== productId));
+    forceUpdate(s => !s);
+  }
+
   function displayCartItems() {
 
     if (hasCalculatedWithCurAlgo === "average") {
@@ -185,16 +191,17 @@ function CheckoutView(props: CheckoutViewProps) {
           <p className="item-quantity">1x</p>
         </div>
         <div className="item-price">~{item.avg_price.toFixed(2)} kr</div>
-      </div>         
+        <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
+      </div>
       ));
     }
     else if (hasCalculatedWithCurAlgo === "area") {
       // For "area" algorithm, show all products and mark out-of-range ones
       const algorithmCartMap = new Map((userModel.algorithmCart).map(item => [item.product_key, item]));
-      
+
       return userModel.cart.map((cartItem) => {
         const algorithmItem = algorithmCartMap.get(cartItem.product_key);
-        
+
         if (algorithmItem) {
           return (
             <div key={cartItem.product_id} className="cart-item">
@@ -211,6 +218,7 @@ function CheckoutView(props: CheckoutViewProps) {
                   {((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0).toFixed(0)}% lägre pris
                 </div>
               </div>
+              <button className="item-remove" onClick={() => removeItemACB(cartItem.product_id)} aria-label="Ta bort">✕</button>
             </div>
           );
         } else {
@@ -222,6 +230,7 @@ function CheckoutView(props: CheckoutViewProps) {
                 <p className="item-quantity">1x</p>
               </div>
               <div className="item-price">Utanför område</div>
+              <button className="item-remove" onClick={() => removeItemACB(cartItem.product_id)} aria-label="Ta bort">✕</button>
             </div>
           );
         }
@@ -244,8 +253,9 @@ function CheckoutView(props: CheckoutViewProps) {
             {((((item.avg_price - item.price) / item.avg_price) * 100) || 0).toFixed(0)}% lägre pris
           </div>
         </div>
+        <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
       </div>
-      ));   
+      ));
     }
   }
 
