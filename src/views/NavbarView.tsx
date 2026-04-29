@@ -82,6 +82,10 @@ export function NavbarView(props: navbarViewProps) {
 		props.onSearch(searchQuery);
 	}
 
+	function handleAboutClick() {
+		navigate('/about');
+	}
+
 	function handleCloseSearchModal() {
 		setIsSearchModalOpen(false);
 	}
@@ -116,6 +120,7 @@ export function NavbarView(props: navbarViewProps) {
 				</div>
 
 				<div className="navbar-actions">
+					<button className="navbar-about-btn" onClick={handleAboutClick}>About</button>
 					<button className="navbar-login-btn" onClick={handleLoginClick}>
 						<FaUserCircle size={18} />
 						<span>{props.user ? (props.user.user_metadata?.display_name || props.user.email) : "Logga in"}</span>

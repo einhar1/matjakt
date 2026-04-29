@@ -7,6 +7,7 @@ import { SearchView } from "./views/SearchView";
 import { HomePresenter } from "./presenters/HomePresenter";
 import { userModel } from "./models/userModel";
 import { Layout } from "./components/Layout";
+import { AboutView } from "./views/AboutView";
 
 
 
@@ -47,6 +48,10 @@ function App(props: AppRenderProps) {
           path: "/details/:productId",
           element: <DetailsView userModel={userModel}/>
         },
+        {
+          path: "/about",
+          element: <AboutView />
+        }
       ]},
     ]);
   }
