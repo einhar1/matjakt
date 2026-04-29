@@ -3,8 +3,7 @@ import { useState } from 'react';
 import '../home.css'
 import '../style.css'
 import { OfferCard, type OfferItem } from '../components/OfferCard';
-import { PostalCodeInput } from '../components/PostalCodeInput';
-import { userModel, type userModelType } from '../models/userModel.ts';
+import { type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
 import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
 
