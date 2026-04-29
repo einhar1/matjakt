@@ -92,6 +92,28 @@
   gap: 12px;
 }
 
+.navbar-about-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.navbar-about-btn:hover {
+  border-color: var(--accent-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+  transform: translateY(-2px);
+}
+
 .navbar-login-btn {
   display: flex;
   align-items: center;
