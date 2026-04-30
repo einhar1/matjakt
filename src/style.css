@@ -184,3 +184,36 @@ html, body {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Cart toast notification */
+.cart-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: #f0fdf4;
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  white-space: nowrap;
+}
+
+.cart-toast--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.cart-toast-icon {
+  font-size: 16px;
+}

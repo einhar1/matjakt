@@ -6,11 +6,13 @@ import { useAuth } from '../context/AuthContext'
 import { useProfileSync } from '../hooks/useProfileSync'
 import { userModel } from '../models/userModel'
 import { offerItemToCartProduct, type OfferItem } from './OfferCard'
+import { useToast } from '../context/ToastContext'
 
 export function Layout() {
   const [loginOpen, setLoginOpen] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { showCartToast } = useToast()
 
   // Wait for the user's profile to load from Supabase before rendering
   // This ensures userModel is hydrated before any child component reads it
@@ -28,6 +30,7 @@ export function Layout() {
 
   function handleAddToCart(offer: OfferItem) {
     userModel.addToCart(offerItemToCartProduct(offer));
+    showCartToast();
   }                                                                                                                   
   
   return (                                                                                                            

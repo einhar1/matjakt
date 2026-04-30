@@ -6,6 +6,7 @@ import { ScrollObserver } from "../components/ScrollObserver.tsx";
 import { useProductSearch } from '../hooks/useProductSearch.ts'
 import { useSearchParams } from 'react-router-dom';
 import type { userModelType } from '../models/userModel';
+import { useToast } from '../context/ToastContext';
 
 const LoadingSpinner = () => (
     <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>
@@ -18,6 +19,7 @@ type SearchViewProps = {
 }
 
 function SearchView({ userModel }: SearchViewProps) {
+    const { showCartToast } = useToast();
 
     const [searchParams] = useSearchParams()
     const queryFromUrl = searchParams.get('q') || ''
@@ -37,6 +39,7 @@ function SearchView({ userModel }: SearchViewProps) {
 
     function onAddToCartACB(offer: OfferItem) {
         userModel.addToCart(offerItemToCartProduct(offer));
+        showCartToast();
     }
 
     let content

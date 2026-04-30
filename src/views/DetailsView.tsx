@@ -31,6 +31,7 @@ import { LocationModal, type LocationResult } from "../components/LocationModal"
 import { useQuery } from "@tanstack/react-query";
 import { type userModelType } from '../models/userModel';
 import { getDistanceKm } from "../utils/distanceFormulas";
+import { useToast } from '../context/ToastContext';
 
 export type Product = {
   product_id: string,
@@ -55,6 +56,7 @@ function DetailsView(props: DetailsViewProps) {
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const userModel = props.userModel;
+  const { showCartToast } = useToast();
 
   const productQuery = useQuery({
     queryKey: ["product", productId],
@@ -186,6 +188,7 @@ function DetailsView(props: DetailsViewProps) {
   
   function addToCartACB(){
     userModel.addToCart(product as Product);
+    showCartToast();
   }
 
   return (
