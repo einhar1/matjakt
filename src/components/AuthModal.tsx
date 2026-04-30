@@ -82,7 +82,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <button className="auth-submit-btn" type="submit" disabled={loading}>
+          <button className="btn-primary auth-submit-btn" type="submit" disabled={loading}>
             {loading ? 'Laddar...' : mode === 'login' ? 'Logga in' : 'Registrera'}
           </button>
         </form>

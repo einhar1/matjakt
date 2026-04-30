@@ -169,16 +169,5 @@
 .location-btn-home {
   margin-top: 20px;
   padding: 10px 55px;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
   font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.1s;
-}
-
-.location-btn-home:hover {
-  background: var(--accent-hover);
 }

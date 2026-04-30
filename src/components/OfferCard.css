@@ -106,19 +106,6 @@
 
 .offer-btn {
     width: 100%;
-    padding: 10px 16px;
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.offer-btn:hover {
-    box-shadow: 0 5px 8px 0 var(--accent-hover);
 }
 
 .offer-content {

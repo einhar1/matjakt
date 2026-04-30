@@ -55,20 +55,8 @@
 }
 
 .postal-code-save-btn {
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
   padding: 0 24px;
   font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.postal-code-save-btn:hover {
-  box-shadow: 0 5px 8px 0 var(--accent-hover);
-  transform: translateY(-2px);
 }
 
 .postal-code-error {

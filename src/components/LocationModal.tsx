@@ -69,7 +69,7 @@ export function LocationModal({
         
         <div className="location-modal-content">
           <button 
-            className="current-location-btn" 
+            className="btn-primary current-location-btn"
             onClick={handleCurrentLocation}
             disabled={isLoading}
           >

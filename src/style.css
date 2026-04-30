@@ -118,3 +118,69 @@ html, body {
   background: var(--accent-color-hover);
   transform: translateY(-1px);
 }
+
+/* Universal button system. Visuals controlled here; instance classes only set layout (width, margin, position, padding/font-size overrides). */
+.btn-primary,
+.btn-secondary,
+.btn-destructive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+  border: 1px solid var(--accent-color);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: none;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent-color);
+  box-shadow: 0 5px 8px 0 var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn-destructive {
+  background: var(--bg-card);
+  color: var(--discount-red);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-destructive:hover:not(:disabled) {
+  border-color: var(--discount-red);
+  box-shadow: 0 5px 8px 0 rgba(239, 68, 68, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled),
+.btn-destructive:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-destructive:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -82,7 +82,7 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
                 {renderPrices()}
             </div>
             <button 
-                className='offer-btn'
+                className='btn-primary offer-btn'
                 /* TODO: ändra vid implementation av AddToCart: */
                 onClick={(e) => { e.stopPropagation(); onAddToCart && onAddToCart(offer); }}
             >

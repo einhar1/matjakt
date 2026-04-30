@@ -40,7 +40,7 @@ function HomeView(props: HomeViewProps) {
             Automatiserad insamling från <strong>ICA, Coop, Willys och Hemköp</strong>. 
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
           </p>
-          <button className="location-btn-home" onClick={() => setShowLocationModal(true)}>Välj område</button>
+          <button className="btn-primary location-btn-home" onClick={() => setShowLocationModal(true)}>Välj område</button>
         </section>
 
         <section className="home-offers">

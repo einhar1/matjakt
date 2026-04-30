@@ -69,7 +69,7 @@ function ProfileView() {
 
         {/* Sign out */}
         <section className="profile-section">
-          <button className="profile-signout-btn" onClick={handleSignOut}>
+          <button className="btn-destructive profile-signout-btn" onClick={handleSignOut}>
             <FiLogOut size={16} />
             Logga ut
           </button>

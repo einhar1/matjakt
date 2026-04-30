@@ -49,7 +49,7 @@ export function PostalCodeInput(props: PostalCodeInputProps) {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                 />
-                <button type='submit' className='postal-code-save-btn'>
+                <button type='submit' className='btn-primary postal-code-save-btn'>
                     Spara
                 </button>
             </form>

@@ -116,18 +116,18 @@ export function NavbarView(props: navbarViewProps) {
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
-					<button className="navbar-search-btn" onClick={handleSearchClick}>
+					<button className="btn-primary" onClick={handleSearchClick}>
 						Sök
 					</button>
 				</div>
 
 				<div className="navbar-actions">
-					<button className="navbar-about-btn" onClick={handleAboutClick}>About</button>
-					<button className="navbar-login-btn" onClick={handleLoginClick}>
+					<button className="btn-secondary" onClick={handleAboutClick}>About</button>
+					<button className="btn-secondary navbar-login-btn" onClick={handleLoginClick}>
 						<FaUserCircle size={18} />
 						<span>{props.user ? (props.user.user_metadata?.display_name || props.user.email) : "Logga in"}</span>
 					</button>
-					<button className="navbar-cart-btn" onClick={handleCartClick}>
+					<button className="btn-primary navbar-cart-btn" onClick={handleCartClick}>
 						<FaShoppingCart size={18} />
 						<span>Matkasse</span>
 						{props.cartItemCount !== undefined && props.cartItemCount > 0 && (
@@ -150,7 +150,7 @@ export function NavbarView(props: navbarViewProps) {
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
-					<button className="navbar-search-btn" onClick={handleSearchClick}>Sök</button>
+					<button className="btn-primary" onClick={handleSearchClick}>Sök</button>
 				</div>
 			</div>
 

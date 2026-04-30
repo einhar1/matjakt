@@ -362,7 +362,7 @@ function CheckoutView(props: CheckoutViewProps) {
           </div>
 
           {/* Location Selection */}
-          <button className="location-btn-checkout" onClick={() => setShowLocationModal(true)}>Välj område</button>
+          <button className="btn-secondary location-btn-checkout" onClick={() => setShowLocationModal(true)}>Välj område</button>
 
           {/* Delivery Method Selection */}
           <div className="delivery-section">
@@ -381,7 +381,7 @@ function CheckoutView(props: CheckoutViewProps) {
           </div>
 
           {/* Pay Button */}
-          <button className="calculate-button" onClick={onCalculateButtonClickACB} disabled={!userModel.usesLocation}>
+          <button className="btn-primary calculate-button" onClick={onCalculateButtonClickACB} disabled={!userModel.usesLocation}>
             Beräkna total
           </button>
         </div>

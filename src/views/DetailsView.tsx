@@ -202,7 +202,7 @@ function DetailsView(props: DetailsViewProps) {
                     <h1>{product?.name}</h1>
                     <h3>{product?.brand}. {product?.pack_size}.</h3>
                     <p>Genomsnittspris: <span><b>{product.avg_price.toFixed(2)}kr</b></span></p>
-                    <button className="add-to-cart-btn" onClick={addToCartACB}>
+                    <button className="btn-primary" onClick={addToCartACB}>
                       Lägg i varukorg
                     </button>
                   </div>
@@ -232,7 +232,7 @@ function DetailsView(props: DetailsViewProps) {
               </div>
 
             <div className="box box-padding store-prices-box">
-              <button className="location-btn" onClick={() => setShowLocationModal(true)}>Välj område</button>
+              <button className="btn-primary location-btn" onClick={() => setShowLocationModal(true)}>Välj område</button>
               <Bar data={storeChartData} options={storeOptions}/>
             </div>
             <div className="box box-padding">
