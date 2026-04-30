@@ -14,8 +14,11 @@
 }
 
 .product-img-wrapper img{
-    display: flex;
+    display: block;
     max-height: 400px;
+    max-width: 100%;
+    width: 100%;
+    object-fit: contain;
     margin: 0 auto;
 }
 
