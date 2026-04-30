@@ -3,12 +3,28 @@
 
 import { useNavigate } from 'react-router-dom';
 import type { Product, CurrentPrice, Store } from '../types/database';
+import type { Product as CartProduct } from '../views/DetailsView';
 import './OfferCard.css';
 
 export type OfferItem = {
   product: Product;
   store: Store;
   currentPrice: CurrentPrice;
+}
+
+export function offerItemToCartProduct(offer: OfferItem): CartProduct {
+  return {
+    product_id: offer.product.product_id ?? offer.product.product_key,
+    product_key: offer.product.product_key,
+    name: offer.product.name ?? '',
+    brand: offer.product.brand ?? '',
+    pack_size: offer.product.pack_size ?? '',
+    country_of_origin: offer.product.country_of_origin ?? '',
+    product_image_url: offer.product.product_image_url ?? '',
+    product_information: '',
+    ingredients: '',
+    avg_price: offer.currentPrice.promo_price ?? offer.currentPrice.price,
+  };
 }
 
 interface OfferCardProps {

@@ -11,6 +11,7 @@ import { Modal } from '../components/Modal'
 import { List } from '../components/List.tsx'
 import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
+import type { OfferItem } from '../components/OfferCard';
 
 export type navbarViewProps = {
 	// username: string | null;
@@ -22,6 +23,7 @@ export type navbarViewProps = {
 	onSearch: (query: string) => void;
 	onLoginClick: () => void;
 	onCartClick: () => void;
+	onAddToCart: (offer: OfferItem) => void;
 	cartItemCount?: number;
 	user: User | null;
 }
@@ -170,7 +172,7 @@ export function NavbarView(props: navbarViewProps) {
 						</button>
 					</div>
 				</>
-				<List searchTerm={debouncedQuery} searchQuery={searchQuery} closeModal={handleCloseSearchModal} />
+				<List searchTerm={debouncedQuery} searchQuery={searchQuery} closeModal={handleCloseSearchModal} onAddToCart={props.onAddToCart} />
 			</Modal>
 			{/* User authentication section, not ready yet
 			{

@@ -26,7 +26,7 @@ function App(props: AppRenderProps) {
         },
         {
           path: "/search",
-          element: <SearchView/>,
+          element: <SearchView userModel={userModel}/>,
         },
         /* {
           path: "/map",

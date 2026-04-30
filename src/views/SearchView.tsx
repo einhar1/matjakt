@@ -1,10 +1,11 @@
 import '../style.css'
 import '../search.css'
 import { useCallback } from 'react';
-import { OfferCard } from '../components/OfferCard.tsx';
+import { OfferCard, offerItemToCartProduct, type OfferItem } from '../components/OfferCard.tsx';
 import { ScrollObserver } from "../components/ScrollObserver.tsx";
 import { useProductSearch } from '../hooks/useProductSearch.ts'
 import { useSearchParams } from 'react-router-dom';
+import type { userModelType } from '../models/userModel';
 
 const LoadingSpinner = () => (
     <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>
@@ -12,7 +13,11 @@ const LoadingSpinner = () => (
     </p>
 )
 
-function SearchView() {
+type SearchViewProps = {
+    userModel: userModelType;
+}
+
+function SearchView({ userModel }: SearchViewProps) {
 
     const [searchParams] = useSearchParams()
     const queryFromUrl = searchParams.get('q') || ''
@@ -30,6 +35,10 @@ function SearchView() {
             setSize(prevSize => prevSize + 1)
     }, [setSize]);
 
+    function onAddToCartACB(offer: OfferItem) {
+        userModel.addToCart(offerItemToCartProduct(offer));
+    }
+
     let content
     if (isLoading) content = <LoadingSpinner />
     else if (error) content = <p>{error.message}</p>
@@ -44,6 +53,7 @@ function SearchView() {
                     <OfferCard
                         key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
                         offer={offer}
+                        onAddToCart={onAddToCartACB}
                     />
                 ))}
             </div>

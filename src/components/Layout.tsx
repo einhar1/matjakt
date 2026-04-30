@@ -4,6 +4,8 @@ import { NavbarView } from '../views/NavbarView'
 import { AuthModal } from './AuthModal'
 import { useAuth } from '../context/AuthContext'
 import { useProfileSync } from '../hooks/useProfileSync'
+import { userModel } from '../models/userModel'
+import { offerItemToCartProduct, type OfferItem } from './OfferCard'
 
 export function Layout() {
   const [loginOpen, setLoginOpen] = useState(false)
@@ -22,6 +24,10 @@ export function Layout() {
                                                                                                                       
   function handleSearch(query: string) {
     navigate(`/search?q=${encodeURIComponent(query)}`)
+  }
+
+  function handleAddToCart(offer: OfferItem) {
+    userModel.addToCart(offerItemToCartProduct(offer));
   }                                                                                                                   
   
   return (                                                                                                            
@@ -30,6 +36,7 @@ export function Layout() {
         onSearch={handleSearch}
         onLoginClick={handleLoginClick}
         onCartClick={() => navigate('/checkout')}
+        onAddToCart={handleAddToCart}
         user={useAuth().user}
       />                                                                                                              
       <AuthModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />

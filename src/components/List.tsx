@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { OfferCard } from './OfferCard.tsx'
+import { OfferCard, type OfferItem } from './OfferCard.tsx'
 import '../search.css'
 import { useProductSearch, PAGE_SIZE } from "../hooks/useProductSearch.ts";
 
@@ -7,25 +7,26 @@ export type ListProps = {
     searchTerm: string;
     searchQuery?: string;
     closeModal: () => void;
+    onAddToCart?: (offer: OfferItem) => void;
 }
 
-export function List(props: ListProps) {
+export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListProps) {
 
     const navigate = useNavigate()
 
     function handleShowAll() {
-        if (props.searchQuery) {
-            const params = new URLSearchParams({ q: props.searchQuery })
+        if (searchQuery) {
+            const params = new URLSearchParams({ q: searchQuery })
             navigate('/search?' + params)
-            props.closeModal()
+            closeModal()
         }
     }
-    
+
     const {
         isLoading,
         error,
         data,
-    } = useProductSearch(props.searchTerm)
+    } = useProductSearch(searchTerm)
 
     // Force 9 items regardless of what SWR has in cache
     const displayData = data ? data.slice(0, 9) : []
@@ -38,12 +39,13 @@ export function List(props: ListProps) {
             <div className='search-results-header' /* style = {{margin: '8px 2px'}} */>
                 Produkter <span>• visar {data.length === PAGE_SIZE ? data.length+'+': data.length} träffar</span>
             </div>
-            
+
             <div className='search-results-grid modal'>
                 {displayData.map((offer, index) => (
-                    <div key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} onClick={props.closeModal}>
+                    <div key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} onClick={closeModal}>
                         <OfferCard
                             offer={offer}
+                            onAddToCart={onAddToCart}
                         />
                     </div>
                 ))}
