@@ -178,10 +178,10 @@ function CheckoutView(props: CheckoutViewProps) {
   const subtotal = 2;
   function getTotal() {
     if (hasCalculatedWithCurAlgo === "average") {
-      return userModel.cart.length > 0 ? cart.map(item => item.avg_price).reduce((a, b) => a + b, 0) : 0;  
+      return userModel.cart.length > 0 ? cart.map(item => item.avg_price * (item.qty || 1)).reduce((a, b) => a + b, 0) : 0;  
     }
     else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") { 
-      return userModel.algorithmCart.length > 0 ? userModel.algorithmCart.map(item => item.price).reduce((a, b) => a + b, 0) + travelCost : 0; 
+      return userModel.algorithmCart.length > 0 ? userModel.algorithmCart.map(item => (item.price * (item.qty || 1))).reduce((a, b) => a + b, 0) + travelCost : 0; 
     }
   }
 
@@ -233,9 +233,9 @@ function CheckoutView(props: CheckoutViewProps) {
         <img src={item.product_image_url} alt={item.name} className="item-image" />
         <div className="item-details">
           <h3 className="item-name">{item.name}</h3>
-          <p className="item-quantity">1x</p>
+          <p className="item-quantity">{item.qty || 1}x</p>
         </div>
-        <div className="item-price">~{item.avg_price.toFixed(2)} kr</div>
+        <div className="item-price">~{(item.avg_price * (item.qty || 1)).toFixed(2)} kr</div>
         <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
       </div>
       ));
@@ -246,21 +246,22 @@ function CheckoutView(props: CheckoutViewProps) {
 
       return userModel.cart.map((cartItem) => {
         const algorithmItem = algorithmCartMap.get(cartItem.product_key);
-
         if (algorithmItem) {
+          const reducedPercentage = ((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0);
+          const itemsSavingsClassName = reducedPercentage > 0 ? "item-savings" : "item-savings no-savings";
           return (
             <div key={cartItem.product_id} className="cart-item">
               <img src={algorithmItem.product_image_url} alt={algorithmItem.name} className="item-image" />
               <div className="item-details">
                 <h3 className="item-name">{algorithmItem.name}</h3>
-                <p className="item-quantity">1x</p>
+                <p className="item-quantity">{algorithmItem.qty || 1}x</p>
                 <p className="item-store">{algorithmItem.store_name}</p>
                 <p className="item-distance">{algorithmItem.distance.toFixed(1)} km ifrån</p>
               </div>
               <div className="item-price-section">
-                <div className="item-price">{algorithmItem.price.toFixed(2)} kr</div>
-                <div className="item-savings">
-                  {((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0).toFixed(0)}% lägre pris
+                <div className="item-price">{(algorithmItem.price * (algorithmItem.qty || 1)).toFixed(2)} kr</div>
+                <div className={`${itemsSavingsClassName}`}>
+                  {reducedPercentage > 0 ? `${reducedPercentage.toFixed(0)}% lägre pris` : `${Math.abs(reducedPercentage).toFixed(0)}% högre pris`}
                 </div>
               </div>
               <button className="item-remove" onClick={() => removeItemACB(cartItem.product_id)} aria-label="Ta bort">✕</button>
@@ -272,7 +273,7 @@ function CheckoutView(props: CheckoutViewProps) {
               <img src={cartItem.product_image_url} alt={cartItem.name} className="item-image" />
               <div className="item-details">
                 <h3 className="item-name">{cartItem.name}</h3>
-                <p className="item-quantity">1x</p>
+                <p className="item-quantity">{cartItem.qty || 1}x</p>
               </div>
               <div className="item-price">Utanför område</div>
               <button className="item-remove" onClick={() => removeItemACB(cartItem.product_id)} aria-label="Ta bort">✕</button>
@@ -288,12 +289,12 @@ function CheckoutView(props: CheckoutViewProps) {
         <img src={item.product_image_url} alt={item.name} className="item-image" />
         <div className="item-details">
           <h3 className="item-name">{item.name}</h3>
-          <p className="item-quantity">1x</p>
+          <p className="item-quantity">{item.qty || 1}x</p>
           <p className="item-store">{item.store_name}</p>
           <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
         </div>
         <div className="item-price-section">
-          <div className="item-price">{item.price.toFixed(2)} kr</div>
+          <div className="item-price">{(item.price * (item.qty || 1)).toFixed(2)} kr</div>
           <div className="item-savings">
             {((((item.avg_price - item.price) / item.avg_price) * 100) || 0).toFixed(0)}% lägre pris
           </div>

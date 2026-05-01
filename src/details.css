@@ -85,3 +85,67 @@
     position: absolute;
     right: 0;
 }
+
+/* Quantity Selector */
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+}
+
+.qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: #f0f9ff;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.qty-btn:hover {
+    background: #e0f2fe;
+    border-color: var(--accent-color);
+}
+
+.qty-btn:active {
+    transform: scale(0.95);
+}
+
+.qty-input {
+    width: 50px;
+    height: 36px;
+    text-align: center;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.qty-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-input[type=number] {
+    -moz-appearance: textfield;
+}

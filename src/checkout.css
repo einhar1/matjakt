@@ -118,6 +118,11 @@
   border-radius: 4px;
 }
 
+.item-savings.no-savings {
+  color: var(--text-muted);
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
 .item-remove {
   align-self: flex-start;
   flex-shrink: 0;

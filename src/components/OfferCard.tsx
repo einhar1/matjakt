@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import type { Product, CurrentPrice, Store } from '../types/database';
 import type { Product as CartProduct } from '../views/DetailsView';
 import './OfferCard.css';
+import { useState } from 'react';
+import { useToast } from '../context/ToastContext';
 
 export type OfferItem = {
   product: Product;
@@ -24,6 +26,7 @@ export function offerItemToCartProduct(offer: OfferItem): CartProduct {
     product_information: '',
     ingredients: '',
     avg_price: offer.currentPrice.promo_price ?? offer.currentPrice.price,
+    qty: offer.product.qty ?? 1,
   };
 }
 
@@ -38,6 +41,10 @@ function getDiscountPercent(original: number, promo: number): number {
 
 export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
   const navigate = useNavigate();
+  const [showQuantitySelector, setShowQuantitySelector] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const { showCartToast } = useToast();
+
   function renderPrices() {
     if (offer.currentPrice.promo_price) {
       const pct = getDiscountPercent(offer.currentPrice.price, offer.currentPrice.promo_price);
@@ -62,6 +69,66 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
     );
   }
 
+
+  function cartButtonOnClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation(); // Förhindra att kortet klickas när knappen klickas
+    if (!showQuantitySelector) {
+      setShowQuantitySelector(true);
+      setQuantity(1);
+      addToCart(1);
+    }
+  }
+  function handleIncreaseQuantity(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+    addToCart(newQuantity);
+  }
+
+  function handleDecreaseQuantity(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    if (quantity <= 1) {
+      setShowQuantitySelector(false);
+      setQuantity(0);
+      addToCart(0);
+    }
+    else if (quantity > 1) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      addToCart(newQuantity);
+    }
+  }
+
+  function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = parseInt(e.target.value) || 1;
+
+    if (value <= 0) {
+      setShowQuantitySelector(false);
+      setQuantity(0);
+      addToCart(0);
+    }
+    else if (value > 0) {
+      console.log("Setting quantity to", value);
+      setQuantity(value);
+      addToCart(value);
+    }
+  }
+
+  function addToCart(qty: number) {
+    if (qty <= 0) {
+      setShowQuantitySelector(false);
+    }
+    if (onAddToCart) {
+      const offerWithQty = {
+        ...offer,
+        product: { ...offer.product, qty: qty },
+      };
+      onAddToCart(offerWithQty);
+    }
+    
+    showCartToast();
+  }
+
   return (
     <div className='offer-card' onClick={() => navigate(`/details/${offer.product.product_key}`)} style={{ cursor: 'pointer' }}>
         <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`}>
@@ -81,13 +148,36 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
             <div className='offer-prices'>
                 {renderPrices()}
             </div>
-            <button 
-                className='btn-primary offer-btn'
-                /* TODO: ändra vid implementation av AddToCart: */
-                onClick={(e) => { e.stopPropagation(); onAddToCart && onAddToCart(offer); }}
-            >
-                Lägg till i matkasse
-            </button>
+            {!showQuantitySelector ? (
+              <button className="btn-primary offer-btn" onClick={cartButtonOnClick}>
+                Lägg i varukorg
+              </button>
+            ) : (
+              <div className="quantity-selector">
+                <button 
+                  className="qty-btn qty-minus" 
+                  onClick={handleDecreaseQuantity}
+                  aria-label="Minska kvantitet"
+                >
+                  −
+                </button>
+                <input 
+                  type="number" 
+                  className="qty-input" 
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  min="1"
+                  aria-label="Kvantitet"
+                />
+                <button 
+                  className="qty-btn qty-plus" 
+                  onClick={handleIncreaseQuantity}
+                  aria-label="Öka kvantitet"
+                >
+                  +
+                </button>
+              </div>
+            )}
         </div>
     </div>
   );

@@ -19,7 +19,7 @@ export type AppRenderProps = {
 function App(props: AppRenderProps) {
   function makeRouter() {
     return createHashRouter([
-      {element: <Layout />, children: [
+      {element: <Layout userModel={userModel}/>, children: [
         {
           path: "/",
           element: <HomePresenter userModel={userModel}/>,

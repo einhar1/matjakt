@@ -44,6 +44,7 @@ export type Product = {
   product_information: string,
   ingredients: string,
   avg_price: number,
+  qty?: number,
 }
 
 export type DetailsViewProps = {
@@ -55,6 +56,8 @@ function DetailsView(props: DetailsViewProps) {
   const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showQuantitySelector, setShowQuantitySelector] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const userModel = props.userModel;
   const { showCartToast } = useToast();
 
@@ -185,9 +188,54 @@ function DetailsView(props: DetailsViewProps) {
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
   }
-  
-  function addToCartACB(){
-    userModel.addToCart(product as Product);
+
+  function cartButtonOnClick() {
+    if (!showQuantitySelector) {
+      setShowQuantitySelector(true);
+      setQuantity(1);
+      addToCart(1);
+    }
+  }
+  function handleIncreaseQuantity() {
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+    addToCart(newQuantity);
+  }
+
+  function handleDecreaseQuantity() {
+    if (quantity <= 1) {
+      setShowQuantitySelector(false);
+      setQuantity(0);
+      addToCart(0);
+    }
+    else if (quantity > 1) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      addToCart(newQuantity);
+    }
+  }
+
+  function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = parseInt(e.target.value) || 1;
+
+    if (value <= 0) {
+      setShowQuantitySelector(false);
+      setQuantity(0);
+      addToCart(0);
+    }
+    else if (value > 0) {
+      console.log("Setting quantity to", value);
+      setQuantity(value);
+      addToCart(value);
+    }
+  }
+
+  function addToCart(qty: number) {
+    if (qty <= 0) {
+      setShowQuantitySelector(false);
+    }
+    const productWithQty = {...product, qty: qty} as Product;
+    userModel.addToCart(productWithQty);
     showCartToast();
   }
 
@@ -205,9 +253,36 @@ function DetailsView(props: DetailsViewProps) {
                     <h1>{product?.name}</h1>
                     <h3>{product?.brand}. {product?.pack_size}.</h3>
                     <p>Genomsnittspris: <span><b>{product.avg_price.toFixed(2)}kr</b></span></p>
-                    <button className="btn-primary" onClick={addToCartACB}>
-                      Lägg i varukorg
-                    </button>
+                    {!showQuantitySelector ? (
+                      <button className="btn-primary" onClick={cartButtonOnClick}>
+                        Lägg i varukorg
+                      </button>
+                    ) : (
+                      <div className="quantity-selector">
+                        <button 
+                          className="qty-btn qty-minus" 
+                          onClick={handleDecreaseQuantity}
+                          aria-label="Minska kvantitet"
+                        >
+                          −
+                        </button>
+                        <input 
+                          type="number" 
+                          className="qty-input" 
+                          value={quantity}
+                          onChange={handleQuantityChange}
+                          min="1"
+                          aria-label="Kvantitet"
+                        />
+                        <button 
+                          className="qty-btn qty-plus" 
+                          onClick={handleIncreaseQuantity}
+                          aria-label="Öka kvantitet"
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
                   {!!product.ingredients ?
                     <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>

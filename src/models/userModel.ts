@@ -12,6 +12,7 @@ export type StoreProduct = {
   product_information: string,
   ingredients: string,
   avg_price: number,
+  qty: number,
   price: number, 
   store_id: string,
   store_name: string,
@@ -32,6 +33,7 @@ export type userModelType = {
     usesLocation: boolean;
     cart: Product[];
     algorithmCart: StoreProduct[];
+    cartItemCount: number;
     setLocation: (longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) => void;
     setMaxDistance: (distance: number) => void;
     addToCart: (product: Product) => void;
@@ -55,6 +57,7 @@ export const userModel: userModelType = {
     usesLocation: false,
     cart: [] as Product[],
     algorithmCart: [] as StoreProduct[],
+    cartItemCount: 0,
 
     setLocation(longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) {
         if (postalCode) this.postalCode = postalCode;
@@ -70,7 +73,21 @@ export const userModel: userModelType = {
         this.saveToSupabase();
     },
     addToCart(product: Product) {
-        this.cart.push(product);
+
+        const sameProduct = this.cart.find(p => p.product_id === product.product_id);
+        if (sameProduct) {
+            // Update the quantity of the existing product
+            if ((product.qty ?? 0) <= 0) {
+                this.cart = this.cart.filter(p => p.product_id !== product.product_id);
+                this.saveToSupabase();
+                this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
+                return;
+            }
+            this.cart = this.cart.map(p => p.product_id === product.product_id ? { ...p, qty: (product.qty || 1) } : p);
+        } else {
+            this.cart.push(product);
+        }
+        this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
     },
     removeFromCart(productId: string) {

@@ -4,15 +4,20 @@ import { NavbarView } from '../views/NavbarView'
 import { AuthModal } from './AuthModal'
 import { useAuth } from '../context/AuthContext'
 import { useProfileSync } from '../hooks/useProfileSync'
-import { userModel } from '../models/userModel'
+import { type userModelType } from '../models/userModel'
 import { offerItemToCartProduct, type OfferItem } from './OfferCard'
 import { useToast } from '../context/ToastContext'
 
-export function Layout() {
+type LayoutProps = {
+  userModel: userModelType;
+}
+
+export function Layout(props: LayoutProps) {
   const [loginOpen, setLoginOpen] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
   const { showCartToast } = useToast()
+  const userModel = props.userModel
 
   // Wait for the user's profile to load from Supabase before rendering
   // This ensures userModel is hydrated before any child component reads it
@@ -31,7 +36,7 @@ export function Layout() {
   function handleAddToCart(offer: OfferItem) {
     userModel.addToCart(offerItemToCartProduct(offer));
     showCartToast();
-  }                                                                                                                   
+  }                                                                                                                  
   
   return (                                                                                                            
     <>          
@@ -41,6 +46,7 @@ export function Layout() {
         onCartClick={() => navigate('/checkout')}
         onAddToCart={handleAddToCart}
         user={useAuth().user}
+        cartItemCount={userModel.cartItemCount}
       />                                                                                                              
       <AuthModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
       <Outlet />                                                                                                      

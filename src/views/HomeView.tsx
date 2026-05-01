@@ -93,9 +93,6 @@ function HomeView(props: HomeViewProps) {
             )}
           </div>
         </section>
-        <section className='start'>
-          <button className='start-btn'></button>
-        </section>
       </div>
 
       <Modal

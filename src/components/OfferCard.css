@@ -114,3 +114,13 @@
     flex-direction: column;
     flex-grow: 1;
 }
+
+
+/* Quantity Selector */
+.offer-card .quantity-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
