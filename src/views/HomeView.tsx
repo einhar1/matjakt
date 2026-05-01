@@ -1,21 +1,34 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../home.css'
 import '../style.css'
 import { OfferCard, type OfferItem } from '../components/OfferCard';
 import { type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
 import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
+import { useBestLocalDeals } from '../hooks/HomeModalGetter.ts';
+import { LoadingSpinner } from '../components/LoadingSpinner.tsx';
 
 export type HomeViewProps = {
-  offers: OfferItem[];
-  userModel: userModelType
+  userModel: userModelType;
 }
 
 function HomeView(props: HomeViewProps) {
   const [showAll, setShowAll] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [, setVersion] = useState(0);
   const userModel = props.userModel;
+
+  // const [refresh, setRefresh] = useState<number>(0);
+  
+  const {
+    data: products,
+    error,
+    isLoading
+  } = useBestLocalDeals();
+
+  const bestOffers = products || [];
+  
   function handleOpenModal() {
     setShowAll(true);
   }
@@ -26,9 +39,10 @@ function HomeView(props: HomeViewProps) {
 
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
+    setVersion(v => v + 1);
   }
 
-  const carouselItems = [...props.offers, ...props.offers];
+  const carouselItems = [...bestOffers.slice(0, 15), ...bestOffers.slice(0, 15)];
 
   return (
     <div className="home-wrapper">
@@ -45,7 +59,7 @@ function HomeView(props: HomeViewProps) {
 
         <section className="home-offers">
           <div className="section-header">
-            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
+            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
             <div className='section-header-row'>
               <span className='badge live-indicator'>
                 <span className='dot'></span> 
@@ -55,16 +69,28 @@ function HomeView(props: HomeViewProps) {
                   Visa alla →
               </button>
             </div>
-            <div className='carousel-view'>
-              <div className='carousel-track'>
-                {carouselItems.map((offer, index) => (
-                  <OfferCard 
-                    key={`carousel-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
-                    offer={offer} 
-                  />
-                ))}
+            {bestOffers.length > 0 ? (
+              <div className='carousel-view'>
+                <div className='carousel-track'>
+                  {carouselItems.map((offer, index) => (
+                    <OfferCard 
+                      key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
+                      offer={offer} 
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={`offers-state ${error ? 'error' : ''}`}>
+                {isLoading ? <LoadingSpinner/> : 
+                  error ? <span>Något gick snett! Försök igen!</span> :
+                  (
+                    <span>Inga deals i din närhet 🥲 <br/>
+                    Ändra ort eller öka distansen i 'Välj område'</span>
+                  )
+                }
+              </div>
+            )}
           </div>
         </section>
         <section className='start'>
@@ -81,12 +107,12 @@ function HomeView(props: HomeViewProps) {
             ← Back to home
           </button>
           <div className='modal-header'>
-            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ''}</h2>
+            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
           </div>
           <div className='modal-grid'>
-            {props.offers.map((offer, index) => (
+            {bestOffers.map((offer, index) => (
               <OfferCard
-                key={`modal-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} 
+                key={`modal-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                 offer={offer} 
               />
             ))}
@@ -98,7 +124,10 @@ function HomeView(props: HomeViewProps) {
         maxDistance={userModel.maxDistance}
         onClose={() => setShowLocationModal(false)}
         onLocationSelect={onLocationSelectACB}
-        onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
+        onMaxDistanceSet={(distance) => {
+          userModel.setMaxDistance(distance);
+          setVersion(v => v + 1);
+        }}
       />
     </div>
   );

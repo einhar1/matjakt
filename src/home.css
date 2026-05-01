@@ -169,5 +169,37 @@
 .location-btn-home {
   margin-top: 20px;
   padding: 10px 55px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
   font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.location-btn-home:hover {
+  background: var(--accent-hover);
+}
+
+.offers-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 180px;
+  padding: 32px 20px;
+  margin: 16px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  color: var(--text-muted);
+  font-size: 20px;
+  text-align: center;
+}
+
+.offers-state.error {
+  color: var(--discount-red);
+  background: #fef2f2;
+  border-color: #fecaca;
 }
