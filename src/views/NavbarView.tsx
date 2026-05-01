@@ -104,7 +104,7 @@ export function NavbarView(props: navbarViewProps) {
 		<div className={`header`}>
 			<div className="header-top-row">
 				<h1 className="logo-text" onClick={logoClickACB}>
-					{'你的母親'}
+					{'彼得·格里芬'}
 				</h1>
 				<div className="navbar-search">
 					<input 
