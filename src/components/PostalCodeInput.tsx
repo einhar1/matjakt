@@ -34,6 +34,8 @@ export function PostalCodeInput(props: PostalCodeInputProps) {
 
         console.log('user: ',userModel.postalCode, ' | ',userModel.city, ' | ',userModel.county, ' | ', userModel.longitude, ' | ', userModel.latitude)
     }
+    const savedPostal = userModel.getPostalCode();
+    const postalCodePlaceholder = savedPostal ? savedPostal : ('t.ex. 114 55')
 
     return (
         <div className='postal-code-input'>
@@ -45,7 +47,7 @@ export function PostalCodeInput(props: PostalCodeInputProps) {
                     type='text'
                     inputMode='numeric'
                     maxLength={6}
-                    placeholder='t.ex. 114 55'
+                    placeholder={postalCodePlaceholder}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                 />
