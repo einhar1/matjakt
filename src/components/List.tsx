@@ -16,9 +16,9 @@ export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListP
 
     function handleShowAll() {
         if (searchQuery) {
+            closeModal()
             const params = new URLSearchParams({ q: searchQuery })
             navigate('/search?' + params)
-            closeModal()
         }
     }
 
@@ -42,10 +42,11 @@ export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListP
 
             <div className='search-results-grid modal'>
                 {displayData.map((offer, index) => (
-                    <div key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`} onClick={closeModal}>
+                    <div key={`search-${offer.currentPrice.product_key}-${index}`} onClick={closeModal}>
                         <OfferCard
                             offer={offer}
                             onAddToCart={onAddToCart}
+                            use_avg={true}
                         />
                     </div>
                 ))}

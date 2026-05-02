@@ -54,9 +54,10 @@ function SearchView({ userModel }: SearchViewProps) {
             <div className='search-results-grid search-view'>
                 {products.map((offer, index) => (
                     <OfferCard
-                        key={`search-${offer.currentPrice.store_id}-${offer.currentPrice.product_key}-${index}`}
+                        key={`search-${offer.currentPrice.product_key}-${index}`}
                         offer={offer}
                         onAddToCart={onAddToCartACB}
+                        use_avg={true}
                     />
                 ))}
             </div>

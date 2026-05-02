@@ -70,6 +70,10 @@
     margin-bottom: 12px;
 }
 
+.offer-prices:hover {
+    cursor: help;
+}
+
 .discount-badge {
     display: inline-block;
     background: rgb(254, 226, 226);

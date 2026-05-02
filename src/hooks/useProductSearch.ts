@@ -33,7 +33,7 @@ async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDist
     console.log(`fetching products from search... Page Index: ${pageIndex}`)
 
     const { data: results, error: searchError } = await supabase
-        .rpc("search_products_dev1_1", {
+        .rpc("search_products_dev1_2", {
             search_term: sanitized,
             result_limit: PAGE_SIZE,
             result_offset: pageIndex * PAGE_SIZE,

@@ -33,16 +33,19 @@ export function NavbarView(props: navbarViewProps) {
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const debouncedQuery = useDebounce(searchQuery, 500)
 	const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
+	const justSubmittedRef = useRef(false);
 
 	const modalInputRef = useRef<HTMLInputElement>(null)
 	const navigate = useNavigate()
 
 	useEffect (() => {
-		if (Boolean(debouncedQuery) && !isSearchModalOpen) {
-			console.log(isSearchModalOpen)
+		if (debouncedQuery && !isSearchModalOpen && !justSubmittedRef.current) {
 			setIsSearchModalOpen(true);
 		}
-	}, [debouncedQuery]);
+		if (debouncedQuery) {
+			justSubmittedRef.current = false;
+		}
+	}, [debouncedQuery, isSearchModalOpen]);
 
 	useEffect (() => {
 		if (modalInputRef.current) {
@@ -75,13 +78,24 @@ export function NavbarView(props: navbarViewProps) {
 
 	function handleSearchKeyDownACB(e: React.KeyboardEvent<HTMLInputElement>) {
 		if (e.key === 'Enter') {
-			props.onSearch(searchQuery);
 			e.currentTarget.blur();
+			submitSearch()
+		}
+		if (e.key === 'Escape') {
+			e.currentTarget.blur();
+			justSubmittedRef.current = true;
+			handleCloseSearchModal();
 		}
 	}
 
-	function handleSearchClick() {
+	async function submitSearch() {
+		justSubmittedRef.current = true;
+		setIsSearchModalOpen(false);
 		props.onSearch(searchQuery);
+	}
+
+	function handleSearchClick() {
+		submitSearch()
 	}
 
 	function handleAboutClick() {
@@ -89,6 +103,7 @@ export function NavbarView(props: navbarViewProps) {
 	}
 
 	function handleCloseSearchModal() {
+		justSubmittedRef.current = true;
 		setIsSearchModalOpen(false);
 	}
 
