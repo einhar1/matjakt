@@ -7,6 +7,7 @@ import type { Product as CartProduct } from '../views/DetailsView';
 import './OfferCard.css';
 import { useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { userModel } from '../models/userModel'
 
 export type OfferItem = {
   product: Product & {source?: string, qty?: number};
@@ -75,7 +76,7 @@ export function OfferCard({ offer, onAddToCart, use_avg }: OfferCardProps) {
   }
 
   const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
-  const offerPriceTitle = offer.store?.store_name ? 'Billigaste priset nära dig!' : 'Genomsnittl. priset i Sverige'
+  const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCounty() !== ''? userModel.getCounty() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
 
 
   function cartButtonOnClick(e: React.MouseEvent<HTMLButtonElement>) {
