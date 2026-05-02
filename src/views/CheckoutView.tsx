@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { coopSupabase, supabase } from '../utils/supabase';
 import { LocationModal, type LocationResult } from '../components/LocationModal';
 import type { Product } from './DetailsView';
+import { useNavigate } from 'react-router-dom';
 
 
 export type CheckoutViewProps = {
@@ -42,6 +43,7 @@ function CheckoutView(props: CheckoutViewProps) {
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
   const [, forceUpdate] = useState(false);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
+  const navigate = useNavigate();
 
   const storesQuery = useQuery({
     queryKey: ["stores_radius", userModel.latitude, userModel.longitude, userModel.maxDistance],
@@ -302,14 +304,18 @@ function CheckoutView(props: CheckoutViewProps) {
     }
   }
 
+  function onCartItemClickACB(item: Product) {
+    navigate(`/details/${item.product_id}`);
+  }
+
   function displayCartItems() {
 
     if (hasCalculatedWithCurAlgo === "average") {
       return userModel.cart.map((item: Product) => (
       <div key={item.product_id} className="cart-item">
-        <img src={item.product_image_url} alt={item.name} className="item-image" />
+        <img src={item.product_image_url} alt={item.name} className="item-image" onClick={() => onCartItemClickACB(item)}/>
         <div className="item-details">
-          <h3 className="item-name">{item.name}</h3>
+          <h3 className="item-name" onClick={() => onCartItemClickACB(item)}>{item.name}</h3>
           <p className="item-quantity">{item.qty || 1}x</p>
         </div>
         <div className="item-price">~{(item.avg_price * (item.qty || 1)).toFixed(2)} kr</div>
@@ -328,9 +334,9 @@ function CheckoutView(props: CheckoutViewProps) {
           const itemsSavingsClassName = reducedPercentage > 0 ? "item-savings" : "item-savings no-savings";
           return (
             <div key={cartItem.product_id} className="cart-item">
-              <img src={algorithmItem.product_image_url} alt={algorithmItem.name} className="item-image" />
+              <img src={algorithmItem.product_image_url} alt={algorithmItem.name} className="item-image" onClick={() => onCartItemClickACB(algorithmItem)}/>
               <div className="item-details">
-                <h3 className="item-name">{algorithmItem.name}</h3>
+                <h3 className="item-name" onClick={() => onCartItemClickACB(algorithmItem)}>{algorithmItem.name}</h3>
                 <p className="item-quantity">{algorithmItem.qty || 1}x</p>
                 <p className="item-store">{algorithmItem.store_name}</p>
                 <p className="item-distance">{algorithmItem.distance.toFixed(1)} km ifrån</p>
@@ -347,9 +353,9 @@ function CheckoutView(props: CheckoutViewProps) {
         } else {
           return (
             <div key={cartItem.product_id} className="cart-item out-of-range">
-              <img src={cartItem.product_image_url} alt={cartItem.name} className="item-image" />
+              <img src={cartItem.product_image_url} alt={cartItem.name} className="item-image" onClick={() => onCartItemClickACB(cartItem)}/>
               <div className="item-details">
-                <h3 className="item-name">{cartItem.name}</h3>
+                <h3 className="item-name" onClick={() => onCartItemClickACB(cartItem)}>{cartItem.name}</h3>
                 <p className="item-quantity">{cartItem.qty || 1}x</p>
               </div>
               <div className="item-price">Utanför område</div>
@@ -366,9 +372,11 @@ function CheckoutView(props: CheckoutViewProps) {
         const itemsSavingsClassName = reducedPercentage > 0 ? "item-savings" : "item-savings no-savings";
         return (
           <div key={item.product_id} className="cart-item">
-            <img src={item.product_image_url} alt={item.name} className="item-image" />
+            <img src={item.product_image_url} alt={item.name} className="item-image" onClick={() => onCartItemClickACB(item)}/>
             <div className="item-details">
-              <h3 className="item-name">{item.name}</h3>
+              <h3 className="item-name" onClick={() => onCartItemClickACB(item)}>
+                {item.name}
+              </h3>
               <p className="item-quantity">{item.qty || 1}x</p>
               <p className="item-store">{item.store_name}</p>
               <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
@@ -483,7 +491,7 @@ function CheckoutView(props: CheckoutViewProps) {
             <div className='grocery-list-section'>
               <div className='grocery-list-header'>
                 <h3>Varukorg sammandrag</h3>
-                <button className='btn-pdf-download' onClick={downloadGroceryListPDF}>
+                <button className='btn-primary' onClick={downloadGroceryListPDF}>
                   Ladda ner PDF
                 </button>
               </div>
