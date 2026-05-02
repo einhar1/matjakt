@@ -225,6 +225,83 @@ function CheckoutView(props: CheckoutViewProps) {
     setFuelType(e.target.value);
   }
 
+  function downloadGroceryListPDF() {
+    const doc = document.createElement('div');
+    doc.innerHTML = `
+      <h1>Varukorg sammandrag</h1>
+      <p>Algoritm: ${hasCalculatedWithCurAlgo === 'area' ? 'Närmaste område' : 'Bästa pris (hela Sverige)'}</p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="border-bottom: 2px solid #000;">
+            <th style="text-align: left; padding: 8px;">Produkt</th>
+            <th style="text-align: left; padding: 8px;">Butik</th>
+            <th style="text-align: center; padding: 8px;">Mängd</th>
+            <th style="text-align: right; padding: 8px;">Pris</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${userModel.algorithmCart.map(item => `
+            <tr style="border-bottom: 1px solid #ccc;">
+              <td style="padding: 8px;">${item.name}</td>
+              <td style="padding: 8px;">${item.store_name}</td>
+              <td style="text-align: center; padding: 8px;">${item.qty}x</td>
+              <td style="text-align: right; padding: 8px;">${(item.price * item.qty).toFixed(2)} kr</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top: 20px; text-align: right;">
+        <strong>Total kostnad: ${userModel.algorithmCart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} kr</strong>
+      </div>
+    `;
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Varukorg sammandrag</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background-color: #f0f0f0; font-weight: bold; }
+            .total { text-align: right; margin-top: 20px; font-size: 18px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h1>Varukorg sammandrag</h1>
+          <p><strong>Algoritm:</strong> ${hasCalculatedWithCurAlgo === 'area' ? 'Närmaste område' : 'Bästa pris (hela Sverige)'}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Produkt</th>
+                <th>Butik</th>
+                <th>Mängd</th>
+                <th style="text-align: right;">Pris</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${userModel.algorithmCart.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.store_name}</td>
+                  <td style="text-align: center;">${item.qty}x</td>
+                  <td style="text-align: right;">${(item.price * item.qty).toFixed(2)} kr</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="total">Total kostnad: ${userModel.algorithmCart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} kr</div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  }
+
   function displayCartItems() {
 
     if (hasCalculatedWithCurAlgo === "average") {
@@ -284,24 +361,28 @@ function CheckoutView(props: CheckoutViewProps) {
     }
     else {
       // For other algorithms, just display the items from algorithmCart
-      return userModel.algorithmCart.map((item) => (
-      <div key={item.product_id} className="cart-item">
-        <img src={item.product_image_url} alt={item.name} className="item-image" />
-        <div className="item-details">
-          <h3 className="item-name">{item.name}</h3>
-          <p className="item-quantity">{item.qty || 1}x</p>
-          <p className="item-store">{item.store_name}</p>
-          <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
-        </div>
-        <div className="item-price-section">
-          <div className="item-price">{(item.price * (item.qty || 1)).toFixed(2)} kr</div>
-          <div className="item-savings">
-            {((((item.avg_price - item.price) / item.avg_price) * 100) || 0).toFixed(0)}% lägre pris
-          </div>
-        </div>
-        <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
-      </div>
-      ));
+      return userModel.algorithmCart.map((item) => {
+        const reducedPercentage = ((((item.avg_price - item.price) / item.avg_price) * 100) || 0);
+        const itemsSavingsClassName = reducedPercentage > 0 ? "item-savings" : "item-savings no-savings";
+        return (
+          <div key={item.product_id} className="cart-item">
+            <img src={item.product_image_url} alt={item.name} className="item-image" />
+            <div className="item-details">
+              <h3 className="item-name">{item.name}</h3>
+              <p className="item-quantity">{item.qty || 1}x</p>
+              <p className="item-store">{item.store_name}</p>
+              <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
+            </div>
+            <div className="item-price-section">
+              <div className="item-price">{(item.price * (item.qty || 1)).toFixed(2)} kr</div>
+              <div className={itemsSavingsClassName}>
+                {reducedPercentage > 0 ? `${reducedPercentage.toFixed(0)}% lägre pris` : `${Math.abs(reducedPercentage).toFixed(0)}% högre pris`}
+              </div>
+            </div>
+            <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
+          </div>          
+        );
+      });
     }
   }
 
@@ -323,7 +404,7 @@ function CheckoutView(props: CheckoutViewProps) {
             </div>
             
             {/* Fuel Selection */}
-            <div className="fuel-selection-block">
+            <div className={`fuel-selection-block ${!(routeData && hasCalculatedWithCurAlgo === "area") ? 'no-border' : ''}`}>
               <select 
                 id="fuel-type"
                 value={fuelType}
@@ -338,7 +419,7 @@ function CheckoutView(props: CheckoutViewProps) {
             </div>
 
             {/* Fuel Details */}
-            {routeData && (
+            {(routeData && hasCalculatedWithCurAlgo === "area") && (
               <div className="fuel-details-block">
                 <div className="detail-row">
                   <span className="detail-label">Pris per liter:</span>
@@ -387,15 +468,41 @@ function CheckoutView(props: CheckoutViewProps) {
           </button>
         </div>
         <div className='map-section'>
-          <MapView 
-            position={[userModel.latitude, userModel.longitude]} 
-            usesLocation={userModel.usesLocation} stores={storesData} 
-            radius={userModel.maxDistance}
-            hasCalculatedWithCurAlgo={hasCalculatedWithCurAlgo}
-            algorithmCart={userModel.algorithmCart}
-            routeData={routeData?.coordinates || []}
-            stops={stops}
-            />
+          <div className='map-container'>
+            <MapView 
+              position={[userModel.latitude, userModel.longitude]} 
+              usesLocation={userModel.usesLocation} stores={storesData} 
+              radius={userModel.maxDistance}
+              hasCalculatedWithCurAlgo={hasCalculatedWithCurAlgo}
+              algorithmCart={userModel.algorithmCart}
+              routeData={routeData?.coordinates || []}
+              stops={stops}
+              />
+          </div>
+          {hasCalculatedWithCurAlgo !== 'average' && userModel.algorithmCart.length > 0 && (
+            <div className='grocery-list-section'>
+              <div className='grocery-list-header'>
+                <h3>Varukorg sammandrag</h3>
+                <button className='btn-pdf-download' onClick={downloadGroceryListPDF}>
+                  Ladda ner PDF
+                </button>
+              </div>
+              <div className='grocery-list-container'>
+                {userModel.algorithmCart.map((item) => (
+                  <div key={`${item.product_key}-${item.store_id}`} className='grocery-item'>
+                    <div className='grocery-item-info'>
+                      <p className='grocery-item-name'>{item.name}</p>
+                      <p className='grocery-item-store'>{item.store_name}</p>
+                    </div>
+                    <div className='grocery-item-price'>
+                      <p className='grocery-item-qty'>{item.qty}x</p>
+                      <p className='grocery-item-cost'>{(item.price * item.qty).toFixed(2)} kr</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <LocationModal 
           isOpen={showLocationModal}
