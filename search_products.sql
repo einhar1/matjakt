@@ -12,8 +12,9 @@ CREATE INDEX IF NOT EXISTS idx_products_name_trgm_gin ON public.products USING G
 -- DROP INDEX IF EXISTS idx_products_search_vector;
 CREATE INDEX IF NOT EXISTS idx_products_search_vector ON public.products USING GIN (search_vector);
 
-CREATE INDEX IF NOT EXISTS idx_public_prices_key_price ON public.current_prices(product_key, price);
-CREATE INDEX IF NOT EXISTS idx_coop_prices_key_price ON coop.current_prices(product_key, price);
+-- Indexes to speed up the nearby_keys CTE
+CREATE INDEX IF NOT EXISTS idx_public_prices_store_id ON public.current_prices(store_id);
+CREATE INDEX IF NOT EXISTS idx_coop_prices_store_id ON coop.current_prices(store_id);
 
 /* 
 
@@ -24,7 +25,7 @@ WHERE proname = 'product_search_vector';
 
 */
 
-CREATE OR REPLACE FUNCTION public.search_products_dev1_1(
+CREATE OR REPLACE FUNCTION public.search_products_dev1_2(
   search_term text, 
   result_limit integer DEFAULT 9, 
   result_offset integer DEFAULT 0,
@@ -39,7 +40,6 @@ AS $function$DECLARE
   query_sv      tsquery;
   query_en      tsquery;
   has_loc       boolean;
---   sim_threshold REAL := 0.15;
 BEGIN
   sanitized := trim(search_term);
 
@@ -70,12 +70,11 @@ BEGIN
     WHERE has_loc AND store_id IN (SELECT store_id FROM nearby_stores)
   ),
   
-  
   all_products AS (
-    SELECT product_key, name, brand, product_image_url, search_vector, 'ica' AS src
+    SELECT product_key, name, brand, product_image_url, search_vector, avg_price, 'ica' AS src
     FROM public.products
     UNION ALL
-    SELECT product_key, name, brand, product_image_url, search_vector, 'coop'
+    SELECT product_key, name, brand, product_image_url, search_vector, avg_price, 'coop'
     FROM coop.products
   ),
 
@@ -89,7 +88,7 @@ BEGIN
 
   top_products AS (
   SELECT 
-    c.product_key, c.name, c.brand, c.product_image_url, c.src,
+    c.product_key, c.name, c.brand, c.product_image_url, c.avg_price, c.src,
     (
       coalesce(ts_rank_cd(c.search_vector, query_sv, 32), 0) * 3.0 +
       coalesce(ts_rank_cd(c.search_vector, query_en, 32), 0) * 2.0 +
@@ -107,7 +106,6 @@ BEGIN
   )
 
   SELECT 
-    -- add only what OfferCard uses
     jsonb_build_object(
         'product_key', tp.product_key,
         'name', tp.name,
@@ -116,29 +114,13 @@ BEGIN
         'source', tp.src
     ) AS product,
     jsonb_build_object(
-        'store_name', cheapest_store.store_name
+        'store_name', NULL 
     ) AS store,
     jsonb_build_object(
-        'price', cheapest_store.price,
-        'promo_price', cheapest_store.promo_price
+        'price', tp.avg_price, 
+        'promo_price', NULL
     ) AS current_price,
     tp.relevance
     FROM top_products tp
-    LEFT JOIN LATERAL (
-        SELECT u.price, u.promo_price, u.store_name
-        FROM (
-          SELECT cp.product_key, cp.price, cp.promo_price, s.store_name, s.store_id
-          FROM public.current_prices cp JOIN public.stores s USING(store_id)
-          WHERE NOT has_loc OR s.store_id IN (SELECT store_id FROM nearby_stores)
-          UNION ALL
-          SELECT cp.product_key, cp.price, cp.promo_price, s.store_name, s.store_id
-          FROM coop.current_prices cp JOIN coop.stores s USING(store_id)
-          WHERE NOT has_loc OR s.store_id IN (SELECT store_id FROM nearby_stores)
-        ) AS u
-        
-        WHERE u.product_key = tp.product_key
-        ORDER BY u.price ASC NULLS LAST
-        LIMIT 1
-    ) AS cheapest_store ON true
     ORDER BY tp.relevance DESC, tp.name ASC, tp.product_key ASC, tp.src ASC;
-END;$function$
+END;$function$;

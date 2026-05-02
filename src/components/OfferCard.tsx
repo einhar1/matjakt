@@ -7,9 +7,10 @@ import type { Product as CartProduct } from '../views/DetailsView';
 import './OfferCard.css';
 import { useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { userModel } from '../models/userModel'
 
 export type OfferItem = {
-  product: Product;
+  product: Product & {source?: string, qty?: number};
   store: Store;
   currentPrice: CurrentPrice;
 }
@@ -33,13 +34,15 @@ export function offerItemToCartProduct(offer: OfferItem): CartProduct {
 interface OfferCardProps {
   offer: OfferItem;
   onAddToCart?: (offer: OfferItem) => void;
+  use_avg?: boolean;
 }
 
 function getDiscountPercent(original: number, promo: number): number {
+  if (!original || original <= 0) return 0;
   return Math.round(((original - promo) / original) * 100);
 }
 
-export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
+export function OfferCard({ offer, onAddToCart, use_avg }: OfferCardProps) {
   const navigate = useNavigate();
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -62,12 +65,18 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
         </>
       );
     }
+
+    const prefix = use_avg ? '~' : '';
+    
     return (
       <span className='offer-price'>
-        {offer.currentPrice.price} kr
+        {offer.currentPrice.price ? `${prefix}${Number(offer.currentPrice.price).toFixed(2)} kr` : 'Pris saknas'}
       </span>
     );
   }
+
+  const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
+  const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCounty() !== ''? userModel.getCounty() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
 
 
   function cartButtonOnClick(e: React.MouseEvent<HTMLButtonElement>) {
@@ -135,9 +144,11 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
             {offer.product.product_image_url && (
                 <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
             )}
-            <span className='offer-store'>
-                {offer.store.store_name}
-            </span>
+            {badgeText && (
+              <span className='offer-store'>
+                {badgeText}
+              </span>
+            )}
         </div>
         
         <div className='offer-content'>
@@ -145,7 +156,7 @@ export function OfferCard({ offer, onAddToCart }: OfferCardProps) {
             {offer.product.brand && (
                 <p className='offer-brand'>{offer.product.brand}</p>
             )}
-            <div className='offer-prices'>
+            <div title={offerPriceTitle} className='offer-prices'>
                 {renderPrices()}
             </div>
             {!showQuantitySelector ? (

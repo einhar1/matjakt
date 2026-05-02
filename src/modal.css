@@ -53,6 +53,44 @@
   color: var(--text-main);
 }
 
+.modal-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px -8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color .15s, color .15s;
+}
+.modal-back-btn:hover {
+  color: var(--accent-color);
+  background: rgb(240, 253, 244);
+}
+
+.modal-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-main);
+  padding: 16px 24px 12px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 24px;
+}
+.modal-top-bar .modal-header h2 {
+  margin: 0;
+}
+
+/* kills the top padding ONLY when top-bar exists */
+.modal-content:has(.modal-top-bar) {
+  padding-top: 0;
+}
+
 .modal-grid {
   display: flex;
   flex-wrap: wrap;

@@ -1,8 +1,8 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import '../home.css'
 import '../style.css'
-import { OfferCard, type OfferItem } from '../components/OfferCard';
+import { OfferCard } from '../components/OfferCard';
 import { type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
 import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
@@ -100,11 +100,13 @@ function HomeView(props: HomeViewProps) {
         onClose={handleCloseModal}
       >
         <>
-          <button className='modal-close-btn' onClick={handleCloseModal}>
-            ← Back to home
-          </button>
-          <div className='modal-header'>
-            <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
+          <div className="modal-top-bar">
+            <button className='modal-back-btn' onClick={handleCloseModal}>
+              ← Tillbaka
+            </button>
+            <div className='modal-header'>
+              <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
+            </div>
           </div>
           <div className='modal-grid'>
             {bestOffers.map((offer, index) => (
