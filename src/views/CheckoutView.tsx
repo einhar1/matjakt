@@ -9,7 +9,8 @@ import { coopSupabase, supabase } from '../utils/supabase';
 import { LocationModal, type LocationResult } from '../components/LocationModal';
 import type { Product } from './DetailsView';
 import { useNavigate } from 'react-router-dom';
-
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { createPortal } from 'react-dom';
 
 export type CheckoutViewProps = {
   userModel: userModelType
@@ -41,9 +42,20 @@ function CheckoutView(props: CheckoutViewProps) {
   const [fuelType, setFuelType] = useState('none');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
+  const [showLoadingDelivery, setShowLoadingDelivery] = useState(false);
   const [, forceUpdate] = useState(false);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
   const navigate = useNavigate();
+
+  useEffect(() => {
+      if (!showLoadingDelivery) return;
+      
+      const timer = setTimeout(() => {
+          setShowLoadingDelivery(false);
+      }, 700);
+      
+      return () => clearTimeout(timer);  // Cleanup if component unmounts
+  }, [showLoadingDelivery]);
 
   const storesQuery = useQuery({
     queryKey: ["stores_radius", userModel.latitude, userModel.longitude, userModel.maxDistance],
@@ -167,8 +179,10 @@ function CheckoutView(props: CheckoutViewProps) {
     return <div>Error loading fuel price...</div>;
   }
 
-  if (routeQuery.isLoading) return null;
-  if (routeQuery.isError) return null;
+  //if (routeQuery.isLoading) return <div>Loading route data...</div>;
+  if (routeQuery.isError) return <div>Error loading route data...</div>;
+
+  const anyQueryIsLoading = storesQuery.isLoading || storePricesQuery.isLoading || fuelQuery.isLoading || routeQuery.isLoading;
 
   const routeData = routeQuery.data;
   const fuelMap = fuelQuery.data || new Map();
@@ -177,7 +191,6 @@ function CheckoutView(props: CheckoutViewProps) {
   const storePrices = storePricesQuery.data || [];
   const travelCost = calculateFuelCost(routeData, fuelType, fuelMap, literPerKm);
 
-  const subtotal = 2;
   function getTotal() {
     if (hasCalculatedWithCurAlgo === "average") {
       return userModel.cart.length > 0 ? cart.map(item => item.avg_price * (item.qty || 1)).reduce((a, b) => a + b, 0) : 0;  
@@ -185,6 +198,14 @@ function CheckoutView(props: CheckoutViewProps) {
     else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") { 
       return userModel.algorithmCart.length > 0 ? userModel.algorithmCart.map(item => (item.price * (item.qty || 1))).reduce((a, b) => a + b, 0) + travelCost : 0; 
     }
+  }
+
+  function getAvgTotal() {
+    return userModel.cart.length > 0 ? cart.map(item => item.avg_price * (item.qty || 1)).reduce((a, b) => a + b, 0) : 0;
+  }
+
+  function getSavings() {
+    return getAvgTotal() - (getTotal() || 0);
   }
 
   function onLocationSelectACB(location: LocationResult) {
@@ -200,6 +221,7 @@ function CheckoutView(props: CheckoutViewProps) {
       if (algorithmMethod === "average") {
         setHasCalculatedWithCurAlgo("average");
         forceUpdate(s => !s); // Force re-render to show avg prices
+        setShowLoadingDelivery(true);
       }
       if (algorithmMethod === "area") {
         const cheapestInArea = findCheapestStores(storePrices, storesMap, userModel.cart, userModel.maxDistance);
@@ -207,6 +229,7 @@ function CheckoutView(props: CheckoutViewProps) {
         userModel.setAlgorithmCart(cheapestInArea);
         setHasCalculatedWithCurAlgo("area");
         forceUpdate(s => !s); // Force re-render to show updated cart
+        setShowLoadingDelivery(true);
       }
       else if (algorithmMethod === "global") {
         const cheapestGlobal = findCheapestStores(storePrices, storesMap, userModel.cart);
@@ -214,6 +237,7 @@ function CheckoutView(props: CheckoutViewProps) {
         userModel.setAlgorithmCart(cheapestGlobal);
         setHasCalculatedWithCurAlgo("global");
         forceUpdate(s => !s); // Force re-render to show updated cart
+        setShowLoadingDelivery(true);
       }
     }
   }
@@ -394,9 +418,11 @@ function CheckoutView(props: CheckoutViewProps) {
     }
   }
 
+  const checkoutContainerClassName = `checkout-container ${showLoadingDelivery ? 'hidden' : ''}`;
+
   return (
     <div className="checkout-wrapper">
-      <div className="checkout-container">
+      <div className={checkoutContainerClassName}>
         <div className='cart-section'>
           <h1 className="checkout-title">Granska din varukorg</h1>
 
@@ -447,7 +473,15 @@ function CheckoutView(props: CheckoutViewProps) {
             {/* Total */}
             <div className="summary-row total-row">
               <span className="summary-label total-label">Total</span>
-              <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
+              <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
+                {getSavings() > 0 && (
+                  <span className="savings-badge savings-positive">✓ Sparar {getSavings().toFixed(2)} kr</span>
+                )}
+                {getSavings() < 0 && (
+                  <span className="savings-badge savings-negative">⚠ +{Math.abs(getSavings()).toFixed(2)} kr</span>
+                )}
+                <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
+              </div>
             </div>
           </div>
 
@@ -520,6 +554,12 @@ function CheckoutView(props: CheckoutViewProps) {
           onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
         />
       </div>
+      {showLoadingDelivery && createPortal(
+        <div className="loading-delivery">
+          <LoadingDelivery />
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
@@ -780,5 +820,16 @@ function calculateFuelCost(routeData: routeDataType | undefined, fuelType: strin
   const totalLiters = (routeData.distance / 1000) * literPerKm;
   return totalLiters * fuelPrice;
 }
+
+export function LoadingDelivery() {
+  return (
+    <DotLottieReact 
+      src='src/assets/DeliveryLoading.lottie'
+      className='loading-delivery'
+      autoplay
+    />
+  );
+}
+
 
 export { CheckoutView }

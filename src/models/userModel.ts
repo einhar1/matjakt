@@ -94,6 +94,7 @@ export const userModel: userModelType = {
     },
     removeFromCart(productId: string) {
         this.cart = this.cart.filter(p => p.product_id !== productId);
+        this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
     },
     setAlgorithmCart(algorithmCart: StoreProduct[]) {
