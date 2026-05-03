@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import '../checkout.css';
 import type { StoreProduct, userModelType } from '../models/userModel';
 import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents, Polyline } from 'react-leaflet';
@@ -43,7 +43,10 @@ function CheckoutView(props: CheckoutViewProps) {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
   const [showLoadingDelivery, setShowLoadingDelivery] = useState(false);
+  const [selectedStores, setSelectedStores] = useState<number[]>([]);
+  const [showStoresDropdown, setShowStoresDropdown] = useState(false);
   const [, forceUpdate] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
   const navigate = useNavigate();
 
@@ -57,8 +60,24 @@ function CheckoutView(props: CheckoutViewProps) {
       return () => clearTimeout(timer);  // Cleanup if component unmounts
   }, [showLoadingDelivery]);
 
+  useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+          if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+              setShowStoresDropdown(false);
+          }
+      }
+
+      if (showStoresDropdown) {
+          document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+      };
+  }, [showStoresDropdown]);
+
   const storesQuery = useQuery({
-    queryKey: ["stores_radius", userModel.latitude, userModel.longitude, userModel.maxDistance],
+    queryKey: ["stores_radius", userModel.latitude, userModel.longitude, userModel.maxDistance, algorithmMethod],
     queryFn: async () => {
 
       const allStores = [];
@@ -149,22 +168,21 @@ function CheckoutView(props: CheckoutViewProps) {
   const routeQuery = useQuery({
     queryKey: ["route", stops],
     queryFn: async () => fetchRoute(stops),
-    enabled: !!stops && (hasCalculatedWithCurAlgo === "shortest-path" || hasCalculatedWithCurAlgo === "area") && userModel.algorithmCart.length > 0,
+    enabled: !!stops && (hasCalculatedWithCurAlgo === "select-stores" || hasCalculatedWithCurAlgo === "area") && userModel.algorithmCart.length > 0,
   });
 
-
-
-
+  /*
   if (storesQuery.isLoading) {
     return <div>Loading...</div>;
   }
   if (storesQuery.isError) {
     return <div>Error loading stores</div>;
   }
+  */
 
   const storesData = storesQuery.data || [];
   const storesMap = new Map(storesData.map(store => [store.store_id, store]));
-
+  /*
   if (storePricesQuery.isLoading) {
     return <div>Loading...</div>;
   }
@@ -178,12 +196,12 @@ function CheckoutView(props: CheckoutViewProps) {
   if (fuelQuery.isError) {
     return <div>Error loading fuel price...</div>;
   }
-
+  
   //if (routeQuery.isLoading) return <div>Loading route data...</div>;
   if (routeQuery.isError) return <div>Error loading route data...</div>;
+  */
 
-  const anyQueryIsLoading = storesQuery.isLoading || storePricesQuery.isLoading || fuelQuery.isLoading || routeQuery.isLoading;
-
+  const algorithmCartMap = new Map((userModel.algorithmCart).map(item => [item.product_key, item]));
   const routeData = routeQuery.data;
   const fuelMap = fuelQuery.data || new Map();
 
@@ -193,15 +211,38 @@ function CheckoutView(props: CheckoutViewProps) {
 
   function getTotal() {
     if (hasCalculatedWithCurAlgo === "average") {
-      return userModel.cart.length > 0 ? cart.map(item => item.avg_price * (item.qty || 1)).reduce((a, b) => a + b, 0) : 0;  
+      if (userModel.cart.length === 0) return 0;
+      let total = 0;
+      userModel.cart.forEach(item => {
+        if (algorithmCartMap.has(item.product_key)) {
+          total += (item.avg_price * (item.qty || 1));
+        }
+      });
+      return total;
     }
-    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") { 
-      return userModel.algorithmCart.length > 0 ? userModel.algorithmCart.map(item => (item.price * (item.qty || 1))).reduce((a, b) => a + b, 0) + travelCost : 0; 
+    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "select-stores") { 
+      let total = 0;
+      if (userModel.algorithmCart.length > 0) {
+        total += travelCost;
+        userModel.algorithmCart.forEach(item => {
+          if (algorithmCartMap.has(item.product_key)) {
+            total += (item.price * (item.qty || 1));
+          }
+        })
+      }
+      return total;
     }
   }
 
   function getAvgTotal() {
-    return userModel.cart.length > 0 ? cart.map(item => item.avg_price * (item.qty || 1)).reduce((a, b) => a + b, 0) : 0;
+    if (userModel.cart.length === 0) return 0;
+    let total = 0;
+    userModel.cart.forEach(item => {
+      if (algorithmCartMap.has(item.product_key)) {
+        total += (item.avg_price * (item.qty || 1));
+      }
+    });
+    return total;
   }
 
   function getSavings() {
@@ -214,13 +255,21 @@ function CheckoutView(props: CheckoutViewProps) {
 
   function onAlgorithmChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
     setAlgorithmMethod(e.target.value);
+    setSelectedStores([]);  // Reset store selection when algorithm changes
+  }
+
+  function onStoreToggleACB(storeId: number) {
+    setSelectedStores(prev => 
+      prev.includes(storeId) 
+        ? prev.filter(id => id !== storeId)
+        : [...prev, storeId]
+    );
   }
   
   function onCalculateButtonClickACB(event: React.MouseEvent<HTMLButtonElement>) {
     if (userModel.usesLocation) {
       if (algorithmMethod === "average") {
         setHasCalculatedWithCurAlgo("average");
-        forceUpdate(s => !s); // Force re-render to show avg prices
         setShowLoadingDelivery(true);
       }
       if (algorithmMethod === "area") {
@@ -228,7 +277,6 @@ function CheckoutView(props: CheckoutViewProps) {
         console.log("Cheapest in area:", cheapestInArea);
         userModel.setAlgorithmCart(cheapestInArea);
         setHasCalculatedWithCurAlgo("area");
-        forceUpdate(s => !s); // Force re-render to show updated cart
         setShowLoadingDelivery(true);
       }
       else if (algorithmMethod === "global") {
@@ -236,7 +284,13 @@ function CheckoutView(props: CheckoutViewProps) {
         console.log("Cheapest globally:", cheapestGlobal);
         userModel.setAlgorithmCart(cheapestGlobal);
         setHasCalculatedWithCurAlgo("global");
-        forceUpdate(s => !s); // Force re-render to show updated cart
+        setShowLoadingDelivery(true);
+      }
+      else if (algorithmMethod === "select-stores") {
+        const selectStoresMap = new Map(storesData.filter(store => selectedStores.includes(store.store_id)).map(store => [store.store_id, store]));
+        const cheapestSelectedStores = findCheapestStores(storePrices, selectStoresMap, userModel.cart);
+        userModel.setAlgorithmCart(cheapestSelectedStores);
+        setHasCalculatedWithCurAlgo("select-stores");
         setShowLoadingDelivery(true);
       }
     }
@@ -253,9 +307,22 @@ function CheckoutView(props: CheckoutViewProps) {
 
   function downloadGroceryListPDF() {
     const doc = document.createElement('div');
+    let algoName = "";
+    if (hasCalculatedWithCurAlgo === "area") {
+      algoName = "närmaste område";
+    }
+    else if (hasCalculatedWithCurAlgo === "global") {
+      algoName = "bästa pris (hela Sverige)";
+    }
+    else if (hasCalculatedWithCurAlgo === "select-stores") {
+      algoName = "bästa pris från utvalda butiker";
+    }
+    else {
+      algoName = "genomsnittspris";
+    }
     doc.innerHTML = `
       <h1>Varukorg sammandrag</h1>
-      <p>Algoritm: ${hasCalculatedWithCurAlgo === 'area' ? 'Närmaste område' : 'Bästa pris (hela Sverige)'}</p>
+      <p>Algoritm: ${algoName}</p>
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
           <tr style="border-bottom: 2px solid #000;">
@@ -298,7 +365,7 @@ function CheckoutView(props: CheckoutViewProps) {
         </head>
         <body>
           <h1>Varukorg sammandrag</h1>
-          <p><strong>Algoritm:</strong> ${hasCalculatedWithCurAlgo === 'area' ? 'Närmaste område' : 'Bästa pris (hela Sverige)'}</p>
+          <p><strong>Algoritm:</strong> ${algoName}</p>
           <table>
             <thead>
               <tr>
@@ -347,9 +414,8 @@ function CheckoutView(props: CheckoutViewProps) {
       </div>
       ));
     }
-    else if (hasCalculatedWithCurAlgo === "area") {
+    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores") {
       // For "area" algorithm, show all products and mark out-of-range ones
-      const algorithmCartMap = new Map((userModel.algorithmCart).map(item => [item.product_key, item]));
 
       return userModel.cart.map((cartItem) => {
         const algorithmItem = algorithmCartMap.get(cartItem.product_key);
@@ -420,6 +486,8 @@ function CheckoutView(props: CheckoutViewProps) {
 
   const checkoutContainerClassName = `checkout-container ${showLoadingDelivery ? 'hidden' : ''}`;
 
+  const savingsValue = getSavings();
+
   return (
     <div className="checkout-wrapper">
       <div className={checkoutContainerClassName}>
@@ -438,7 +506,7 @@ function CheckoutView(props: CheckoutViewProps) {
             </div>
             
             {/* Fuel Selection */}
-            <div className={`fuel-selection-block ${!(routeData && hasCalculatedWithCurAlgo === "area") ? 'no-border' : ''}`}>
+            <div className={`fuel-selection-block ${!(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) ? 'no-border' : ''}`}>
               <select 
                 id="fuel-type"
                 value={fuelType}
@@ -453,7 +521,7 @@ function CheckoutView(props: CheckoutViewProps) {
             </div>
 
             {/* Fuel Details */}
-            {(routeData && hasCalculatedWithCurAlgo === "area") && (
+            {(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
               <div className="fuel-details-block">
                 <div className="detail-row">
                   <span className="detail-label">Pris per liter:</span>
@@ -474,11 +542,11 @@ function CheckoutView(props: CheckoutViewProps) {
             <div className="summary-row total-row">
               <span className="summary-label total-label">Total</span>
               <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
-                {getSavings() > 0 && (
-                  <span className="savings-badge savings-positive">✓ Sparar {getSavings().toFixed(2)} kr</span>
+                {savingsValue > 0 && (
+                  <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
                 )}
-                {getSavings() < 0 && (
-                  <span className="savings-badge savings-negative">⚠ +{Math.abs(getSavings()).toFixed(2)} kr</span>
+                {savingsValue < 0 && (
+                  <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
                 )}
                 <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
               </div>
@@ -499,13 +567,51 @@ function CheckoutView(props: CheckoutViewProps) {
             >
               <option value="average">Genomsnittspris</option>
               <option value="area">Bästa pris inom område (max {userModel.maxDistance} km)</option>
-              <option value="shortest-path">Kortaste väg prioritet (max {userModel.maxDistance} km)</option>
+              <option value="select-stores">Bästa pris från utvalda butiker</option>
               <option value="global">Bästa pris (hela Sverige)</option>
             </select>
           </div>
 
+          {/* Store Multi-Select Dropdown */}
+          {algorithmMethod === "select-stores" && (
+            <div className="delivery-section">
+              <label className="delivery-label">Välj butiker</label>
+              <div className="stores-dropdown-wrapper" ref={dropdownRef}>
+                <button 
+                  className="stores-dropdown-trigger"
+                  onClick={() => setShowStoresDropdown(!showStoresDropdown)}
+                >
+                  {selectedStores.length === 0 
+                    ? 'Välj butiker...' 
+                    : `${selectedStores.length} butik${selectedStores.length !== 1 ? 'er' : ''} vald${selectedStores.length !== 1 ? 'a' : ''}`}
+                  <span className={`dropdown-arrow ${showStoresDropdown ? 'open' : ''}`}>▼</span>
+                </button>
+                
+                {showStoresDropdown && (
+                  <div className="stores-dropdown-list">
+                    {storesData.sort((a, b) => a.distance_km - b.distance_km).map((store) => (
+                      <label key={store.store_id} className="store-dropdown-item">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedStores.includes(store.store_id)}
+                          onChange={() => onStoreToggleACB(store.store_id)}
+                        />
+                        <span>{store.store_name}</span>
+                        <span className="store-distance">({store.distance_km.toFixed(1)} km)</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Pay Button */}
-          <button className="btn-primary calculate-button" onClick={onCalculateButtonClickACB} disabled={!userModel.usesLocation}>
+          <button 
+            className="btn-primary calculate-button" 
+            onClick={onCalculateButtonClickACB} 
+            disabled={!userModel.usesLocation || (algorithmMethod === "select-stores" && selectedStores.length === 0)}
+          >
             Beräkna total
           </button>
         </div>

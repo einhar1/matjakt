@@ -36,6 +36,7 @@ interface OfferCardProps {
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
   showSavingsBadge?: boolean;
+  initialQuantity: number;
 }
 
 function getDiscountPercent(original: number, promo: number): number {
@@ -43,10 +44,10 @@ function getDiscountPercent(original: number, promo: number): number {
   return Math.round(((original - promo) / original) * 100);
 }
 
-export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: OfferCardProps) {
+export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initialQuantity }: OfferCardProps) {
   const navigate = useNavigate();
-  const [showQuantitySelector, setShowQuantitySelector] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(initialQuantity);
+  const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
   const { showCartToast } = useToast();
 
   const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
@@ -118,7 +119,8 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: Off
   }
 
   function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = parseInt(e.target.value) || 1;
+    e.stopPropagation();
+    const value = parseInt(e.target.value) || 0;
 
     if (value <= 0) {
       setShowQuantitySelector(false);
@@ -148,8 +150,8 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: Off
   }
 
   return (
-    <div className='offer-card' onClick={() => navigate(`/details/${offer.product.product_key}`)} style={{ cursor: 'pointer' }}>
-        <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`}>
+    <div className='offer-card'>
+        <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`} onClick={() => navigate(`/details/${offer.product.product_key}`)}>
             {offer.product.product_image_url && (
                 <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
             )}
@@ -164,7 +166,9 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: Off
         </div>
         
         <div className='offer-content'>
-            <h3>{offer.product.name}</h3>
+            <h3 onClick={() => navigate(`/details/${offer.product.product_key}`)}>
+              {offer.product.name}
+            </h3>
             {offer.product.brand && (
                 <p className='offer-brand'>{offer.product.brand}</p>
             )}
@@ -189,7 +193,7 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: Off
                   className="qty-input" 
                   value={quantity}
                   onChange={handleQuantityChange}
-                  min="1"
+                  min="0"
                   aria-label="Kvantitet"
                 />
                 <button 

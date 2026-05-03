@@ -56,10 +56,13 @@ function DetailsView(props: DetailsViewProps) {
   const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
   const [factExpanded, setFactExpanded] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showQuantitySelector, setShowQuantitySelector] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const userModel = props.userModel;
   const { showCartToast } = useToast();
+
+  const userModel = props.userModel;
+  const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
+  const initialQuantity = cartQtyMap.get(productId || "") || 1;
+  const [quantity, setQuantity] = useState(initialQuantity);
+  const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
 
   const productQuery = useQuery({
     queryKey: ["product", productId],
@@ -216,7 +219,7 @@ function DetailsView(props: DetailsViewProps) {
   }
 
   function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = parseInt(e.target.value) || 1;
+    const value = parseInt(e.target.value) || 0;
 
     if (value <= 0) {
       setShowQuantitySelector(false);
@@ -224,7 +227,6 @@ function DetailsView(props: DetailsViewProps) {
       addToCart(0);
     }
     else if (value > 0) {
-      console.log("Setting quantity to", value);
       setQuantity(value);
       addToCart(value);
     }
@@ -271,7 +273,7 @@ function DetailsView(props: DetailsViewProps) {
                           className="qty-input" 
                           value={quantity}
                           onChange={handleQuantityChange}
-                          min="1"
+                          min="0"
                           aria-label="Kvantitet"
                         />
                         <button 

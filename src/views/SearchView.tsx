@@ -31,6 +31,7 @@ function SearchView({ userModel }: SearchViewProps) {
         hasMore,
         setSize,
     } = useProductSearch(queryFromUrl)
+    const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
 
     // Memoizes this function so ScrollObserver's useEffect doesn't "thrash"
     const onLoadMoreACB = useCallback(() => {
@@ -41,7 +42,7 @@ function SearchView({ userModel }: SearchViewProps) {
         userModel.addToCart(offerItemToCartProduct(offer));
         showCartToast();
     }
-
+    
     let content
     if (isLoading) content = <LoadingSpinner />
     else if (error) content = <p>{error.message}</p>
@@ -58,6 +59,7 @@ function SearchView({ userModel }: SearchViewProps) {
                         offer={offer}
                         onAddToCart={onAddToCartACB}
                         use_avg={true}
+                        initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
                     />
                 ))}
             </div>
