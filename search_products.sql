@@ -124,3 +124,6 @@ BEGIN
     FROM top_products tp
     ORDER BY tp.relevance DESC, tp.name ASC, tp.product_key ASC, tp.src ASC;
 END;$function$;
+
+ALTER FUNCTION public.search_products_dev1_2(text, integer, integer, double precision, double precision, integer)
+  SET statement_timeout = '20s';

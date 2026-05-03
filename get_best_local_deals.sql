@@ -132,3 +132,6 @@ BEGIN
   ORDER BY c.relevance DESC, c.effective_price ASC, c.product_key ASC;
 END;
 $function$;
+
+ALTER FUNCTION public.get_best_local_deals(integer, integer, double precision, double precision, integer)
+  SET statement_timeout = '20s';
