@@ -138,7 +138,7 @@
     width: 100%;
 }
 
-.savings-badge {
+/* .savings-badge {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -155,4 +155,4 @@
 
 .savings-badge:hover {
     cursor: help;
-}
+} */

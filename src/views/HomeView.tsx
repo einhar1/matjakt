@@ -76,7 +76,6 @@ function HomeView(props: HomeViewProps) {
                     <OfferCard 
                       key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                       offer={offer} 
-                      showSavingsBadge
                     />
                   ))}
                 </div>
@@ -114,7 +113,6 @@ function HomeView(props: HomeViewProps) {
               <OfferCard
                 key={`modal-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                 offer={offer} 
-                showSavingsBadge
               />
             ))}
           </div>

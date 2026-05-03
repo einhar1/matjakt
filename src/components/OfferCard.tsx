@@ -53,26 +53,22 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initi
   const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
   const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCity() !== ''? userModel.getCity() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
   const savingsPctTitle = 'Jämfört med genomsnittl. priset i Sverige'
-  const discountTitle = 'Rea lokalt i butiken'
 
   const cheapestPrice = Number(offer.currentPrice.promo_price ?? offer.currentPrice.price ?? 0);
   const avgPrice = Number(offer.product.avg_price ?? 0);
-  const savingsPct = avgPrice > 0 && cheapestPrice > 0 && cheapestPrice < avgPrice
-    ? Math.round(((avgPrice - cheapestPrice) / avgPrice) * 100)
-    : 0;
 
   function renderPrices() {
-    if (offer.currentPrice.promo_price) {
-      const pct = getDiscountPercent(offer.currentPrice.price, offer.currentPrice.promo_price);
+    if (cheapestPrice > 0 && avgPrice > 0) {
+      const pct = getDiscountPercent(avgPrice, cheapestPrice);
       return (
         <>
-          <span title={discountTitle} className='discount-badge'>-{pct}%</span>
+          <span title={savingsPctTitle} className='discount-badge'>-{pct}%</span>
           <div className='offer-price-row'>
             <span className='offer-price-promo'>
-              {offer.currentPrice.promo_price} kr
+              {cheapestPrice.toFixed(2)} kr
             </span>
             <span className='offer-price-old'>
-              {offer.currentPrice.price} kr
+              {avgPrice.toFixed(2)} kr
             </span>
           </div>
         </>
@@ -154,9 +150,6 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initi
         <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`} onClick={() => navigate(`/details/${offer.product.product_key}`)}>
             {offer.product.product_image_url && (
                 <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
-            )}
-            {showSavingsBadge && savingsPct > 0 && (
-              <span title={savingsPctTitle} className='savings-badge'>-{savingsPct}%</span>
             )}
             {badgeText && (
               <span className='offer-store'>
