@@ -203,3 +203,55 @@
   background: #fef2f2;
   border-color: #fecaca;
 }
+
+.klipp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-badge {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  background: rgb(249, 255, 251);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.help-badge:hover {
+  background: rgb(240, 253, 244);
+  color: var(--accent-color);
+}
+
+.help-legend {
+  padding: 0 24px 24px;
+}
+
+.help-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.help-item > :first-child {
+  flex-shrink: 0;
+  min-width: 10px;
+  text-align: center;
+}
+
+.help-item strong {
+  color: var(--text-main);
+}

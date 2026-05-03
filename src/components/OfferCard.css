@@ -137,22 +137,3 @@
     gap: 8px;
     width: 100%;
 }
-
-/* .savings-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgb(220, 252, 231);
-    color: var(--accent-color);
-    border: 1px solid rgb(187, 247, 208);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    z-index: 2;
-}
-
-.savings-badge:hover {
-    cursor: help;
-} */
