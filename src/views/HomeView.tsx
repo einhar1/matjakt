@@ -6,7 +6,7 @@ import { OfferCard } from '../components/OfferCard';
 import { type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
 import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
-import { useBestLocalDeals } from '../hooks/HomeModalGetter.ts';
+import { useBestLocalDeals } from '../hooks/useBestLocalDeals.ts';
 import { LoadingSpinner } from '../components/LoadingSpinner.tsx';
 
 export type HomeViewProps = {
@@ -76,6 +76,7 @@ function HomeView(props: HomeViewProps) {
                     <OfferCard 
                       key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                       offer={offer} 
+                      showSavingsBadge
                     />
                   ))}
                 </div>
@@ -113,6 +114,7 @@ function HomeView(props: HomeViewProps) {
               <OfferCard
                 key={`modal-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                 offer={offer} 
+                showSavingsBadge
               />
             ))}
           </div>

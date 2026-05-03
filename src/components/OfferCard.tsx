@@ -10,7 +10,7 @@ import { useToast } from '../context/ToastContext';
 import { userModel } from '../models/userModel'
 
 export type OfferItem = {
-  product: Product & {source?: string, qty?: number};
+  product: Product & {source?: string, qty?: number, avg_price?: number};
   store: Store;
   currentPrice: CurrentPrice;
 }
@@ -35,6 +35,7 @@ interface OfferCardProps {
   offer: OfferItem;
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
+  showSavingsBadge?: boolean;
 }
 
 function getDiscountPercent(original: number, promo: number): number {
@@ -42,18 +43,29 @@ function getDiscountPercent(original: number, promo: number): number {
   return Math.round(((original - promo) / original) * 100);
 }
 
-export function OfferCard({ offer, onAddToCart, use_avg }: OfferCardProps) {
+export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge }: OfferCardProps) {
   const navigate = useNavigate();
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const { showCartToast } = useToast();
+
+  const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
+  const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCity() !== ''? userModel.getCity() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
+  const savingsPctTitle = 'Jämfört med genomsnittl. priset i Sverige'
+  const discountTitle = 'Rea lokalt i butiken'
+
+  const cheapestPrice = Number(offer.currentPrice.promo_price ?? offer.currentPrice.price ?? 0);
+  const avgPrice = Number(offer.product.avg_price ?? 0);
+  const savingsPct = avgPrice > 0 && cheapestPrice > 0 && cheapestPrice < avgPrice
+    ? Math.round(((avgPrice - cheapestPrice) / avgPrice) * 100)
+    : 0;
 
   function renderPrices() {
     if (offer.currentPrice.promo_price) {
       const pct = getDiscountPercent(offer.currentPrice.price, offer.currentPrice.promo_price);
       return (
         <>
-          <span className='discount-badge'>-{pct}%</span>
+          <span title={discountTitle} className='discount-badge'>-{pct}%</span>
           <div className='offer-price-row'>
             <span className='offer-price-promo'>
               {offer.currentPrice.promo_price} kr
@@ -74,9 +86,6 @@ export function OfferCard({ offer, onAddToCart, use_avg }: OfferCardProps) {
       </span>
     );
   }
-
-  const badgeText = offer.store?.store_name || (offer.product.source ? offer.product.source.toUpperCase() : null);
-  const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCounty() !== ''? userModel.getCounty() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
 
 
   function cartButtonOnClick(e: React.MouseEvent<HTMLButtonElement>) {
@@ -143,6 +152,9 @@ export function OfferCard({ offer, onAddToCart, use_avg }: OfferCardProps) {
         <div className={`offer-image${offer.product.product_image_url ? '' : ' no-image'}`}>
             {offer.product.product_image_url && (
                 <img src={offer.product.product_image_url} alt={offer.product.name ? `Bild på ${offer.product.name}` : "Produktbild"}/>
+            )}
+            {showSavingsBadge && savingsPct > 0 && (
+              <span title={savingsPctTitle} className='savings-badge'>-{savingsPct}%</span>
             )}
             {badgeText && (
               <span className='offer-store'>

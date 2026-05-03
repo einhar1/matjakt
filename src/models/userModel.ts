@@ -40,7 +40,7 @@ export type userModelType = {
     removeFromCart: (productId: string) => void;
     setAlgorithmCart: (algorithmCart: StoreProduct[]) => void;
     getLocation: () => [number, number];
-    getCounty: () => string;
+    getCity: () => string;
     getPostalCode: () => string;
     getMaxDistance: () => number;
     // Supabase persistence
@@ -104,8 +104,8 @@ export const userModel: userModelType = {
     getLocation(): [number, number] {
         return [this.latitude, this.longitude];
     },
-    getCounty(): string {
-        return this.county
+    getCity(): string {
+        return this.city
     },
     getPostalCode(): string {
         return this.postalCode;
