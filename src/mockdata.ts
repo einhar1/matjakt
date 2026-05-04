@@ -14,7 +14,7 @@ export const mockOffers: OfferItem[] = [
       is_alcohol: false,
       first_seen_at: '2024-01-15T10:00:00Z',
       last_seen_at: new Date().toISOString(),
-      product_image_url: 'https://assets.axfood.se/image/upload/f_auto,t_500/07310865071804_C1L1_s09'
+      product_image_url: '../src/assets/standardmjolk.avif'
     },
     store: {
       store_id: 'store_001',
