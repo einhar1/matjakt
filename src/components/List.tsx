@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { OfferCard, type OfferItem } from './OfferCard.tsx'
 import '../search.css'
 import { useProductSearch, PAGE_SIZE } from "../hooks/useProductSearch.ts";
+import { userModel } from "../models/userModel.ts";
 
 export type ListProps = {
     searchTerm: string;
@@ -28,6 +29,9 @@ export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListP
         data,
     } = useProductSearch(searchTerm)
 
+    const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
+
+
     // Force 9 items regardless of what SWR has in cache
     const displayData = data ? data.slice(0, 9) : []
 
@@ -47,6 +51,7 @@ export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListP
                             offer={offer}
                             onAddToCart={onAddToCart}
                             use_avg={true}
+                            initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
                         />
                     </div>
                 ))}

@@ -30,6 +30,8 @@ function HomeView(props: HomeViewProps) {
   } = useBestLocalDeals();
 
   const bestOffers = products || [];
+
+  const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
   
   function handleOpenModal() {
     setShowAll(true);
@@ -60,7 +62,7 @@ function HomeView(props: HomeViewProps) {
           <div className="badge">Data driven grocery optimization</div>
           <h1>Realtidspriser.<br/><span className="highlight-text">Optimerade inköp.</span></h1>
           <p>
-            Automatiserad insamling från <strong>ICA, Coop, Willys och Hemköp</strong>. 
+            Automatiserad insamling från <strong>Sveriges matbutiker</strong>.<br/> 
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
           </p>
           <button className="btn-primary location-btn-home" onClick={() => setShowLocationModal(true)}>Välj område</button>
@@ -88,6 +90,7 @@ function HomeView(props: HomeViewProps) {
                     <OfferCard 
                       key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                       offer={offer} 
+                      initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
                     />
                   ))}
                 </div>
@@ -215,6 +218,7 @@ function HomeView(props: HomeViewProps) {
               <OfferCard
                 key={`modal-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                 offer={offer} 
+                initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
               />
             ))}
           </div>
