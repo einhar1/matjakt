@@ -34,7 +34,10 @@ class UserModel {
     usesLocation: boolean = false;
     cart: Product[] = [];
     algorithmCart: StoreProduct[] = [];
-    cartItemCount: number = 0;
+
+    get cartItemCount() {
+        return this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
+    }
 
     constructor() {
         makeAutoObservable(this);
@@ -61,20 +64,17 @@ class UserModel {
             if ((product.qty ?? 0) <= 0) {
                 this.cart = this.cart.filter(p => p.product_id !== product.product_id);
                 this.saveToSupabase();
-                this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
                 return;
             }
             this.cart = this.cart.map(p => p.product_id === product.product_id ? { ...p, qty: (product.qty || 1) } : p);
         } else {
             this.cart.push(product);
         }
-        this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
     }
 
     removeFromCart(productId: string) {
         this.cart = this.cart.filter(p => p.product_id !== productId);
-        this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
     }
 
