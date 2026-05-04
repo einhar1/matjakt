@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { observer } from 'mobx-react-lite';
 import { OfferCard, type OfferItem } from './OfferCard.tsx'
 import '../search.css'
 import { useProductSearch, PAGE_SIZE } from "../hooks/useProductSearch.ts";
@@ -11,7 +12,7 @@ export type ListProps = {
     onAddToCart?: (offer: OfferItem) => void;
 }
 
-export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListProps) {
+export const List = observer(function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListProps) {
 
     const navigate = useNavigate()
 
@@ -66,4 +67,4 @@ export function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListP
     )
 
     return content || null;
-}
+});

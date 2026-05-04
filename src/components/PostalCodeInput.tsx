@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { observer } from 'mobx-react-lite';
 import { postalCodeModel } from '../models/postalCodeModel'
 import { userModel } from '../models/userModel';
 import '../postcodeInput.css'
@@ -8,7 +9,7 @@ type PostalCodeInputProps = {
     initialValue?: string;
 }
 
-export function PostalCodeInput(props: PostalCodeInputProps) {
+export const PostalCodeInput = observer(function PostalCodeInput(props: PostalCodeInputProps) {
     const [inputValue, setInputValue] = useState(props.initialValue || '');
     const [error, setError] = useState<string | null>(null);
 
@@ -59,4 +60,4 @@ export function PostalCodeInput(props: PostalCodeInputProps) {
             {error && <p className='postal-code-error'>{error}</p>}
         </div>
     )
-}
+});

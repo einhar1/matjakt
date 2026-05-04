@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { observer } from 'mobx-react-lite'
 import { useNavigate, Outlet } from 'react-router-dom'
 import { NavbarView } from '../views/NavbarView'
 import { AuthModal } from './AuthModal'
@@ -12,7 +13,7 @@ type LayoutProps = {
   userModel: userModelType;
 }
 
-export function Layout(props: LayoutProps) {
+export const Layout = observer(function Layout(props: LayoutProps) {
   const [loginOpen, setLoginOpen] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -49,7 +50,7 @@ export function Layout(props: LayoutProps) {
         cartItemCount={userModel.cartItemCount}
       />                                                                                                              
       <AuthModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
-      <Outlet />                                                                                                      
-    </>         
+      <Outlet />
+    </>
   )
-}
+});

@@ -6,6 +6,7 @@ import type { Product, CurrentPrice, Store } from '../types/database';
 import type { Product as CartProduct } from '../views/DetailsView';
 import './OfferCard.css';
 import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { useToast } from '../context/ToastContext';
 import { userModel } from '../models/userModel'
 
@@ -44,7 +45,7 @@ function getDiscountPercent(original: number, promo: number): number {
   return Math.round(((original - promo) / original) * 100);
 }
 
-export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initialQuantity }: OfferCardProps) {
+export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initialQuantity }: OfferCardProps) {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(initialQuantity);
   const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
@@ -201,4 +202,4 @@ export function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initi
         </div>
     </div>
   );
-}
+});

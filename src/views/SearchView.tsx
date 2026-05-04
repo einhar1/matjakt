@@ -1,6 +1,7 @@
 import '../style.css'
 import '../search.css'
 import { useCallback, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { OfferCard, offerItemToCartProduct, type OfferItem } from '../components/OfferCard.tsx';
 import { ScrollObserver } from "../components/ScrollObserver.tsx";
 import { useProductSearch } from '../hooks/useProductSearch.ts'
@@ -20,7 +21,7 @@ type SearchViewProps = {
     userModel: userModelType;
 }
 
-function SearchView({ userModel }: SearchViewProps) {
+const SearchView = observer(function SearchView({ userModel }: SearchViewProps) {
     const { showCartToast } = useToast();
     const [showCardHelpModal, setShowCardHelpModal] = useState(false);
 
@@ -169,6 +170,6 @@ function SearchView({ userModel }: SearchViewProps) {
         {content}
     </div>
     )
-}
+});
 
 export { SearchView };

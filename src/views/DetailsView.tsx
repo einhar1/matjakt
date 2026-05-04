@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { useEffect, useState } from "react";
+import { observer } from 'mobx-react-lite';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -51,7 +52,7 @@ export type DetailsViewProps = {
   userModel: userModelType,
 }
 
-function DetailsView(props: DetailsViewProps) {
+const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
   const { productId } = useParams<{ productId: string}>();
   const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
   const [factExpanded, setFactExpanded] = useState(false);
@@ -331,7 +332,7 @@ function DetailsView(props: DetailsViewProps) {
         />
     </div>
   );
-}
+});
 
 const priceHistoryData: ChartData<'line'> = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],

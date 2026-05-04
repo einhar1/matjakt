@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
 import '../checkout.css';
 import type { StoreProduct, userModelType } from '../models/userModel';
 import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents, Polyline } from 'react-leaflet';
@@ -34,7 +35,7 @@ interface storePriceData {
   };
 }
 
-function CheckoutView(props: CheckoutViewProps) {
+const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
   const cart = props.userModel.cart;
@@ -45,7 +46,6 @@ function CheckoutView(props: CheckoutViewProps) {
   const [showLoadingDelivery, setShowLoadingDelivery] = useState(false);
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
   const [showStoresDropdown, setShowStoresDropdown] = useState(false);
-  const [, forceUpdate] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
   const navigate = useNavigate();
@@ -299,7 +299,6 @@ function CheckoutView(props: CheckoutViewProps) {
   function removeItemACB(productId: string) {
     userModel.removeFromCart(productId);
     userModel.setAlgorithmCart(userModel.algorithmCart.filter(item => item.product_id !== productId));
-    forceUpdate(s => !s);
   }
   function onFuelChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
     setFuelType(e.target.value);
@@ -668,7 +667,7 @@ function CheckoutView(props: CheckoutViewProps) {
       )}
     </div>
   );
-}
+});
 
 export default function MapView({position, usesLocation, stores, radius, hasCalculatedWithCurAlgo, algorithmCart, routeData, stops}: 
   {position: [number, number], usesLocation: boolean, stores: storesData[], radius: number, hasCalculatedWithCurAlgo: string, algorithmCart: StoreProduct[], routeData: LatLng[], stops: LatLng[]}

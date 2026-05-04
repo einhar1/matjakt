@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import '../home.css'
 import '../style.css'
 import { OfferCard } from '../components/OfferCard';
@@ -14,10 +15,9 @@ export type HomeViewProps = {
   userModel: userModelType;
 }
 
-function HomeView(props: HomeViewProps) {
+const HomeView = observer(function HomeView(props: HomeViewProps) {
   const [showAll, setShowAll] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [, setVersion] = useState(0);
   const userModel = props.userModel;
   const [showCardHelpModal, setShowCardHelpModal] = useState(false);
 
@@ -43,7 +43,6 @@ function HomeView(props: HomeViewProps) {
 
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
-    setVersion(v => v + 1);
   }
 
   function showHelpModal() {
@@ -224,18 +223,15 @@ function HomeView(props: HomeViewProps) {
           </div>
         </>
       </Modal>
-      <LocationModal 
+      <LocationModal
         isOpen={showLocationModal}
         maxDistance={userModel.maxDistance}
         onClose={() => setShowLocationModal(false)}
         onLocationSelect={onLocationSelectACB}
-        onMaxDistanceSet={(distance) => {
-          userModel.setMaxDistance(distance);
-          setVersion(v => v + 1);
-        }}
+        onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
       />
     </div>
   );
-}
+});
 
 export { HomeView };

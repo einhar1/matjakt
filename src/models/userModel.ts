@@ -1,3 +1,4 @@
+import { makeAutoObservable, runInAction } from 'mobx';
 import type { Product } from "../views/DetailsView";
 import { supabase } from "../utils/supabase";
 
@@ -13,53 +14,31 @@ export type StoreProduct = {
   ingredients: string,
   avg_price: number,
   qty: number,
-  price: number, 
+  price: number,
   store_id: string,
   store_name: string,
   lat: number,
   lon: number,
-  available: boolean, 
-  distance: number, // in km  
+  available: boolean,
+  distance: number, // in km
 }
 
-export type userModelType = {
-    userId: string | null;
-    postalCode: string;
-    city: string;
-    county: string;
-    latitude: number;
-    longitude: number;
-    maxDistance: number; // in km
-    usesLocation: boolean;
-    cart: Product[];
-    algorithmCart: StoreProduct[];
-    cartItemCount: number;
-    setLocation: (longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) => void;
-    setMaxDistance: (distance: number) => void;
-    addToCart: (product: Product) => void;
-    removeFromCart: (productId: string) => void;
-    setAlgorithmCart: (algorithmCart: StoreProduct[]) => void;
-    getLocation: () => [number, number];
-    getCity: () => string;
-    getPostalCode: () => string;
-    getMaxDistance: () => number;
-    // Supabase persistence
-    saveToSupabase: () => void;
-    loadFromSupabase: (userId: string) => Promise<boolean>;
-}
+class UserModel {
+    userId: string | null = null;
+    postalCode: string = '';
+    city: string = '';
+    county: string = '';
+    longitude: number = 0;
+    latitude: number = 0;
+    maxDistance: number = 10; // in km
+    usesLocation: boolean = false;
+    cart: Product[] = [];
+    algorithmCart: StoreProduct[] = [];
+    cartItemCount: number = 0;
 
-export const userModel: userModelType = {
-    userId: null, // set when user logs in, null when logged out
-    postalCode: '',
-    city: '',
-    county: '',
-    longitude: 0,
-    latitude: 0,
-    maxDistance: 10, // in km
-    usesLocation: false,
-    cart: [] as Product[],
-    algorithmCart: [] as StoreProduct[],
-    cartItemCount: 0,
+    constructor() {
+        makeAutoObservable(this);
+    }
 
     setLocation(longitude: number, latitude: number, postalCode?: string, city?: string, county?: string) {
         if (postalCode) this.postalCode = postalCode;
@@ -69,16 +48,16 @@ export const userModel: userModelType = {
         this.latitude = latitude;
         this.usesLocation = true;
         this.saveToSupabase();
-    },
+    }
+
     setMaxDistance(distance: number) {
         this.maxDistance = distance;
         this.saveToSupabase();
-    },
-    addToCart(product: Product) {
+    }
 
+    addToCart(product: Product) {
         const sameProduct = this.cart.find(p => p.product_id === product.product_id);
         if (sameProduct) {
-            // Update the quantity of the existing product
             if ((product.qty ?? 0) <= 0) {
                 this.cart = this.cart.filter(p => p.product_id !== product.product_id);
                 this.saveToSupabase();
@@ -91,33 +70,37 @@ export const userModel: userModelType = {
         }
         this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
-    },
+    }
+
     removeFromCart(productId: string) {
         this.cart = this.cart.filter(p => p.product_id !== productId);
         this.cartItemCount = this.cart.reduce((total, item) => total + (item.qty ?? 1), 0);
         this.saveToSupabase();
-    },
+    }
+
     setAlgorithmCart(algorithmCart: StoreProduct[]) {
         console.log("Setting algorithm cart to", algorithmCart);
         this.algorithmCart = algorithmCart;
-    },
+    }
+
     getLocation(): [number, number] {
         return [this.latitude, this.longitude];
-    },
+    }
+
     getCity(): string {
-        return this.city
-    },
+        return this.city;
+    }
+
     getPostalCode(): string {
         return this.postalCode;
-    },
+    }
+
     getMaxDistance() {
         return this.maxDistance;
-    },
-    // Persist current local state to the user's profile row in Supabase
-    // Only runs if the user is logged in (userId is set)
+    }
+
     saveToSupabase() {
         if (!this.userId) return;
-
         supabase
             .from("profiles")
             .update({
@@ -134,10 +117,8 @@ export const userModel: userModelType = {
             .then(({ error }) => {
                 if (error) console.error("Failed to save profile:", error.message);
             });
-    },
+    }
 
-    // Load the user's profile from Supabase and hydrate local fields
-    // Returns true if the profile had saved data (uses_location or non-empty cart)
     async loadFromSupabase(userId: string) {
         const { data, error } = await supabase
             .from("profiles")
@@ -150,23 +131,27 @@ export const userModel: userModelType = {
             return false;
         }
 
-        // Check if the profile has any saved data worth loading
         const hasData = data.uses_location || (data.cart && data.cart.length > 0);
 
-        if (hasData) {
-            this.postalCode = data.postal_code ?? '';
-            this.city = data.city ?? '';
-            this.county = data.county ?? '';
-            this.latitude = data.latitude ?? 0;
-            this.longitude = data.longitude ?? 0;
-            this.maxDistance = data.max_distance ?? 10;
-            this.usesLocation = data.uses_location ?? false;
-            this.cart = data.cart ?? [];
-        }
+        runInAction(() => {
+            if (hasData) {
+                this.postalCode = data.postal_code ?? '';
+                this.city = data.city ?? '';
+                this.county = data.county ?? '';
+                this.latitude = data.latitude ?? 0;
+                this.longitude = data.longitude ?? 0;
+                this.maxDistance = data.max_distance ?? 10;
+                this.usesLocation = data.uses_location ?? false;
+                this.cart = data.cart ?? [];
+            }
+        });
 
         return hasData;
-    },
+    }
 }
+
+export const userModel = new UserModel();
+export type userModelType = typeof userModel;
 
 declare global {
     interface Window {
