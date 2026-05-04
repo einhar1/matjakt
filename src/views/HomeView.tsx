@@ -171,7 +171,7 @@ function HomeView(props: HomeViewProps) {
               <span className="offer-price-promo">6,27 kr</span>
               <div>
                 <strong>Ditt lokala pris</strong><br/>
-                Lägsta priset just nu i butiker nära dig.
+                Lägsta priset just nu i butiker nära {userModel.getCity() !== ''? userModel.getCity() : 'Stockholm'}.
               </div>
             </div>
 
