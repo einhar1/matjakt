@@ -317,7 +317,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
               <Bar data={storeChartData} options={storeOptions}/>
             </div>
             <div className="box box-padding">
-              <Line data={priceHistoryData} options={priceHistoryOptions}/>
+              <Line data={generatePriceHistoryData(product?.avg_price || 0)} options={getPriceHistoryOptions(product?.avg_price || 0)}/>
             </div>
           </div>
           )
@@ -347,21 +347,50 @@ const priceHistoryData: ChartData<'line'> = {
   ],
 };
 
-const priceHistoryOptions: ChartOptions<'line'> = {
-  responsive: true,
-  scales: {
-    y: {
-      min: 40,
-      max: 50,
+function generatePriceHistoryData(avgPrice: number): ChartData<'line'> {
+  const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Okt', "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "Maj"];
+  
+  // Generate fake data around avg_price with some variance
+  const priceData = months.map((_, index) => {
+    const variance = (Math.random() - 0.5) * avgPrice * 0.2; // ±10% variance
+    const trend = (index / months.length) * avgPrice * 0.1; // slight upward trend
+    return Math.max(avgPrice * 0.8, avgPrice + variance + trend); // min 80% of avg_price
+  });
+
+  return {
+    labels: months,
+    datasets: [
+      {
+        label: 'Pris (kr)',
+        data: priceData,
+        tension: 0.1,
+        backgroundColor: "rgb(84, 174, 226)",
+        borderColor: "rgb(84, 174, 226)",
+      },
+    ],
+  };
+}
+
+function getPriceHistoryOptions(avgPrice: number): ChartOptions<'line'> {
+  const minPrice = avgPrice * 0.75;
+  const maxPrice = avgPrice * 1.25;
+
+  return {
+    responsive: true,
+    scales: {
+      y: {
+        min: Math.floor(minPrice),
+        max: Math.ceil(maxPrice),
+      }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Prishistorik',
+      }
     }
-  },
-  plugins: {
-    title: {
-      display: true,
-      text: 'Prishistorik',
-    }
-  }
-};
+  };
+}
 
 
 export { DetailsView };

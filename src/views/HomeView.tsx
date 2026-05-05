@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import '../home.css'
 import '../style.css'
-import { OfferCard } from '../components/OfferCard';
+import { OfferCard, offerItemToCartProduct, type OfferItem } from '../components/OfferCard';
 import { type userModelType } from '../models/userModel.ts';
 import { Modal } from '../components/Modal.tsx'
 import { LocationModal, type LocationResult } from '../components/LocationModal.tsx';
 import { useBestLocalDeals } from '../hooks/useBestLocalDeals.ts';
 import { LoadingSpinner } from '../components/LoadingSpinner.tsx';
 import { mockOffers } from '../mockdata.ts';
+import { useToast } from '../context/ToastContext.tsx';
 
 export type HomeViewProps = {
   userModel: userModelType;
@@ -20,6 +21,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const userModel = props.userModel;
   const [showCardHelpModal, setShowCardHelpModal] = useState(false);
+  const { showCartToast } = useToast();
 
   // const [refresh, setRefresh] = useState<number>(0);
   
@@ -51,7 +53,11 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
   function closeCardHelpModal() {
     setShowCardHelpModal(false)
   }
-  
+  function onAddToCartACB(offer: OfferItem) {
+      userModel.addToCart(offerItemToCartProduct(offer));
+      showCartToast();
+  }
+
   const carouselItems = [...bestOffers.slice(0, 15), ...bestOffers.slice(0, 15)];
 
   return (
@@ -90,6 +96,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
                       key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                       offer={offer} 
                       initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
+                      onAddToCart={onAddToCartACB}
                     />
                   ))}
                 </div>
@@ -218,6 +225,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
                 key={`modal-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                 offer={offer} 
                 initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
+                onAddToCart={onAddToCartACB}
               />
             ))}
           </div>

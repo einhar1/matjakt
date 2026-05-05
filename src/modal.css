@@ -13,9 +13,9 @@
 .modal-content {
   background: var(--bg-main);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
+  border-radius: 16px 0px 0px 16px;
   width: 90%;
-  max-width: 800px;
+  max-width: 880px;
   max-height: 80%;
   overflow-y: auto;
   margin: 0 auto;
