@@ -401,12 +401,16 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
   function displayCartItems() {
 
     if (hasCalculatedWithCurAlgo === "average") {
+
       return userModel.cart.map((item: Product) => (
       <div key={item.product_id} className="cart-item">
         <img src={item.product_image_url} alt={item.name} className="item-image" onClick={() => onCartItemClickACB(item)}/>
         <div className="item-details">
           <h3 className="item-name" onClick={() => onCartItemClickACB(item)}>{item.name}</h3>
           <p className="item-quantity">{item.qty || 1}x</p>
+          <span className={`store-badge ${containsAlphabetic(item.product_key) ? "store-badge-ica" : "store-badge-coop"}`}>
+            {containsAlphabetic(item.product_key) ? "ICA" : "COOP"}
+          </span>
         </div>
         <div className="item-price">~{(item.avg_price * (item.qty || 1)).toFixed(2)} kr</div>
         <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
@@ -936,5 +940,12 @@ export function LoadingDelivery() {
   );
 }
 
+function containsAlphabetic(str: string): boolean {
+  return Array.from(str).some((char) => /[a-zA-Z]/.test(char));
+}
+
+function containsOnlyDigits(str: string): boolean {
+  return /^\d+$/.test(str);
+}
 
 export { CheckoutView }

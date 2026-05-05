@@ -157,6 +157,29 @@
   background-color: rgba(220, 38, 38, 0.1);
 }
 
+.store-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border: 1.5px solid;
+}
+
+.store-badge-ica {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border-color: var(--border-subtle);
+}
+
+.store-badge-coop {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border-color: var(--border-subtle);
+}
+
 
 /* Order Summary */
 .order-summary {
