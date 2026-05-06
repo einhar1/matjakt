@@ -44,61 +44,145 @@ html, body {
 .about-wrapper {
   min-height: 100vh;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, var(--bg-main) 0%, #f0f9f0 100%);
 }
 
 .about-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 60px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
 }
 
 .about-hero {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 0; /* Remove since using gap */
+  animation: fadeInUp 1s ease-out;
 }
 
 .about-hero h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--text-main);
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--accent-color);
   margin-bottom: 20px;
+  font-family: 'Inter', serif; /* Secondary font for emphasis */
+  line-height: 1.2;
 }
 
 .about-hero p {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .about-purpose, .about-contact {
-  margin-bottom: 40px;
-  padding: 20px;
+  margin-bottom: 0; /* Remove since using gap */
+  padding: 40px;
   background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  border: 2px solid var(--accent-color);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.about-purpose:hover, .about-contact:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .about-purpose h2, .about-contact h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 16px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-color);
+  margin-bottom: 20px;
+  font-family: 'Inter', serif;
 }
 
 .about-purpose p, .about-contact p {
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 16px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  font-weight: 500;
 }
 
 .about-contact ul {
   list-style: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 .about-contact li {
-  margin-bottom: 8px;
-  color: var(--text-muted);
+  margin-bottom: 0; /* Remove since using grid */
+  padding: 12px;
+  background: var(--bg-main);
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.about-contact li:hover {
+  background: var(--accent-hover);
+}
+
+.about-contact a {
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.about-contact a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  .about-hero h1 {
+    font-size: 2.8rem;
+  }
+
+  .about-hero p {
+    font-size: 1.1rem;
+  }
+
+  .about-purpose, .about-contact {
+    padding: 30px 20px;
+  }
+
+  .about-purpose h2, .about-contact h2 {
+    font-size: 1.6rem;
+  }
+
+  .about-contact ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .back-btn {
