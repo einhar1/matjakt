@@ -11,14 +11,16 @@ Ta alltid en sökning baserat på cheapest_price - avg
 */
 
 -- public
+-- DROP INDEX idx_public_cp_store_product;
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_public_cp_store_product
   ON public.current_prices (store_id, product_key)
-  INCLUDE (price, promo_price);
+  INCLUDE (price);
 
 -- coop
+-- DROP INDEX idx_coop_cp_store_product
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coop_cp_store_product
   ON coop.current_prices (store_id, product_key)
-  INCLUDE (price, promo_price);
+  INCLUDE (price);
 
 CREATE UNIQUE INDEX idx_mv_deals_unique ON public.mv_active_deals (src, store_id, product_key);
 CREATE INDEX idx_mv_deals_store_rel ON public.mv_active_deals (store_id, relevance DESC);
@@ -27,19 +29,19 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_active_deals;
 
 -- FOR:
 
+/* DROP MATERIALIZED VIEW public.mv_active_deals */
+
 /* CREATE MATERIALIZED VIEW public.mv_active_deals AS
 SELECT 
     cp.store_id, 
     cp.product_key,
     cp.price,
-    cp.promo_price,
-    COALESCE(cp.promo_price, cp.price) AS effective_price,
     p.avg_price,
-    ((p.avg_price - COALESCE(cp.promo_price, cp.price)) / p.avg_price)::real AS relevance,
+    ((p.avg_price - cp.price) / p.avg_price)::real AS relevance,
     'ica'::text AS src
 FROM public.current_prices cp
 JOIN public.products p ON p.product_key = cp.product_key
-WHERE p.avg_price > 0 AND COALESCE(cp.promo_price, cp.price) < p.avg_price AND p.ingredients IS NOT NULL
+WHERE p.avg_price > 0 AND cp.price < p.avg_price AND p.ingredients IS NOT NULL
 
 UNION ALL
 
@@ -47,14 +49,12 @@ SELECT
     cp.store_id, 
     cp.product_key,
     cp.price,
-    cp.promo_price,
-    COALESCE(cp.promo_price, cp.price) AS effective_price,
     p.avg_price,
-    ((p.avg_price - COALESCE(cp.promo_price, cp.price)) / p.avg_price)::real AS relevance,
+    ((p.avg_price - cp.price) / p.avg_price)::real AS relevance,
     'coop'::text AS src
 FROM coop.current_prices cp
 JOIN coop.products p ON p.product_key = cp.product_key
-WHERE p.avg_price > 0 AND COALESCE(cp.promo_price, cp.price) < p.avg_price AND p.ingredients IS NOT NULL; */
+WHERE p.avg_price > 0 AND cp.price < p.avg_price AND p.ingredients IS NOT NULL; */
 
 CREATE UNIQUE INDEX idx_mv_deals_unique ON public.mv_active_deals (src, store_id, product_key);
 CREATE INDEX idx_mv_deals_store_rel ON public.mv_active_deals (store_id, relevance DESC);
@@ -92,7 +92,7 @@ BEGIN
   local_deals AS (
     -- Fetch pre-calculated deals just for the stores nearby
     SELECT d.product_key, d.store_id, ns.store_name, ns.distance_m, 
-           d.price, d.promo_price, d.effective_price, d.avg_price, d.relevance, d.src
+           d.price, /* d.promo_price,  *//* d.effective_price, */ d.avg_price, d.relevance, d.src
     FROM nearby_stores ns
     JOIN public.mv_active_deals d ON d.store_id = ns.store_id AND d.src = ns.src
   ),
@@ -106,7 +106,7 @@ BEGIN
     -- Limit out the results
     SELECT *
     FROM cheapest_overall
-    ORDER BY relevance DESC, effective_price ASC, product_key ASC
+    ORDER BY relevance DESC, price ASC, product_key ASC
     LIMIT result_limit OFFSET result_offset
   )
   -- Join to text-heavy `products` table strictly for the final ~30 items
@@ -123,13 +123,13 @@ BEGIN
       'store_id', c.store_id, 'store_name', c.store_name
     ) AS store,
     jsonb_build_object(
-      'price', c.price, 'promo_price', c.promo_price, 'effective_price', c.effective_price
+      'price', c.price/*,  'promo_price', c.promo_price, */ /* 'effective_price', c.effective_price */
     ) AS price,
     c.relevance
   FROM top_deals c
   LEFT JOIN public.products p_ica ON p_ica.product_key = c.product_key AND c.src = 'ica'
   LEFT JOIN coop.products p_coop ON p_coop.product_key = c.product_key AND c.src = 'coop'
-  ORDER BY c.relevance DESC, c.effective_price ASC, c.product_key ASC;
+  ORDER BY c.relevance DESC, c.price ASC, c.product_key ASC;
 END;
 $function$;
 

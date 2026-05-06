@@ -27,7 +27,7 @@ export function offerItemToCartProduct(offer: OfferItem): CartProduct {
     product_image_url: offer.product.product_image_url ?? '',
     product_information: '',
     ingredients: '',
-    avg_price: offer.currentPrice.promo_price ?? offer.currentPrice.price,
+    avg_price: /* offer.currentPrice.promo_price ??  */offer.currentPrice.price,
     qty: offer.product.qty ?? 1,
   };
 }
@@ -56,7 +56,7 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
   const offerPriceTitle = offer.store?.store_name ? `Billigaste priset nära ${userModel.getCity() !== ''? userModel.getCity() : 'Stockholm'}!` : 'Genomsnittl. priset i Sverige'
   const savingsPctTitle = 'Jämfört med genomsnittl. priset i Sverige'
 
-  const cheapestPrice = Number(offer.currentPrice.promo_price ?? offer.currentPrice.price ?? 0);
+  const cheapestPrice = Number(/* offer.currentPrice.promo_price ?? */ offer.currentPrice.price ?? 0);
   const avgPrice = Number(offer.product.avg_price ?? 0);
 
   const handlePriceClick = (e: React.MouseEvent) => {

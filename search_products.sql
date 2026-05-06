@@ -25,9 +25,9 @@ WHERE proname = 'product_search_vector';
 
 */
 
-DROP FUNCTION IF EXISTS public.search_products_dev1_2(text, integer, integer, double precision, double precision, integer);
+DROP FUNCTION IF EXISTS public.search_products_dev1_3(text, integer, integer, double precision, double precision, integer);
 
-CREATE OR REPLACE FUNCTION public.search_products_dev1_3(
+CREATE OR REPLACE FUNCTION public.search_products_dev1_4(
   search_term text,
   result_limit integer DEFAULT 9,
   result_offset integer DEFAULT 0,
@@ -92,12 +92,9 @@ BEGIN
   SELECT p.*
   FROM all_products p
   WHERE (
-      CASE WHEN sort_by = 'price'
-        THEN p.name ILIKE '%' || sanitized || '%'
-        ELSE p.search_vector @@ query_sv
-          OR p.search_vector @@ query_en
-          OR lower(p.name) % lower(sanitized)
-      END
+      p.search_vector @@ query_sv
+      OR p.search_vector @@ query_en
+      OR lower(p.name) % lower(sanitized) 
     )
     AND (NOT has_loc OR p.product_key IN (SELECT product_key FROM nearby_keys))
   ),
@@ -145,8 +142,8 @@ BEGIN
         'store_name', NULL
     ) AS store,
     jsonb_build_object(
-        'price', tp.avg_price,
-        'promo_price', NULL
+        'price', tp.avg_price/* , */
+        -- 'promo_price', NULL
     ) AS current_price,
     tp.relevance
     FROM top_products tp
@@ -156,5 +153,5 @@ BEGIN
       tp.name ASC, tp.product_key ASC, tp.src ASC;
 END;$function$;
 
-ALTER FUNCTION public.search_products_dev1_3(text, integer, integer, double precision, double precision, integer, text, text)
+ALTER FUNCTION public.search_products_dev1_4(text, integer, integer, double precision, double precision, integer, text, text)
   SET statement_timeout = '20s';

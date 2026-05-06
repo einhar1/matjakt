@@ -32,6 +32,8 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
     isLoading
   } = useBestLocalDeals();
 
+  // const lastUpdate = useLastUpdateCheck();
+
   const bestOffers = products || [];
 
   const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
@@ -66,7 +68,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
       <div className="home-container">
         <section className="home-hero">
           <div className="badge">Data driven grocery optimization</div>
-          <h1>Realtidspriser.<br/><span className="highlight-text">Optimerade inköp.</span></h1>
+          <h1>Smartare priser.<br/><span className="highlight-text">Optimerade inköp.</span></h1>
           <p>
             Automatiserad insamling från <strong>Sveriges matbutiker</strong>.<br/> 
             Jämför, bygg din matkasse och sluta gissa var det är billigast!
@@ -77,13 +79,13 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
         <section className="home-offers">
           <div className="section-header">
             <div className='klipp-header'>
-              <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
+              <h2>Prisfynd{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
               <span className='help-badge' onClick={showHelpModal}>?</span>
             </div>
             <div className='section-header-row'>
               <span className='badge live-indicator'>
                 <span className='dot'></span> 
-                Live Data
+                Live Data {/* TODO! Ändra till useLastUpdateCheck?*/}
               </span>
               <button className='view-all-btn' onClick={handleOpenModal}>
                   Visa alla →
@@ -218,7 +220,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
               ← Tillbaka
             </button>
             <div className='modal-header'>
-              <h2>Veckans klipp{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
+              <h2>Prisfynd{userModel.city !== '' ? ' — ' + userModel.city : ' — Stockholm'}</h2>
             </div>
           </div>
           <div className='modal-grid'>
