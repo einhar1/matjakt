@@ -7,30 +7,36 @@ function AboutView() {
   return (
     <div className="about-wrapper">
       <div className="about-container">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="btn-primary" onClick={() => navigate('/')}>
           ← Tillbaka till startsidan
         </button>
+        
         <section className="about-hero">
-          <h1>Om oss</h1>
+          <h1>Om Matjakt</h1>
           <p>
-            Välkommen till vår app för data-driven grocery optimization. Vi hjälper dig att jämföra priser från ICA, Coop, Willys och Hemköp för att optimera dina inköp.
+            Välkommen till vår app för data-driven grocery optimization! Vi hjälper dig att jämföra priser från Sveriges butiker för att optimera dina inköp. 
           </p>
         </section>
+
         <section className="about-purpose">
           <h2>Vårt syfte</h2>
           <p>
-            Automatiserad insamling från ledande svenska livsmedelskedjor. Jämför, bygg din matkasse och sluta gissa var det är billigast!
+            Under de senaste åren har inflationen lett till kraftigt ökade matpriser i Sverige. {' '}
+            <a href='https://www.scb.se/pressmeddelande/matpriserna-steg-nagot-2024/' target='_blank'>Enligt SCB ökade livsmedelspriserna med 18,6 % under 2022 och ligger kvar på en hög nivå. </a>
+            Det har därför blivit allt viktigare för kunder att enkelt kunna överblicka och jämföra aktuella priser!
+          </p>
+          <p>
+            Vårt mål är att öka pristransparensen på matvarumarknaden, och göra så konsumenter slutar behöva gissa var det är billigast!
           </p>
         </section>
+
         <section className="about-contact">
-          <h2>Kontaktinformation</h2>
-          <p>
-            Har du frågor eller feedback? Kontakta oss på:
-          </p>
+          <h2>Kontakt</h2>
           <ul>
-            <li>Email: info@example.com</li>
-            <li>Telefon: 012-345 6789</li>
-            <li>Adress: Stockholm, Sverige</li>
+            <li>Adam Östberg — adamostb@kth.se</li>
+            <li>Gustav Lundborg — glundbo@kth.se</li>
+            <li>Rasmus Nordahl — rnordahl@kth.se</li>
+            <li>Christopher Massi — cmassi@kth.se</li>
           </ul>
         </section>
       </div>
