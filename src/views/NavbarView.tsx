@@ -12,6 +12,8 @@ import { List } from '../components/List.tsx'
 import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
 import type { OfferItem } from '../components/OfferCard';
+import { StoreFilterDropdown, type StoreFilter } from '../components/StoreFilterDropdown';
+import { SortDropdown, type SortBy } from '../components/SortDropdown';
 
 export type navbarViewProps = {
 	// username: string | null;
@@ -20,7 +22,7 @@ export type navbarViewProps = {
 	// onLogoClick: () => void;
 	// onSignOutClick: () => void;
 	// onExitSession: () => void;
-	onSearch: (query: string) => void;
+	onSearch: (query: string, storeFilter: StoreFilter) => void;
 	onLoginClick: () => void;
 	onCartClick: () => void;
 	onAddToCart: (offer: OfferItem) => void;
@@ -31,6 +33,8 @@ export type navbarViewProps = {
 
 export function NavbarView(props: navbarViewProps) {
 	const [searchQuery, setSearchQuery] = useState<string>("");
+	const [storeFilter, setStoreFilter] = useState<StoreFilter>('all');
+	const [sortBy, setSortBy] = useState<SortBy>('relevance');
 	const debouncedQuery = useDebounce(searchQuery, 500)
 	const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
 	const justSubmittedRef = useRef(false);
@@ -91,7 +95,7 @@ export function NavbarView(props: navbarViewProps) {
 	async function submitSearch() {
 		justSubmittedRef.current = true;
 		setIsSearchModalOpen(false);
-		props.onSearch(searchQuery);
+		props.onSearch(searchQuery, storeFilter);
 	}
 
 	function handleSearchClick() {
@@ -122,15 +126,16 @@ export function NavbarView(props: navbarViewProps) {
 					{'Matjakt'}
 				</h1>
 				<div className="navbar-search">
-					<input 
+					<input
 						id="desktop"
-						type="text" 
-						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
+						type="text"
+						placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
 						value={searchQuery}
 						onChange={handleSearchChange}
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
+					<StoreFilterDropdown value={storeFilter} onChange={setStoreFilter} />
 					<button className="btn-primary" onClick={handleSearchClick}>
 						Sök
 					</button>
@@ -156,15 +161,16 @@ export function NavbarView(props: navbarViewProps) {
 
 			<div className="header-search-row">
 				<div className="navbar-search navbar-search-mobile">
-					<input 
+					<input
 						id="mobile"
-						type="text" 
-						placeholder="Sök på produkt, t.ex. mjölk, kaffe..." 
+						type="text"
+						placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
 						value={searchQuery}
 						onChange={handleSearchChange}
 						onKeyDown={handleSearchKeyDownACB}
 						className="navbar-search-input"
 					/>
+					<StoreFilterDropdown value={storeFilter} onChange={setStoreFilter} />
 					<button className="btn-primary" onClick={handleSearchClick}>Sök</button>
 				</div>
 			</div>
@@ -182,12 +188,14 @@ export function NavbarView(props: navbarViewProps) {
 							placeholder="Sök på produkt, t.ex. mjölk, kaffe..."
 							className="search-modal-input"
 						/>
+						<StoreFilterDropdown value={storeFilter} onChange={setStoreFilter} />
+						<SortDropdown value={sortBy} onChange={setSortBy} />
 						<button className="modal-close-btn" onClick={handleCloseSearchModal}>
 							<CgClose/>
 						</button>
 					</div>
 				</>
-				<List searchTerm={debouncedQuery} searchQuery={searchQuery} closeModal={handleCloseSearchModal} onAddToCart={props.onAddToCart} />
+				<List searchTerm={debouncedQuery} searchQuery={searchQuery} closeModal={handleCloseSearchModal} onAddToCart={props.onAddToCart} storeFilter={storeFilter} sortBy={sortBy} />
 			</Modal>
 			{/* User authentication section, not ready yet
 			{

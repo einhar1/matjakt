@@ -10,6 +10,8 @@ import type { userModelType } from '../models/userModel';
 import { useToast } from '../context/ToastContext';
 import { Modal } from '../components/Modal.tsx';
 import { mockOffers } from '../mockdata.ts';
+import type { StoreFilter } from '../components/StoreFilterDropdown';
+import { SortDropdown, type SortBy } from '../components/SortDropdown';
 
 const LoadingSpinner = () => (
     <p style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>
@@ -25,8 +27,10 @@ const SearchView = observer(function SearchView({ userModel }: SearchViewProps) 
     const { showCartToast } = useToast();
     const [showCardHelpModal, setShowCardHelpModal] = useState(false);
 
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const queryFromUrl = searchParams.get('q') || ''
+    const storeFromUrl = (searchParams.get('store') || 'all') as StoreFilter
+    const sortFromUrl = (searchParams.get('sort') || 'relevance') as SortBy
     const {
         data: products,
         error,
@@ -34,7 +38,14 @@ const SearchView = observer(function SearchView({ userModel }: SearchViewProps) 
         isFetching,
         hasMore,
         setSize,
-    } = useProductSearch(queryFromUrl)
+    } = useProductSearch(queryFromUrl, storeFromUrl, sortFromUrl)
+
+    function handleSortChange(next: SortBy) {
+        const params = new URLSearchParams(searchParams)
+        if (next === 'relevance') params.delete('sort')
+        else params.set('sort', next)
+        setSearchParams(params, { replace: true })
+    }
     const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
 
     function showHelpModal() {
@@ -62,6 +73,7 @@ const SearchView = observer(function SearchView({ userModel }: SearchViewProps) 
             <div className='search-results-header'>
                 Produkter <span>• visar {products.length} träffar •</span>
                 <span className='help-badge' onClick={showHelpModal}>?</span>
+                <SortDropdown value={sortFromUrl} onChange={handleSortChange} className="search-header-sort" />
             </div>
 
             <div className='search-results-grid search-view'>

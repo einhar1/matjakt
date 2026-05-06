@@ -4,15 +4,19 @@ import { OfferCard, type OfferItem } from './OfferCard.tsx'
 import '../search.css'
 import { useProductSearch, PAGE_SIZE } from "../hooks/useProductSearch.ts";
 import { userModel } from "../models/userModel.ts";
+import type { StoreFilter } from "./StoreFilterDropdown";
+import type { SortBy } from "./SortDropdown";
 
 export type ListProps = {
     searchTerm: string;
     searchQuery?: string;
     closeModal: () => void;
     onAddToCart?: (offer: OfferItem) => void;
+    storeFilter?: StoreFilter;
+    sortBy?: SortBy;
 }
 
-export const List = observer(function List({ searchTerm, searchQuery, closeModal, onAddToCart }: ListProps) {
+export const List = observer(function List({ searchTerm, searchQuery, closeModal, onAddToCart, storeFilter = 'all', sortBy = 'relevance' }: ListProps) {
 
     const navigate = useNavigate()
 
@@ -20,6 +24,8 @@ export const List = observer(function List({ searchTerm, searchQuery, closeModal
         if (searchQuery) {
             closeModal()
             const params = new URLSearchParams({ q: searchQuery })
+            if (storeFilter !== 'all') params.set('store', storeFilter)
+            if (sortBy !== 'relevance') params.set('sort', sortBy)
             navigate('/search?' + params)
         }
     }
@@ -28,7 +34,7 @@ export const List = observer(function List({ searchTerm, searchQuery, closeModal
         isLoading,
         error,
         data,
-    } = useProductSearch(searchTerm)
+    } = useProductSearch(searchTerm, storeFilter, sortBy)
 
     const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
 

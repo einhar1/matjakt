@@ -110,3 +110,6 @@
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
+.search-header-sort {
+  margin-left: 12px;
+}

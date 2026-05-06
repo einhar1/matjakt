@@ -3,6 +3,8 @@ import { supabase } from '../utils/supabase';
 import { type OfferItem } from '../components/OfferCard.tsx'
 import { userModel } from '../models/userModel.ts';
 import type { CurrentPrice, Product, Store } from '../types/database.ts';
+import type { StoreFilter } from '../components/StoreFilterDropdown';
+import type { SortBy } from '../components/SortDropdown';
 
 /* Built using weighted vectors, inspired by:
 https://dev.to/reclusivecoder/skip-elasticsearch-build-blazing-fast-full-text-search-right-in-supabase-58pf 
@@ -24,8 +26,8 @@ type SearchResultRow = {
 
 export const PAGE_SIZE = 15
 
-async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDistance]: [string, string, number, [number, number], number]): Promise<OfferItem[]> {
-    
+async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDistance, storeFilter, sortBy]: [string, string, number, [number, number], number, StoreFilter, SortBy]): Promise<OfferItem[]> {
+
     const sanitized = term.trim().substring(0,100);
 
     if (!sanitized) return [];
@@ -33,13 +35,15 @@ async function fetchProducts([_key, term, pageIndex, [userLat, userLon], maxDist
     console.log(`fetching products from search... Page Index: ${pageIndex}`)
 
     const { data: results, error: searchError } = await supabase
-        .rpc("search_products_dev1_2", {
+        .rpc("search_products_dev1_3", {
             search_term: sanitized,
             result_limit: PAGE_SIZE,
             result_offset: pageIndex * PAGE_SIZE,
             user_lat: userLat || null,
             user_lon: userLon || null,
-            max_distance: maxDistance
+            max_distance: maxDistance,
+            store_filter: storeFilter === 'all' ? null : storeFilter,
+            sort_by: sortBy
         })
 
     if (searchError) {
@@ -68,7 +72,7 @@ const SWRConfig = {
     revalidateFirstPage: false // stops Page 0 from refetching on every scroll
 }
 
-export function useProductSearch(searchTerm: string) {
+export function useProductSearch(searchTerm: string, storeFilter: StoreFilter = 'all', sortBy: SortBy = 'relevance') {
 
     const [userLat, userLon] = userModel.getLocation() || [null, null];
     const maxDistance = userModel.getMaxDistance()*1000;
@@ -78,7 +82,7 @@ export function useProductSearch(searchTerm: string) {
         if ((previousPageData && !previousPageData.length) || !searchTerm)  {
             return null  // reached the end
         }
-        return ['products', searchTerm, pageIndex, [userLat, userLon], maxDistance]
+        return ['products', searchTerm, pageIndex, [userLat, userLon], maxDistance, storeFilter, sortBy]
     }
 
     const { data, error, size, setSize, isValidating } = useSWRInfinite<OfferItem[], Error>(

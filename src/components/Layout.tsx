@@ -8,6 +8,7 @@ import { useProfileSync } from '../hooks/useProfileSync'
 import { type userModelType } from '../models/userModel'
 import { offerItemToCartProduct, type OfferItem } from './OfferCard'
 import { useToast } from '../context/ToastContext'
+import type { StoreFilter } from './StoreFilterDropdown'
 
 type LayoutProps = {
   userModel: userModelType;
@@ -30,8 +31,10 @@ export const Layout = observer(function Layout(props: LayoutProps) {
     else setLoginOpen(true)                                                                                           
   }
                                                                                                                       
-  function handleSearch(query: string) {
-    navigate(`/search?q=${encodeURIComponent(query)}`)
+  function handleSearch(query: string, storeFilter: StoreFilter) {
+    const params = new URLSearchParams({ q: query })
+    if (storeFilter !== 'all') params.set('store', storeFilter)
+    navigate(`/search?${params}`)
   }
 
   function handleAddToCart(offer: OfferItem) {
