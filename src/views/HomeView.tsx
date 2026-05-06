@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import '../home.css'
 import '../style.css'
@@ -22,6 +22,7 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
   const userModel = props.userModel;
   const [showCardHelpModal, setShowCardHelpModal] = useState(false);
   const { showCartToast } = useToast();
+  const isPaused = showCardHelpModal || showAll;
 
   // const [refresh, setRefresh] = useState<number>(0);
   
@@ -90,13 +91,14 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
             </div>
             {bestOffers.length > 0 ? (
               <div className='carousel-view'>
-                <div className='carousel-track'>
+                <div className='carousel-track'  style={{animationPlayState: (isPaused? 'paused' : '')}}>
                   {carouselItems.map((offer, index) => (
                     <OfferCard 
                       key={`carousel-${offer.store.store_id}-${offer.product.product_key}-${index}`}
                       offer={offer} 
                       initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
                       onAddToCart={onAddToCartACB}
+                      priceClick={showHelpModal}
                     />
                   ))}
                 </div>

@@ -37,6 +37,7 @@ interface OfferCardProps {
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
   showSavingsBadge?: boolean;
+  priceClick?: () => void;
   initialQuantity: number;
 }
 
@@ -45,7 +46,7 @@ function getDiscountPercent(original: number, promo: number): number {
   return Math.round(((original - promo) / original) * 100);
 }
 
-export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, initialQuantity }: OfferCardProps) {
+export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, priceClick, initialQuantity }: OfferCardProps) {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(initialQuantity);
   const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
@@ -58,12 +59,17 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
   const cheapestPrice = Number(offer.currentPrice.promo_price ?? offer.currentPrice.price ?? 0);
   const avgPrice = Number(offer.product.avg_price ?? 0);
 
+  const handlePriceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    priceClick?.();
+  };
+
   function renderPrices() {
     if (cheapestPrice > 0 && avgPrice > 0) {
       const pct = getDiscountPercent(avgPrice, cheapestPrice);
       return (
         <>
-          <span title={savingsPctTitle} className='discount-badge'>-{pct}%</span>
+          <span title={savingsPctTitle} onClick={handlePriceClick} className='discount-badge'>-{pct}%</span>
           <div className='offer-price-row'>
             <span className='offer-price-promo'>
               {cheapestPrice.toFixed(2)} kr
@@ -166,7 +172,7 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
             {offer.product.brand && (
                 <p className='offer-brand'>{offer.product.brand}</p>
             )}
-            <div title={offerPriceTitle} className='offer-prices'>
+            <div title={offerPriceTitle} onClick={handlePriceClick} className='offer-prices'>
                 {renderPrices()}
             </div>
             {!showQuantitySelector ? (

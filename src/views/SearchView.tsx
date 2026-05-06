@@ -72,6 +72,7 @@ const SearchView = observer(function SearchView({ userModel }: SearchViewProps) 
                         onAddToCart={onAddToCartACB}
                         use_avg={true}
                         initialQuantity={cartQtyMap.get(offer.product.product_key) || 0}
+                        priceClick={showHelpModal}
                     />
                 ))}
             </div>
