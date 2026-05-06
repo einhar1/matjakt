@@ -22,7 +22,7 @@ function AboutView() {
           <h2>Vårt syfte</h2>
           <p>
             Under de senaste åren har inflationen lett till kraftigt ökade matpriser i Sverige. {' '}
-            <a href='https://www.scb.se/pressmeddelande/matpriserna-steg-nagot-2024/' target='_blank'>Enligt SCB ökade livsmedelspriserna med 18,6 % under 2022 och ligger kvar på en hög nivå. </a>
+            <a href='https://www.scb.se/pressmeddelande/matpriserna-steg-nagot-2024/' target='_blank'>Enligt SCB ökade livsmedelspriserna med 18,6 % under 2022 och ligger kvar på en hög nivå.</a>{' '}
             Det har därför blivit allt viktigare för kunder att enkelt kunna överblicka och jämföra aktuella priser!
           </p>
           <p>
