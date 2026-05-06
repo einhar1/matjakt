@@ -214,9 +214,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
       if (userModel.cart.length === 0) return 0;
       let total = 0;
       userModel.cart.forEach(item => {
-        if (algorithmCartMap.has(item.product_key)) {
-          total += (item.avg_price * (item.qty || 1));
-        }
+        total += (item.avg_price * (item.qty || 1));
       });
       return total;
     }
@@ -545,10 +543,10 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
             <div className="summary-row total-row">
               <span className="summary-label total-label">Total</span>
               <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
-                {savingsValue > 0 && (
+                {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
                   <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
                 )}
-                {savingsValue < 0 && (
+                {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
                   <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
                 )}
                 <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>

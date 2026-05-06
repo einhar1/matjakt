@@ -27,7 +27,7 @@ export function offerItemToCartProduct(offer: OfferItem): CartProduct {
     product_image_url: offer.product.product_image_url ?? '',
     product_information: '',
     ingredients: '',
-    avg_price: /* offer.currentPrice.promo_price ??  */offer.currentPrice.price,
+    avg_price: /* offer.currentPrice.promo_price ??  */offer.product.avg_price ?? 0,
     qty: offer.product.qty ?? 1,
   };
 }
