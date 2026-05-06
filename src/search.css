@@ -94,6 +94,10 @@
     margin-bottom: 24px;
 }
 
+.search-modal-input-wrapper .store-filter-dropdown {
+    margin: 12px 6px 12px 0;
+}
+
 .search-modal-input {
     width: 100%;
     font-size: 1.2rem;
@@ -112,4 +116,9 @@
 }
 .search-header-sort {
   margin-left: 12px;
+}
+
+.search-modal-input-wrapper .modal-close-btn {
+  top: calc(50% - 30px);
+  right: 16px;
 }
