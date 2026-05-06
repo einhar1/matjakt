@@ -33,10 +33,10 @@ function AboutView() {
         <section className="about-contact">
           <h2>Kontakt</h2>
           <ul>
-            <li>Adam Östberg — adamostb@kth.se</li>
-            <li>Gustav Lundborg — glundbo@kth.se</li>
-            <li>Rasmus Nordahl — rnordahl@kth.se</li>
-            <li>Christopher Massi — cmassi@kth.se</li>
+            <li>Adam Östberg — <a href="mailto:adamostb@kth.se">adamostb@kth.se</a></li>
+            <li>Gustav Lundborg — <a href="mailto:glundbo@kth.se">glundbo@kth.se</a></li>
+            <li>Rasmus Nordahl — <a href="mailto:rnordahl@kth.se">rnordahl@kth.se</a></li>
+            <li>Christopher Massi — <a href="mailto:cmassi@kth.se">cmassi@kth.se</a></li>
           </ul>
         </section>
       </div>
