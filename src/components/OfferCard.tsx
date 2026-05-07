@@ -36,7 +36,7 @@ interface OfferCardProps {
   offer: OfferItem;
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
-  showSavingsBadge?: boolean;
+  showSavings?: boolean;
   priceClick?: () => void;
   initialQuantity: number;
 }
@@ -65,7 +65,7 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
   };
 
   function renderPrices() {
-    if (cheapestPrice > 0 && avgPrice > 0) {
+    if (!use_avg && cheapestPrice > 0 && avgPrice > 0) {
       const pct = getDiscountPercent(avgPrice, cheapestPrice);
       return (
         <>
