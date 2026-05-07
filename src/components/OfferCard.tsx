@@ -36,7 +36,7 @@ interface OfferCardProps {
   offer: OfferItem;
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
-  showSavingsBadge?: boolean;
+  showSavings?: boolean;
   priceClick?: () => void;
   initialQuantity: number;
 }
