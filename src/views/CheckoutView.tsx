@@ -46,6 +46,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
   const [showLoadingDelivery, setShowLoadingDelivery] = useState(false);
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
   const [showStoresDropdown, setShowStoresDropdown] = useState(false);
+  const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
   const navigate = useNavigate();
@@ -299,7 +300,16 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
   }
 
   function removeAllItemsACB() {
+    setShowClearCartConfirm(true);
+  }
+
+  function confirmClearCartACB() {
     userModel.clearCart();
+    setShowClearCartConfirm(false);
+  }
+
+  function cancelClearCartACB() {
+    setShowClearCartConfirm(false);
   }
 
   function onFuelChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -674,6 +684,43 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
           onMaxDistanceSet={(distance) => userModel.setMaxDistance(distance)}
         />
       </div>
+      {showClearCartConfirm && createPortal(
+        <div
+          className="modal-overlay"
+          onClick={cancelClearCartACB}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingTop: '15vh',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              padding: '24px',
+              borderRadius: '12px',
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            <h2 style={{ marginTop: 0 }}>Töm varukorgen?</h2>
+            <p>Är du säker på att du vill ta bort alla varor från varukorgen? Denna åtgärd kan inte ångras.</p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+              <button className="btn-secondary" onClick={cancelClearCartACB}>Avbryt</button>
+              <button className="btn-destructive" onClick={confirmClearCartACB}>Töm varukorgen</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       {showLoadingDelivery && createPortal(
         <div className="loading-delivery">
           <LoadingDelivery />
