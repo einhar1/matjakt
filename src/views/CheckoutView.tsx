@@ -247,6 +247,16 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     return getAvgTotal() - (getTotal() || 0);
   }
 
+  function getDiscountAmount() {
+    if (!userModel.hasSeniorDiscount || userModel.seniorDiscountPercent <= 0) return 0;
+    const subtotal = getTotal() || 0;
+    return subtotal * (userModel.seniorDiscountPercent / 100);
+  }
+
+  function getTotalAfterDiscount() {
+    return (getTotal() || 0) - getDiscountAmount();
+  }
+
   function onLocationSelectACB(location: LocationResult) {
     userModel.setLocation(location.lng, location.lat);
   }
@@ -334,6 +344,10 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   function downloadGroceryListPDF() {
     const doc = document.createElement('div');
+    const subtotal = userModel.algorithmCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const hasDiscount = userModel.hasSeniorDiscount && userModel.seniorDiscountPercent > 0;
+    const discountAmount = hasDiscount ? subtotal * (userModel.seniorDiscountPercent / 100) : 0;
+    const totalAfterDiscount = subtotal - discountAmount;
     let algoName = "";
     if (hasCalculatedWithCurAlgo === "area") {
       algoName = "närmaste område";
@@ -371,7 +385,13 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         </tbody>
       </table>
       <div style="margin-top: 20px; text-align: right;">
-        <strong>Total kostnad: ${userModel.algorithmCart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} kr</strong>
+        ${hasDiscount ? `
+          <div>Delsumma: ${subtotal.toFixed(2)} kr</div>
+          <div style="color: #2e7d32;">Pensionärsrabatt (${userModel.seniorDiscountPercent}%): −${discountAmount.toFixed(2)} kr</div>
+          <strong>Total kostnad: ${totalAfterDiscount.toFixed(2)} kr</strong>
+        ` : `
+          <strong>Total kostnad: ${subtotal.toFixed(2)} kr</strong>
+        `}
       </div>
     `;
 
@@ -413,7 +433,13 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
               `).join('')}
             </tbody>
           </table>
-          <div class="total">Total kostnad: ${userModel.algorithmCart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} kr</div>
+          ${hasDiscount ? `
+            <div style="text-align: right; margin-top: 20px;">Delsumma: ${subtotal.toFixed(2)} kr</div>
+            <div style="text-align: right; color: #2e7d32;">Pensionärsrabatt (${userModel.seniorDiscountPercent}%): −${discountAmount.toFixed(2)} kr</div>
+            <div class="total">Total kostnad: ${totalAfterDiscount.toFixed(2)} kr</div>
+          ` : `
+            <div class="total">Total kostnad: ${subtotal.toFixed(2)} kr</div>
+          `}
         </body>
         </html>
       `);
@@ -589,18 +615,45 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
             )}
 
             {/* Total */}
-            <div className="summary-row total-row">
-              <span className="summary-label total-label">Total</span>
-              <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
-                {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
-                  <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
-                )}
-                {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
-                  <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
-                )}
-                <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
+            {(userModel.hasSeniorDiscount && userModel.seniorDiscountPercent > 0) ? (
+              <>
+                <div className="summary-row">
+                  <span className="summary-label">Delsumma</span>
+                  <span className="summary-value">{getTotal()?.toFixed(2)} kr</span>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-label">Pensionärsrabatt ({userModel.seniorDiscountPercent}%)</span>
+                  <span className="summary-value" style={{ color: '#2e7d32' }}>
+                    −{getDiscountAmount().toFixed(2)} kr
+                  </span>
+                </div>
+                <div className="summary-row total-row">
+                  <span className="summary-label total-label">Total</span>
+                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
+                    {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
+                      <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
+                    )}
+                    {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
+                      <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
+                    )}
+                    <span className="summary-value total-value">{getTotalAfterDiscount().toFixed(2)} kr</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="summary-row total-row">
+                <span className="summary-label total-label">Total</span>
+                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
+                  {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
+                    <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
+                  )}
+                  {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
+                    <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
+                  )}
+                  <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
+                </div>
               </div>
-            </div>
+            )}
             {travelCost > 0 && (routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
               <div className="summary-row fuel-addon-row">
                 <span className="summary-label fuel-addon-label">+ Bensin</span>

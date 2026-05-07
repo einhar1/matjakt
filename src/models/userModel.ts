@@ -32,6 +32,8 @@ class UserModel {
     latitude: number = 0;
     maxDistance: number = 10; // in km
     usesLocation: boolean = false;
+    hasSeniorDiscount: boolean = false;
+    seniorDiscountPercent: number = 0;
     cart: Product[] = [];
     algorithmCart: StoreProduct[] = [];
 
@@ -55,6 +57,18 @@ class UserModel {
 
     setMaxDistance(distance: number) {
         this.maxDistance = distance;
+        this.saveToSupabase();
+    }
+
+    setHasSeniorDiscount(has: boolean) {
+        this.hasSeniorDiscount = has;
+        if (!has) this.seniorDiscountPercent = 0;
+        this.saveToSupabase();
+    }
+
+    setSeniorDiscountPercent(percent: number) {
+        const clamped = Math.max(0, Math.min(100, percent));
+        this.seniorDiscountPercent = clamped;
         this.saveToSupabase();
     }
 
@@ -116,6 +130,8 @@ class UserModel {
                 longitude: this.longitude,
                 max_distance: this.maxDistance,
                 uses_location: this.usesLocation,
+                has_senior_discount: this.hasSeniorDiscount,
+                senior_discount_percent: this.seniorDiscountPercent,
                 cart: this.cart,
             })
             .eq("id", this.userId)
@@ -127,7 +143,7 @@ class UserModel {
     async loadFromSupabase(userId: string) {
         const { data, error } = await supabase
             .from("profiles")
-            .select("postal_code, city, county, latitude, longitude, max_distance, uses_location, cart")
+            .select("postal_code, city, county, latitude, longitude, max_distance, uses_location, has_senior_discount, senior_discount_percent, cart")
             .eq("id", userId)
             .single();
 
@@ -147,6 +163,8 @@ class UserModel {
                 this.longitude = data.longitude ?? 0;
                 this.maxDistance = data.max_distance ?? 10;
                 this.usesLocation = data.uses_location ?? false;
+                this.hasSeniorDiscount = data.has_senior_discount ?? false;
+                this.seniorDiscountPercent = data.senior_discount_percent ?? 0;
                 this.cart = data.cart ?? [];
             }
         });

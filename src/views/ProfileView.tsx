@@ -1,16 +1,27 @@
+import { observer } from 'mobx-react-lite';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { useNavigate } from 'react-router-dom';
-import { FiMail, FiCalendar, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiMail, FiCalendar, FiLogOut, FiUser, FiPercent } from 'react-icons/fi';
+import { userModel } from '../models/userModel';
 import '../profile.css';
 
-function ProfileView() {
+const ProfileView = observer(function ProfileView() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     navigate('/');
+  }
+
+  function onToggleDiscountACB(e: React.ChangeEvent<HTMLInputElement>) {
+    userModel.setHasSeniorDiscount(e.target.checked);
+  }
+
+  function onPercentChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = parseFloat(e.target.value);
+    userModel.setSeniorDiscountPercent(isNaN(value) ? 0 : value);
   }
 
   if (loading) {
@@ -67,6 +78,45 @@ function ProfileView() {
           </div>
         </section>
 
+        {/* Senior / pensioner discount */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">Pensionärsrabatt</h2>
+          <div className="profile-card">
+            <div className="profile-field">
+              <FiPercent className="profile-field-icon" />
+              <div className="profile-discount-row">
+                <span className="profile-field-label">Jag har pensionärsrabatt</span>
+                <label className="profile-toggle">
+                  <input
+                    type="checkbox"
+                    checked={userModel.hasSeniorDiscount}
+                    onChange={onToggleDiscountACB}
+                  />
+                  <span className="profile-toggle-slider" />
+                </label>
+              </div>
+            </div>
+            {userModel.hasSeniorDiscount && (
+              <div className="profile-field">
+                <FiPercent className="profile-field-icon" />
+                <div>
+                  <span className="profile-field-label">Rabatt (%)</span>
+                  <input
+                    className="profile-percent-input"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={userModel.seniorDiscountPercent || ''}
+                    onChange={onPercentChangeACB}
+                    placeholder="t.ex. 10"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Sign out */}
         <section className="profile-section">
           <button className="btn-destructive profile-signout-btn" onClick={handleSignOut}>
@@ -77,6 +127,6 @@ function ProfileView() {
       </div>
     </div>
   );
-}
+});
 
 export { ProfileView };

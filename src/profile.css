@@ -81,6 +81,73 @@
   color: var(--text-main);
 }
 
+/* Discount section */
+.profile-discount-row {
+  flex: 1;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-toggle {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.profile-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.profile-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--border-subtle);
+  border-radius: 999px;
+  transition: background-color 0.2s;
+}
+
+.profile-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.profile-toggle input:checked + .profile-toggle-slider {
+  background-color: #2e7d32;
+}
+
+.profile-toggle input:checked + .profile-toggle-slider::before {
+  transform: translateX(18px);
+}
+
+.profile-percent-input {
+  width: 100px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+.profile-percent-input:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
 /* Sign out button */
 .profile-signout-btn {
   width: 100%;

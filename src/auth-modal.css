@@ -124,3 +124,26 @@
   background: var(--accent-hover);
   border-color: var(--accent-color);
 }
+
+/* Senior discount block (signup) */
+.auth-discount-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-discount-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.auth-discount-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #2e7d32;
+}

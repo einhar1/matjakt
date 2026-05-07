@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Modal } from './Modal'
 import { supabase } from '../utils/supabase'
-import { FiMail, FiLock } from 'react-icons/fi'
+import { FiMail, FiLock, FiPercent } from 'react-icons/fi'
 import '../auth-modal.css'
 import { PiUser } from 'react-icons/pi'
+import { userModel } from '../models/userModel'
 
 type Props = { isOpen: boolean; onClose: () => void }
 
@@ -12,6 +13,8 @@ export function AuthModal({ isOpen, onClose }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [hasSeniorDiscount, setHasSeniorDiscount] = useState(false)
+  const [seniorDiscountPercent, setSeniorDiscountPercent] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -19,6 +22,15 @@ export function AuthModal({ isOpen, onClose }: Props) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    if (mode === 'signup') {
+      // Stage discount on the local model so useProfileSync persists it on first sign-in
+      const percent = parseFloat(seniorDiscountPercent);
+      userModel.hasSeniorDiscount = hasSeniorDiscount;
+      userModel.seniorDiscountPercent = hasSeniorDiscount && !isNaN(percent)
+        ? Math.max(0, Math.min(100, percent))
+        : 0;
+    }
 
     const { error } =
       mode === 'login'
@@ -79,6 +91,35 @@ export function AuthModal({ isOpen, onClose }: Props) {
               required
             />
           </div>
+
+          {mode === 'signup' && (
+            <div className="auth-discount-block">
+              <label className="auth-discount-toggle">
+                <input
+                  type="checkbox"
+                  checked={hasSeniorDiscount}
+                  onChange={e => setHasSeniorDiscount(e.target.checked)}
+                />
+                <span>Jag har pensionärsrabatt</span>
+              </label>
+              {hasSeniorDiscount && (
+                <div className="auth-input-group">
+                  <FiPercent className="auth-input-icon" />
+                  <input
+                    type="number"
+                    className="auth-input"
+                    placeholder="Rabatt i procent (t.ex. 10)"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={seniorDiscountPercent}
+                    onChange={e => setSeniorDiscountPercent(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {error && <p className="auth-error">{error}</p>}
 
