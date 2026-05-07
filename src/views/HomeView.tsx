@@ -67,7 +67,6 @@ const HomeView = observer(function HomeView(props: HomeViewProps) {
     <div className="home-wrapper">
       <div className="home-container">
         <section className="home-hero">
-          <div className="badge">Data driven grocery optimization</div>
           <h1>Smartare priser.<br/><span className="highlight-text">Optimerade inköp.</span></h1>
           <p>
             Automatiserad insamling från <strong>Sveriges matbutiker</strong>.<br/> 
