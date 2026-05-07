@@ -36,7 +36,6 @@ interface OfferCardProps {
   offer: OfferItem;
   onAddToCart?: (offer: OfferItem) => void;
   use_avg?: boolean;
-  showSavings?: boolean;
   priceClick?: () => void;
   initialQuantity: number;
 }
@@ -46,7 +45,7 @@ function getDiscountPercent(original: number, promo: number): number {
   return Math.round(((original - promo) / original) * 100);
 }
 
-export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_avg, showSavingsBadge, priceClick, initialQuantity }: OfferCardProps) {
+export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_avg, priceClick, initialQuantity }: OfferCardProps) {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(initialQuantity);
   const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
@@ -65,7 +64,7 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
   };
 
   function renderPrices() {
-    if (cheapestPrice > 0 && avgPrice > 0 && cheapestPrice < avgPrice && offer.store?.store_name) {
+    if (!use_avg && cheapestPrice > 0 && avgPrice > 0) {
       const pct = getDiscountPercent(avgPrice, cheapestPrice);
       return (
         <>
