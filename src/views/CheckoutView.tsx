@@ -218,10 +218,9 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
       });
       return total;
     }
-    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "select-stores") { 
+    else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "select-stores") {
       let total = 0;
       if (userModel.algorithmCart.length > 0) {
-        total += travelCost;
         userModel.algorithmCart.forEach(item => {
           if (algorithmCartMap.has(item.product_key)) {
             total += (item.price * (item.qty || 1));
@@ -552,6 +551,12 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
                 <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
               </div>
             </div>
+            {travelCost > 0 && (routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
+              <div className="summary-row fuel-addon-row">
+                <span className="summary-label fuel-addon-label">+ Bensin</span>
+                <span className="summary-value fuel-addon-value">+{travelCost.toFixed(2)} kr</span>
+              </div>
+            )}
           </div>
 
           {/* Location Selection */}

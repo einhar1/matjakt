@@ -65,7 +65,7 @@ export const OfferCard = observer(function OfferCard({ offer, onAddToCart, use_a
   };
 
   function renderPrices() {
-    if (cheapestPrice > 0 && avgPrice > 0) {
+    if (cheapestPrice > 0 && avgPrice > 0 && cheapestPrice < avgPrice && offer.store?.store_name) {
       const pct = getDiscountPercent(avgPrice, cheapestPrice);
       return (
         <>
