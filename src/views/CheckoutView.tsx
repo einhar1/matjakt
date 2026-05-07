@@ -39,7 +39,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
   const cart = props.userModel.cart;
-  const [algorithmMethod, setAlgorithmMethod] = useState('average');
+  const [algorithmMethod, setAlgorithmMethod] = useState('area');
   const [fuelType, setFuelType] = useState('none');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
