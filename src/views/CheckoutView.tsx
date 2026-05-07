@@ -297,6 +297,11 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     userModel.removeFromCart(productId);
     userModel.setAlgorithmCart(userModel.algorithmCart.filter(item => item.product_id !== productId));
   }
+
+  function removeAllItemsACB() {
+    userModel.clearCart();
+  }
+
   function onFuelChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
     setFuelType(e.target.value);
   }
@@ -492,7 +497,10 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     <div className="checkout-wrapper">
       <div className={checkoutContainerClassName}>
         <div className='cart-section'>
-          <h1 className="checkout-title">Granska din varukorg</h1>
+          <div className="cart-header">
+            <h1 className="checkout-title">Granska din varukorg</h1>
+            <button className="btn-destructive" onClick={removeAllItemsACB}>Töm varukorgen</button>
+          </div>
 
           {/* Cart Items */}
           <div className="cart-items">

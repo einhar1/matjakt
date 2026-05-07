@@ -78,6 +78,11 @@ class UserModel {
         this.saveToSupabase();
     }
 
+    clearCart() {
+        this.cart = [];
+        this.saveToSupabase();
+    }
+
     setAlgorithmCart(algorithmCart: StoreProduct[]) {
         console.log("Setting algorithm cart to", algorithmCart);
         this.algorithmCart = algorithmCart;

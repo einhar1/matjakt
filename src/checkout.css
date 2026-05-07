@@ -705,3 +705,14 @@
     min-height: 300px;
   }
 }
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.cart-header button {
+  height: 50%;
+}
