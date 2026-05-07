@@ -294,6 +294,22 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     }
   }
 
+  function changeQtyACB(item: Product, delta: number) {
+    const newQty = (item.qty || 1) + delta;
+    if (newQty <= 0) {
+      removeItemACB(item.product_id);
+      return;
+    }
+    userModel.addToCart({ ...item, qty: newQty });
+    if (algorithmCartMap.has(item.product_key)) {
+      userModel.setAlgorithmCart(
+        userModel.algorithmCart.map(a =>
+          a.product_key === item.product_key ? { ...a, qty: newQty } : a
+        )
+      );
+    }
+  }
+
   function removeItemACB(productId: string) {
     userModel.removeFromCart(productId);
     userModel.setAlgorithmCart(userModel.algorithmCart.filter(item => item.product_id !== productId));
@@ -419,7 +435,11 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         <img src={item.product_image_url} alt={item.name} className="item-image" onClick={() => onCartItemClickACB(item)}/>
         <div className="item-details">
           <h3 className="item-name" onClick={() => onCartItemClickACB(item)}>{item.name}</h3>
-          <p className="item-quantity">{item.qty || 1}x</p>
+          <div className="item-qty-controls">
+            <button className="qty-btn" onClick={() => changeQtyACB(item, -1)} disabled={(item.qty || 1) <= 1} aria-label="Minska antal">−</button>
+            <span className="item-quantity">{item.qty || 1}x</span>
+            <button className="qty-btn" onClick={() => changeQtyACB(item, 1)} aria-label="Öka antal">+</button>
+          </div>
           <span className={`store-badge ${containsAlphabetic(item.product_key) ? "store-badge-ica" : "store-badge-coop"}`}>
             {containsAlphabetic(item.product_key) ? "ICA" : "COOP"}
           </span>
@@ -442,7 +462,11 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
               <img src={algorithmItem.product_image_url} alt={algorithmItem.name} className="item-image" onClick={() => onCartItemClickACB(algorithmItem)}/>
               <div className="item-details">
                 <h3 className="item-name" onClick={() => onCartItemClickACB(algorithmItem)}>{algorithmItem.name}</h3>
-                <p className="item-quantity">{algorithmItem.qty || 1}x</p>
+                <div className="item-qty-controls">
+                  <button className="qty-btn" onClick={() => changeQtyACB(cartItem, -1)} disabled={(algorithmItem.qty || 1) <= 1} aria-label="Minska antal">−</button>
+                  <span className="item-quantity">{algorithmItem.qty || 1}x</span>
+                  <button className="qty-btn" onClick={() => changeQtyACB(cartItem, 1)} aria-label="Öka antal">+</button>
+                </div>
                 <p className="item-store">{algorithmItem.store_name}</p>
                 <p className="item-distance">{algorithmItem.distance.toFixed(1)} km ifrån</p>
               </div>
@@ -461,7 +485,11 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
               <img src={cartItem.product_image_url} alt={cartItem.name} className="item-image" onClick={() => onCartItemClickACB(cartItem)}/>
               <div className="item-details">
                 <h3 className="item-name" onClick={() => onCartItemClickACB(cartItem)}>{cartItem.name}</h3>
-                <p className="item-quantity">{cartItem.qty || 1}x</p>
+                <div className="item-qty-controls">
+                  <button className="qty-btn" onClick={() => changeQtyACB(cartItem, -1)} disabled={(cartItem.qty || 1) <= 1} aria-label="Minska antal">−</button>
+                  <span className="item-quantity">{cartItem.qty || 1}x</span>
+                  <button className="qty-btn" onClick={() => changeQtyACB(cartItem, 1)} aria-label="Öka antal">+</button>
+                </div>
               </div>
               <div className="item-price">Utanför område</div>
               <button className="item-remove" onClick={() => removeItemACB(cartItem.product_id)} aria-label="Ta bort">✕</button>
@@ -482,7 +510,11 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
               <h3 className="item-name" onClick={() => onCartItemClickACB(item)}>
                 {item.name}
               </h3>
-              <p className="item-quantity">{item.qty || 1}x</p>
+              <div className="item-qty-controls">
+                <button className="qty-btn" onClick={() => changeQtyACB(item as unknown as Product, -1)} disabled={(item.qty || 1) <= 1} aria-label="Minska antal">−</button>
+                <span className="item-quantity">{item.qty || 1}x</span>
+                <button className="qty-btn" onClick={() => changeQtyACB(item as unknown as Product, 1)} aria-label="Öka antal">+</button>
+              </div>
               <p className="item-store">{item.store_name}</p>
               <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
             </div>
