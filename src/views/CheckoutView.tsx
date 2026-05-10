@@ -39,7 +39,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
   const cart = props.userModel.cart;
-  const [algorithmMethod, setAlgorithmMethod] = useState('area');
+  const [algorithmMethod, setAlgorithmMethod] = useState('average');
   const [fuelType, setFuelType] = useState('none');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
@@ -567,7 +567,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         <div className='cart-section'>
           <div className="cart-header">
             <h1 className="checkout-title">Granska din varukorg</h1>
-            <button className="btn-primary" onClick={removeAllItemsACB}>Töm varukorgen</button>
+            <button className="btn-secondary" onClick={removeAllItemsACB}>Töm varukorgen</button>
           </div>
 
           {/* Cart Items */}
