@@ -567,7 +567,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         <div className='cart-section'>
           <div className="cart-header">
             <h1 className="checkout-title">Granska din varukorg</h1>
-            <button className="btn-destructive" onClick={removeAllItemsACB}>Töm varukorgen</button>
+            <button className="btn-primary" onClick={removeAllItemsACB}>Töm varukorgen</button>
           </div>
 
           {/* Cart Items */}
@@ -800,7 +800,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
             <p>Är du säker på att du vill ta bort alla varor från varukorgen? Denna åtgärd kan inte ångras.</p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
               <button className="btn-secondary" onClick={cancelClearCartACB}>Avbryt</button>
-              <button className="btn-destructive" onClick={confirmClearCartACB}>Töm varukorgen</button>
+              <button className="btn-primary" onClick={confirmClearCartACB}>Töm varukorgen</button>
             </div>
           </div>
         </div>,

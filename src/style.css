@@ -47,7 +47,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(135deg, var(--bg-main) 0%, #f0f9f0 100%);
+
 }
 
 .about-container {
@@ -245,11 +245,12 @@ html, body {
 
 .btn-destructive {
   background: var(--bg-card);
-  color: var(--discount-red);
+  color: var(--text-main);
   border: 1px solid var(--border-subtle);
 }
 
 .btn-destructive:hover:not(:disabled) {
+  color: var(--discount-red);
   border-color: var(--discount-red);
   box-shadow: 0 5px 8px 0 rgba(239, 68, 68, 0.2);
   transform: translateY(-2px);
