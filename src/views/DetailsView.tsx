@@ -61,7 +61,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
 
   const userModel = props.userModel;
   const cartQtyMap = new Map(userModel.cart.map(item => [item.product_key, item.qty]));
-  const initialQuantity = cartQtyMap.get(productId || "") || 1;
+  const initialQuantity = cartQtyMap.get(productId || "") || 0;
   const [quantity, setQuantity] = useState(initialQuantity);
   const [showQuantitySelector, setShowQuantitySelector] = useState(initialQuantity > 0);
 
