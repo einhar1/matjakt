@@ -9,14 +9,7 @@ import { userModel } from "./models/userModel";
 import { Layout } from "./components/Layout";
 import { AboutView } from "./views/AboutView";
 
-
-
-export type AppRenderProps = {
-
-}
-
-
-function App(props: AppRenderProps) {
+function App() {
   function makeRouter() {
     return createHashRouter([
       {element: <Layout userModel={userModel}/>, children: [

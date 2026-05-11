@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import '../checkout.css';
 import type { StoreProduct, userModelType } from '../models/userModel';
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents, Polyline } from 'react-leaflet';
+import { Circle, MapContainer, Marker, TileLayer, useMapEvents, Polyline } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useQuery } from '@tanstack/react-query';
@@ -38,7 +38,6 @@ interface storePriceData {
 const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
-  const cart = props.userModel.cart;
   const [algorithmMethod, setAlgorithmMethod] = useState('average');
   const [fuelType, setFuelType] = useState('none');
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -116,7 +115,6 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
       
       if (storesData.length === 0) { return [] };
       const product_keys = userModel.cart.map(item => item.product_key)
-      const store_ids = storesData.map(store => store.store_id);
 
       let allStorePrices = [];
 
@@ -274,7 +272,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     );
   }
   
-  function onCalculateButtonClickACB(event: React.MouseEvent<HTMLButtonElement>) {
+  function onCalculateButtonClickACB(_event: React.MouseEvent<HTMLButtonElement>) {
     if (userModel.usesLocation) {
       if (algorithmMethod === "average") {
         setHasCalculatedWithCurAlgo("average");
@@ -1085,10 +1083,6 @@ export function LoadingDelivery() {
 
 function containsAlphabetic(str: string): boolean {
   return Array.from(str).some((char) => /[a-zA-Z]/.test(char));
-}
-
-function containsOnlyDigits(str: string): boolean {
-  return /^\d+$/.test(str);
 }
 
 export { CheckoutView }

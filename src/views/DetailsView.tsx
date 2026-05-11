@@ -14,7 +14,7 @@ import {
   type ChartOptions,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { observer } from 'mobx-react-lite';
 ChartJS.register(
   CategoryScale,
@@ -106,7 +106,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
         if (storeError) throw storeError;
 
         const priceAndStoreData = [];
-        for (const item of storeData) {
+        for (const item of storeData as any[]) {
           priceAndStoreData.push(
             {
               store_id: item.store_id,
@@ -333,19 +333,6 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
     </div>
   );
 });
-
-const priceHistoryData: ChartData<'line'> = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
-  datasets: [
-    {
-      label: 'Pris (kr)',
-      data: [40, 40, 42, 42, 43, 42, 42, 45, 45, 45, 48, 48, 45],
-      tension: 0.1, // smooth curve
-      backgroundColor: "rgb(84, 174, 226)",
-      borderColor: "rgb(84, 174, 226)",
-    },
-  ],
-};
 
 function generatePriceHistoryData(avgPrice: number): ChartData<'line'> {
   const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Okt', "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "Maj"];

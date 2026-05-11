@@ -87,8 +87,8 @@ export function LocationModal({
               max="300" 
               value={localMaxDistance} 
               onChange={(e) => setLocalMaxDistance(Number(e.target.value))} 
-              onMouseUp={(e) => onMaxDistanceSet(localMaxDistance)}
-              onTouchEnd={(e) => onMaxDistanceSet(localMaxDistance)}
+              onMouseUp={() => onMaxDistanceSet(localMaxDistance)}
+              onTouchEnd={() => onMaxDistanceSet(localMaxDistance)}
             />
           </div>
         </div>

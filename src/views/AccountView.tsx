@@ -1,7 +1,5 @@
-export type AccountViewProps = {
-}
 
-function AccountView(props: AccountViewProps) {
+function AccountView() {
   return (
     <div className="account-wrapper">
       <div className="account-container">
