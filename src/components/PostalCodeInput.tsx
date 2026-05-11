@@ -7,6 +7,7 @@ import '../postcodeInput.css'
 
 type PostalCodeInputProps = {
     initialValue?: string;
+    closeModal: () => void;
 }
 
 export const PostalCodeInput = observer(function PostalCodeInput(props: PostalCodeInputProps) {
@@ -32,8 +33,8 @@ export const PostalCodeInput = observer(function PostalCodeInput(props: PostalCo
         }
 
         userModel.setLocation(results[0].longitude, results[0].latitude, normalizedCode, results[0].city, results[0].county)
-
         console.log('user: ',userModel.postalCode, ' | ',userModel.city, ' | ',userModel.county, ' | ', userModel.longitude, ' | ', userModel.latitude)
+        props.closeModal();
     }
     const savedPostal = userModel.getPostalCode();
     const postalCodePlaceholder = savedPostal ? savedPostal : ('t.ex. 114 55')

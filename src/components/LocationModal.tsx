@@ -76,7 +76,7 @@ export function LocationModal({
             {isLoading ? 'Hämtar plats...' : 'Använd min nuvarande plats'}
           </button>
           <div className="postal-code-input-wrapper">
-            <PostalCodeInput/>
+            <PostalCodeInput closeModal={onClose}/>
           </div>
           <div className="max-distance-slider">
             <label htmlFor="maxDistance">Max avstånd: {localMaxDistance} km</label>
