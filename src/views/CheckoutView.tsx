@@ -12,7 +12,6 @@ import type { Product } from './DetailsView';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { createPortal } from 'react-dom';
-import { has } from 'mobx';
 
 export type CheckoutViewProps = {
   userModel: userModelType
