@@ -1074,7 +1074,7 @@ function calculateFuelCost(routeData: routeDataType | undefined, fuelType: strin
 export function LoadingDelivery() {
   return (
     <DotLottieReact 
-      src='src/assets/DeliveryLoading.lottie'
+      src='/DeliveryLoading.lottie'
       className='loading-delivery'
       autoplay
     />

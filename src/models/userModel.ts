@@ -94,6 +94,7 @@ class UserModel {
 
     clearCart() {
         this.cart = [];
+        this.algorithmCart = [];
         this.saveToSupabase();
     }
 
