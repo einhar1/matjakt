@@ -12,6 +12,7 @@ import type { Product } from './DetailsView';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { createPortal } from 'react-dom';
+import { has } from 'mobx';
 
 export type CheckoutViewProps = {
   userModel: userModelType
@@ -820,7 +821,7 @@ export default function MapView({position, usesLocation, stores, radius, hasCalc
   const stockholmPos: [number, number] = [59.3293, 18.0686]; // Stockholm
   if (!usesLocation) {position = stockholmPos};
 
-  if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global") {
+  if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "select-stores") {
     stores = stores.map(store => {
       const matchingProduct = algorithmCart.find(item => item.store_name === store.store_name);
       return {
@@ -841,10 +842,15 @@ export default function MapView({position, usesLocation, stores, radius, hasCalc
         attribution='&copy; OpenStreetMap contributors'
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
-      <Polyline 
-        positions={routeData} 
-        pathOptions={{ color: 'rgba(77, 145, 233, 0.8)', weight: 5 }} 
-      />
+      {hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores" ? 
+        (
+          <Polyline 
+            positions={routeData} 
+            pathOptions={{ color: 'rgba(77, 145, 233, 0.8)', weight: 5 }} 
+          />
+        ) : null
+      }
+
       <StoreMarkers stores={stores}/>
       <StopMarkers stops={stops.slice(0, 1)} />
       <Circle
