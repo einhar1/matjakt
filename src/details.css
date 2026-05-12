@@ -1,16 +1,20 @@
 .details-wrapper {
-
+    width: 100%;
+    padding: 0 16px 24px;
+    box-sizing: border-box;
 }
 
 .details-container {
     margin: 0 auto;
-    width: 900px;
+    width: min(900px, 100%);
+    box-sizing: border-box;
 }
 
 .head-container {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 20px;
+    align-items: start;
 }
 
 .product-img-wrapper img{
@@ -25,10 +29,12 @@
 .product-img-wrapper{
     width: 100%;
     max-height: 400px;
+    box-sizing: border-box;
 }
 
 .main-info-container h1 {
     margin-top: 0;
+    overflow-wrap: anywhere;
 }
 
 .main-info-box {
@@ -79,11 +85,13 @@
 
 .store-prices-box {
     position: relative;
+    padding-top: 56px;
 }
 
 .location-btn {
     position: absolute;
-    right: 0;
+    top: 10px;
+    right: 10px;
 }
 
 /* Quantity Selector */
@@ -148,4 +156,87 @@
 
 .qty-input[type=number] {
     -moz-appearance: textfield;
+}
+
+.details-container > .box {
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.details-container canvas {
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .details-wrapper {
+        padding: 0 12px 20px;
+    }
+
+    .head-container {
+        grid-template-columns: 1fr;
+        row-gap: 12px;
+    }
+
+    .product-img-wrapper {
+        max-height: 320px;
+        padding: 12px;
+    }
+
+    .product-img-wrapper img {
+        max-height: 296px;
+    }
+
+    .main-info-container h1 {
+        font-size: 1.6rem;
+        line-height: 1.2;
+    }
+
+    .main-info-box,
+    .clickable-section,
+    .details-container > .box {
+        border-radius: 10px;
+    }
+
+    .store-prices-box {
+        padding-top: 16px;
+    }
+
+    .location-btn {
+        position: static;
+        width: 100%;
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .details-wrapper {
+        padding: 0 8px 16px;
+    }
+
+    .main-info-box,
+    .clickable-section,
+    .details-container > .box {
+        padding: 12px;
+    }
+
+    .main-info-container h1 {
+        font-size: 1.35rem;
+    }
+
+    .main-info-container h3,
+    .clickable-section h3 {
+        font-size: 1rem;
+    }
+
+    .quantity-selector {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .qty-input {
+        flex: 1;
+        min-width: 0;
+        max-width: 96px;
+    }
 }
