@@ -43,7 +43,7 @@ export function useProfileSync() {
         syncProfile();
 
         return () => { cancelled = true; };
-    }, [user, authLoading]);
+    }, [user?.id, authLoading]);
 
     return { loading: authLoading || profileLoading };
 }
