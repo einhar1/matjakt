@@ -38,7 +38,7 @@ interface storePriceData {
 const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   const userModel = props.userModel;
-  const [algorithmMethod, setAlgorithmMethod] = useState('average');
+  const [algorithmMethod, setAlgorithmMethod] = useState('area');
   const [fuelType, setFuelType] = useState('none');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCalculatedWithCurAlgo, setHasCalculatedWithCurAlgo] = useState('average');
@@ -46,6 +46,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
   const [showStoresDropdown, setShowStoresDropdown] = useState(false);
   const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
+  const [avgPriceType, setAvgPriceType] = useState<"area" | "global">("global");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const literPerKm = 0.07; // Genomsnittlig bränsleförbrukning i liter per km, justera efter behov
   const navigate = useNavigate();
@@ -233,11 +234,20 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
   function getAvgTotal() {
     if (userModel.cart.length === 0) return 0;
     let total = 0;
-    userModel.cart.forEach(item => {
-      if (algorithmCartMap.has(item.product_key)) {
-        total += (item.avg_price * (item.qty || 1));
-      }
-    });
+
+    if (avgPriceType === "area") {
+      total = getTotalAvgPriceWithinRange(storePrices, storesMap, userModel.cart, userModel.algorithmCart, algorithmMethod, userModel.maxDistance);
+    }
+    else {
+      userModel.cart.forEach(item => {
+        if (hasCalculatedWithCurAlgo === "average") {
+          total += (item.avg_price * (item.qty || 1));
+        }
+        else if (algorithmCartMap.has(item.product_key)) {
+          total += (item.avg_price * (item.qty || 1));
+        }
+      });
+    }
     return total;
   }
 
@@ -261,7 +271,10 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   function onAlgorithmChangeACB(e: React.ChangeEvent<HTMLSelectElement>) {
     setAlgorithmMethod(e.target.value);
-    setSelectedStores([]);  // Reset store selection when algorithm changes
+  }
+
+  function onCompareScopeChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
+    setAvgPriceType(e.target.value as "area" | "global");
   }
 
   function onStoreToggleACB(storeId: number) {
@@ -446,12 +459,17 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     }
   }
 
+  function resetAvgPriceACB() {
+    setHasCalculatedWithCurAlgo("average");
+  }
+
   function onCartItemClickACB(item: Product) {
     navigate(`/details/${item.product_id}`);
   }
 
   function displayCartItems() {
 
+    const productAvgPriceMap = getAvgPriceWithinRangeProductMap(storePrices, storesMap, userModel.cart, userModel.algorithmCart, algorithmMethod, userModel.maxDistance);
     if (hasCalculatedWithCurAlgo === "average") {
 
       return userModel.cart.map((item: Product) => (
@@ -468,7 +486,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
             {containsAlphabetic(item.product_key) ? "ICA" : "COOP"}
           </span>
         </div>
-        <div className="item-price">~{(item.avg_price * (item.qty || 1)).toFixed(2)} kr</div>
+        <div className="item-price">~{avgPriceType === "area" ? productAvgPriceMap.get(item.product_key)?.toFixed(2) : (item.avg_price * (item.qty || 1)).toFixed(2)} kr</div>
         <button className="item-remove" onClick={() => removeItemACB(item.product_id)} aria-label="Ta bort">✕</button>
       </div>
       ));
@@ -479,7 +497,18 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
       return userModel.cart.map((cartItem) => {
         const algorithmItem = algorithmCartMap.get(cartItem.product_key);
         if (algorithmItem) {
-          const reducedPercentage = ((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0);
+          let reducedPercentage = 0;
+          if (avgPriceType === "area") {
+            const avgPrice = productAvgPriceMap.get(algorithmItem.product_key);
+            if (avgPrice) {
+              reducedPercentage = (((avgPrice - algorithmItem.price) / avgPrice) * 100) || 0;
+            }
+          }
+          else {
+            reducedPercentage = ((((algorithmItem.avg_price - algorithmItem.price) / algorithmItem.avg_price) * 100) || 0);
+          }
+
+          
           const itemsSavingsClassName = reducedPercentage > 0 ? "item-savings" : "item-savings no-savings";
           return (
             <div key={cartItem.product_id} className="cart-item">
@@ -565,6 +594,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         <div className='cart-section'>
           <div className="cart-header">
             <h1 className="checkout-title">Granska din varukorg</h1>
+            <button className="btn-secondary" onClick={resetAvgPriceACB}>Återställ till genomsnittspris</button>
             <button className="btn-secondary" onClick={removeAllItemsACB}>Töm varukorgen</button>
           </div>
 
@@ -575,104 +605,41 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
           {/* Order Summary */}
           <div className="order-summary">
-            <div className="summary-row">
-              <span className="summary-label">Bensin</span>
-            </div>
-            
-            {/* Fuel Selection */}
-            <div className={`fuel-selection-block ${!(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) ? 'no-border' : ''}`}>
-              <select 
-                id="fuel-type"
-                value={fuelType}
-                onChange={onFuelChangeACB}
-                className="fuel-type-select"
-              >
-                <option value="none">Ingen</option>
-                <option value="bensin_95">Bensin 95</option>
-                <option value="oktan_98">E85</option>
-                <option value="diesel">Diesel</option>
-              </select>
-            </div>
 
-            {/* Fuel Details */}
-            {(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
-              <div className="fuel-details-block">
-                <div className="detail-row">
-                  <span className="detail-label">Pris per liter:</span>
-                  <span className="detail-value">{fuelMap.get(fuelType)?.toFixed(2)} kr/L</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Körsträcka:</span>
-                  <span className="detail-value">{(routeData.distance / 1000).toFixed(1)} km</span>
-                </div>
-                <div className="detail-row travel-cost">
-                  <span className="detail-label">Färdkostnad:</span>
-                  <span className="detail-value travel-value">{travelCost.toFixed(2)} kr</span>
-                </div>
-              </div>
-            )}
+            <fieldset className="compare-section">
+              <legend className="delivery-label">Välj genomsnittspris</legend>
+              <label className="compare-option">
+                <input
+                  type="radio"
+                  name="compare-scope"
+                  value="global"
+                  checked={avgPriceType === "global"}
+                  onChange={onCompareScopeChangeACB}
+                />
+                <span>Hela Sverige</span>
+              </label>
+              <label className="compare-option">
+                <input
+                  type="radio"
+                  name="compare-scope"
+                  value="area"
+                  checked={avgPriceType === "area"}
+                  onChange={onCompareScopeChangeACB}
+                />
+                <span>Ditt område {userModel.maxDistance} km</span>
+              </label>
+            </fieldset>  
 
-            {/* Total */}
-            {(userModel.hasSeniorDiscount && userModel.seniorDiscountPercent > 0) ? (
-              <>
-                <div className="summary-row">
-                  <span className="summary-label">Delsumma</span>
-                  <span className="summary-value">{getTotal()?.toFixed(2)} kr</span>
-                </div>
-                <div className="summary-row">
-                  <span className="summary-label">Pensionärsrabatt ({userModel.seniorDiscountPercent}%)</span>
-                  <span className="summary-value" style={{ color: '#2e7d32' }}>
-                    −{getDiscountAmount().toFixed(2)} kr
-                  </span>
-                </div>
-                <div className="summary-row total-row">
-                  <span className="summary-label total-label">Total</span>
-                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
-                    {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
-                      <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
-                    )}
-                    {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
-                      <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
-                    )}
-                    <span className="summary-value total-value">{getTotalAfterDiscount().toFixed(2)} kr</span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="summary-row total-row">
-                <span className="summary-label total-label">Total</span>
-                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
-                  {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
-                    <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
-                  )}
-                  {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
-                    <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
-                  )}
-                  <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
-                </div>
-              </div>
-            )}
-            {travelCost > 0 && (routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
-              <div className="summary-row fuel-addon-row">
-                <span className="summary-label fuel-addon-label">+ Bensin</span>
-                <span className="summary-value fuel-addon-value">+{travelCost.toFixed(2)} kr</span>
-              </div>
-            )}
-          </div>
-
-          {/* Location Selection */}
-          <button className="btn-secondary location-btn-checkout" onClick={() => setShowLocationModal(true)}>Välj område</button>
 
           {/* Delivery Method Selection */}
           <div className="delivery-section">
-            <label htmlFor="delivery-method" className="delivery-label">Prisalgoritm</label>
+            <label htmlFor="delivery-method" className="delivery-label">Val av jämförelse</label>
             <select 
               id="delivery-method"
               value={algorithmMethod} 
               onChange={onAlgorithmChangeACB}
               className="delivery-select"
             >
-              <option value="average">Genomsnittspris</option>
               <option value="area">Bästa pris inom område (max {userModel.maxDistance} km)</option>
               <option value="select-stores">Bästa pris från utvalda butiker</option>
               <option value="global">Bästa pris (hela Sverige)</option>
@@ -712,6 +679,104 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
               </div>
             </div>
           )}
+
+            <div className="summary-row">
+              <span className="summary-label">Bensin</span>
+            </div>
+     
+            {/* Fuel Selection */}
+            <div className={`fuel-selection-block ${!(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) ? 'no-border' : ''}`}>
+              <select 
+                id="fuel-type"
+                value={fuelType}
+                onChange={onFuelChangeACB}
+                className="fuel-type-select"
+              >
+                <option value="none">Ingen</option>
+                <option value="bensin_95">Bensin 95</option>
+                <option value="oktan_98">E85</option>
+                <option value="diesel">Diesel</option>
+              </select>
+            </div>
+
+            {/* Fuel Details */}
+            {(routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
+              <div className="fuel-details-block">
+                <div className="detail-row">
+                  <span className="detail-label">Pris per liter:</span>
+                  <span className="detail-value">{fuelMap.get(fuelType)?.toFixed(2)} kr/L</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Körsträcka:</span>
+                  <span className="detail-value">{(routeData.distance / 1000).toFixed(1)} km</span>
+                </div>
+                <div className="detail-row travel-cost">
+                  <span className="detail-label">Färdkostnad:</span>
+                  <span className="detail-value travel-value">{travelCost.toFixed(2)} kr</span>
+                </div>
+              </div>
+            )}
+            {/* Location Selection */}
+            <button className="btn-secondary location-btn-checkout" onClick={() => setShowLocationModal(true)}>Välj område</button>
+            {/* Total */}
+            {(userModel.hasSeniorDiscount && userModel.seniorDiscountPercent > 0) ? (
+              <>
+                <div className="summary-row">
+                  <span className="summary-label">Delsumma</span>
+                  <span className="summary-value">{getTotal()?.toFixed(2)} kr</span>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-label">Pensionärsrabatt ({userModel.seniorDiscountPercent}%)</span>
+                  <span className="summary-value" style={{ color: '#2e7d32' }}>
+                    −{getDiscountAmount().toFixed(2)} kr
+                  </span>
+                </div>
+                <div className="summary-row total-row">
+                  <span className="summary-label total-label">Total</span>
+                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
+                    {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
+                      <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
+                    )}
+                    {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
+                      <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
+                    )}
+                    <span className="summary-value total-value">{getTotalAfterDiscount().toFixed(2)} kr</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="summary-row total-row">
+                <span className="summary-label total-label">Total</span>
+                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px'}}>
+                  {(savingsValue > 0 && hasCalculatedWithCurAlgo !== "average") && (
+                    <span className="checkout-savings-badge checkout-savings-positive">✓ Sparar {savingsValue.toFixed(2)} kr</span>
+                  )}
+                  {(savingsValue < 0 && hasCalculatedWithCurAlgo !== "average") && (
+                    <span className="checkout-savings-badge checkout-savings-negative">⚠ +{Math.abs(savingsValue).toFixed(2)} kr</span>
+                  )}
+                  {hasCalculatedWithCurAlgo === "average" ? (
+                    <span className="summary-value total-value">~{getTotal()?.toFixed(2)} kr</span>
+                  ) : (
+                    <span className="summary-value total-value">{getTotal()?.toFixed(2)} kr</span>
+                  )}
+                </div>
+              </div>
+            )}
+            {travelCost > 0 && (routeData && (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores")) && (
+              <div className="summary-row fuel-addon-row">
+                <span className="summary-label fuel-addon-label">+ Bensin</span>
+                <span className="summary-value fuel-addon-value">+{travelCost.toFixed(2)} kr</span>
+              </div>
+            )}
+            {hasCalculatedWithCurAlgo !== "average" && (
+            <div className="summary-row fuel-addon-row">
+              <span className="summary-label fuel-addon-label">Genomsnittspris {avgPriceType === "area" ? "för valt område" : "för hela Sverige"}</span>
+              <span className="summary-value fuel-addon-value">~{getAvgTotal().toFixed(2)} kr</span>
+            </div>
+            )}
+          </div>
+
+
 
           {/* Pay Button */}
           <button 
@@ -861,31 +926,108 @@ export default function MapView({position, usesLocation, stores, radius, hasCalc
   );
 }
 
-  function findCheapestStores(
-    data: storePriceData[], 
-    storesData: Map<number, storesData>, 
-    cart: Product[] = [],
-    range?: number
-  ): StoreProduct[] {
-    
-    const cheapestProducts: Map<string, StoreProduct> = new Map();
-    const cartMap = new Map(cart.map(item => [item.product_key, item]));
+function getAvgPriceWithinRangeProductMap(
+  data: storePriceData[],
+  storesData: Map<number, storesData>,
+  cart: Product[] = [],
+  algorithmCart: StoreProduct[],
+  algorithmMethod: string,
+  range: number
+): Map<string, number> {
 
-    for (const storePrice of data) {
-      // If range is provided, check if store is within range
-      if (range !== undefined) {
-        const store = storesData.get(storePrice.store_id);
-        if (!store || store.distance_km > range) {
-          continue; // Skip stores outside range
-        }
+  const productAvgPriceMap = new Map<string, { total: number; count: number }>();
+  const cartMap = new Map(cart.map(item => [item.product_key, item]));
+  const algorithmCartMap = new Map(algorithmCart.map(item => [item.product_key, item]));
+
+  for (const storePrice of data) {
+    const store = storesData.get(storePrice.store_id);
+    if (!store || store.distance_km > range) {
+      continue; // Skip stores outside range
+    }
+
+    if (algorithmMethod === "area" || algorithmMethod === "select-stores") {
+
+      if (algorithmCartMap.has(storePrice.product_key)) {
+        productAvgPriceMap.set(storePrice.product_key, {
+          total: (productAvgPriceMap.get(storePrice.product_key)?.total || 0) + (storePrice.price * (algorithmCartMap.get(storePrice.product_key)?.qty || 1)),
+          count: (productAvgPriceMap.get(storePrice.product_key)?.count || 0) + 1
+        });
       }
+    }
+    else if (algorithmMethod === "global" || algorithmMethod === "average") {
+      if (cartMap.has(storePrice.product_key)) {
+        productAvgPriceMap.set(storePrice.product_key, {
+          total: (productAvgPriceMap.get(storePrice.product_key)?.total || 0) + (storePrice.price * (cartMap.get(storePrice.product_key)?.qty || 1)),
+          count: (productAvgPriceMap.get(storePrice.product_key)?.count || 0) + 1
+        });
+      }
+    }
+  }
 
+  const avgPriceMap = new Map<string, number>();
+  for (const [productKey, { total, count }] of productAvgPriceMap.entries()) {
+    avgPriceMap.set(productKey, count > 0 ? total / count : 0);
+  }
+  return avgPriceMap;
+}
+
+function getTotalAvgPriceWithinRange(
+  data: storePriceData[],
+  storesData: Map<number, storesData>,
+  cart: Product[] = [],
+  algorithmCart: StoreProduct[],
+  algorithmMethod: string,
+  range: number
+): number {
+  const avgPriceMap = getAvgPriceWithinRangeProductMap(data, storesData, cart, algorithmCart, algorithmMethod, range);
+  let total = 0;
+  for (const price of avgPriceMap.values()) {
+    total += price;
+  }
+  return total;
+}
+
+
+function findCheapestStores(
+  data: storePriceData[], 
+  storesData: Map<number, storesData>, 
+  cart: Product[] = [],
+  range?: number
+): StoreProduct[] {
+  
+  const cheapestProducts: Map<string, StoreProduct> = new Map();
+  const cartMap = new Map(cart.map(item => [item.product_key, item]));
+
+  for (const storePrice of data) {
+    // If range is provided, check if store is within range
+    if (range !== undefined) {
       const store = storesData.get(storePrice.store_id);
-      if (!store?.store_name || !store.lat || !store.lon || !store.distance_km) {
-        continue;
+      if (!store || store.distance_km > range) {
+        continue; // Skip stores outside range
       }
-      // If product not in map yet, add it
-      if (!cheapestProducts.has(storePrice.product_key)) {
+    }
+
+    const store = storesData.get(storePrice.store_id);
+    if (!store?.store_name || !store.lat || !store.lon || !store.distance_km) {
+      continue;
+    }
+    // If product not in map yet, add it
+    if (!cheapestProducts.has(storePrice.product_key)) {
+      cheapestProducts.set(
+        storePrice.product_key, 
+        {...cartMap.get(storePrice.product_key), 
+          store_name: store?.store_name || "Okänd butik",
+          lat: store?.lat || 0,
+          lon: store?.lon || 0,
+          price: storePrice.price,
+          distance: store?.distance_km || 0,
+
+        } as StoreProduct
+      );
+    } else {
+      // Compare prices and update if cheaper
+      const current = cheapestProducts.get(storePrice.product_key)!;
+      if (storePrice.price < current.price) {
         cheapestProducts.set(
           storePrice.product_key, 
           {...cartMap.get(storePrice.product_key), 
@@ -897,10 +1039,10 @@ export default function MapView({position, usesLocation, stores, radius, hasCalc
 
           } as StoreProduct
         );
-      } else {
-        // Compare prices and update if cheaper
-        const current = cheapestProducts.get(storePrice.product_key)!;
-        if (storePrice.price < current.price) {
+      }
+      // If prices are equal, prefer the one with shorter distance
+      else if (storePrice.price === current.price && store?.distance_km !== undefined && current.distance !== undefined) {
+        if (store.distance_km < current.distance) {
           cheapestProducts.set(
             storePrice.product_key, 
             {...cartMap.get(storePrice.product_key), 
@@ -909,30 +1051,15 @@ export default function MapView({position, usesLocation, stores, radius, hasCalc
               lon: store?.lon || 0,
               price: storePrice.price,
               distance: store?.distance_km || 0,
-
             } as StoreProduct
           );
         }
-        // If prices are equal, prefer the one with shorter distance
-        else if (storePrice.price === current.price && store?.distance_km !== undefined && current.distance !== undefined) {
-          if (store.distance_km < current.distance) {
-            cheapestProducts.set(
-              storePrice.product_key, 
-              {...cartMap.get(storePrice.product_key), 
-                store_name: store?.store_name || "Okänd butik",
-                lat: store?.lat || 0,
-                lon: store?.lon || 0,
-                price: storePrice.price,
-                distance: store?.distance_km || 0,
-              } as StoreProduct
-            );
-          }
-        }
       }
     }
-
-    return Array.from(cheapestProducts.values());
   }
+
+  return Array.from(cheapestProducts.values());
+}
 
 function StopMarkers({ stops }: { stops: LatLng[] }) {
   const icon = L.icon({

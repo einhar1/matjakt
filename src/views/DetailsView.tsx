@@ -255,7 +255,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
                   <div className="main-info-box">
                     <h1>{product?.name}</h1>
                     <h3>{product?.brand}. {product?.pack_size}.</h3>
-                    <p>Genomsnittspris: <span><b>{product.avg_price.toFixed(2)}kr</b></span></p>
+                    <p>Genomsnittspris: <span><b>~{product.avg_price.toFixed(2)}kr</b></span></p>
                     {!showQuantitySelector ? (
                       <button className="btn-primary" onClick={cartButtonOnClick}>
                         Lägg i varukorg
