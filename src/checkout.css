@@ -357,6 +357,14 @@
   cursor: pointer;
 }
 
+.compare-option:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.compare-option:has(input:disabled) span {
+  cursor: not-allowed;
+}
 .stores-dropdown-wrapper {
   position: relative;
   width: 100%;

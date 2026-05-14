@@ -620,6 +620,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
                   value="area"
                   checked={avgPriceType === "area"}
                   onChange={onCompareScopeChangeACB}
+                  disabled={!userModel.usesLocation}
                 />
                 <span>Ditt område {userModel.maxDistance} km</span>
               </label>
