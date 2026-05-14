@@ -211,12 +211,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   function getTotal() {
     if (hasCalculatedWithCurAlgo === "average") {
-      if (userModel.cart.length === 0) return 0;
-      let total = 0;
-      userModel.cart.forEach(item => {
-        total += (item.avg_price * (item.qty || 1));
-      });
-      return total;
+      return getAvgTotal();
     }
     else if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "select-stores") {
       let total = 0;
@@ -236,7 +231,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     let total = 0;
 
     if (avgPriceType === "area") {
-      total = getTotalAvgPriceWithinRange(storePrices, storesMap, userModel.cart, userModel.algorithmCart, algorithmMethod, userModel.maxDistance);
+      total = getTotalAvgPriceWithinRange(storePrices, storesMap, userModel.cart, userModel.algorithmCart, hasCalculatedWithCurAlgo, userModel.maxDistance);
     }
     else {
       userModel.cart.forEach(item => {
@@ -469,7 +464,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
 
   function displayCartItems() {
 
-    const productAvgPriceMap = getAvgPriceWithinRangeProductMap(storePrices, storesMap, userModel.cart, userModel.algorithmCart, algorithmMethod, userModel.maxDistance);
+    const productAvgPriceMap = getAvgPriceWithinRangeProductMap(storePrices, storesMap, userModel.cart, userModel.algorithmCart, hasCalculatedWithCurAlgo, userModel.maxDistance);
     if (hasCalculatedWithCurAlgo === "average") {
 
       return userModel.cart.map((item: Product) => (
@@ -931,7 +926,7 @@ function getAvgPriceWithinRangeProductMap(
   storesData: Map<number, storesData>,
   cart: Product[] = [],
   algorithmCart: StoreProduct[],
-  algorithmMethod: string,
+  hasCalculatedWithCurAlgo: string,
   range: number
 ): Map<string, number> {
 
@@ -945,7 +940,7 @@ function getAvgPriceWithinRangeProductMap(
       continue; // Skip stores outside range
     }
 
-    if (algorithmMethod === "area" || algorithmMethod === "select-stores") {
+    if (hasCalculatedWithCurAlgo === "area" || hasCalculatedWithCurAlgo === "select-stores") {
 
       if (algorithmCartMap.has(storePrice.product_key)) {
         productAvgPriceMap.set(storePrice.product_key, {
@@ -954,7 +949,7 @@ function getAvgPriceWithinRangeProductMap(
         });
       }
     }
-    else if (algorithmMethod === "global" || algorithmMethod === "average") {
+    else if (hasCalculatedWithCurAlgo === "global" || hasCalculatedWithCurAlgo === "average") {
       if (cartMap.has(storePrice.product_key)) {
         productAvgPriceMap.set(storePrice.product_key, {
           total: (productAvgPriceMap.get(storePrice.product_key)?.total || 0) + (storePrice.price * (cartMap.get(storePrice.product_key)?.qty || 1)),
@@ -976,10 +971,10 @@ function getTotalAvgPriceWithinRange(
   storesData: Map<number, storesData>,
   cart: Product[] = [],
   algorithmCart: StoreProduct[],
-  algorithmMethod: string,
+  hasCalculatedWithCurAlgo: string,
   range: number
 ): number {
-  const avgPriceMap = getAvgPriceWithinRangeProductMap(data, storesData, cart, algorithmCart, algorithmMethod, range);
+  const avgPriceMap = getAvgPriceWithinRangeProductMap(data, storesData, cart, algorithmCart, hasCalculatedWithCurAlgo, range);
   let total = 0;
   for (const price of avgPriceMap.values()) {
     total += price;
