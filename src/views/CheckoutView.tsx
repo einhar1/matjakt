@@ -280,29 +280,30 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     );
   }
   
-  function onCalculateButtonClickACB(_event: React.MouseEvent<HTMLButtonElement>) {
+  async function onCalculateButtonClickACB(_event: React.MouseEvent<HTMLButtonElement>) {
     if (userModel.usesLocation) {
       if (algorithmMethod === "average") {
         setHasCalculatedWithCurAlgo("average");
         setShowLoadingDelivery(true);
       }
       if (algorithmMethod === "area") {
-        const cheapestInArea = findCheapestStores(storePrices, storesMap, userModel.cart, userModel.maxDistance);
-        console.log("Cheapest in area:", cheapestInArea);
+        const cheapestInArea = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart, [], userModel.maxDistance);
+        console.log("Cheapest SQL query:")
+        console.log(cheapestInArea);
+
         userModel.setAlgorithmCart(cheapestInArea);
         setHasCalculatedWithCurAlgo("area");
         setShowLoadingDelivery(true);
       }
       else if (algorithmMethod === "global") {
-        const cheapestGlobal = findCheapestStores(storePrices, storesMap, userModel.cart);
+        const cheapestGlobal = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart);
         console.log("Cheapest globally:", cheapestGlobal);
         userModel.setAlgorithmCart(cheapestGlobal);
         setHasCalculatedWithCurAlgo("global");
         setShowLoadingDelivery(true);
       }
       else if (algorithmMethod === "select-stores") {
-        const selectStoresMap = new Map(storesData.filter(store => selectedStores.includes(store.store_id)).map(store => [store.store_id, store]));
-        const cheapestSelectedStores = findCheapestStores(storePrices, selectStoresMap, userModel.cart);
+        const cheapestSelectedStores = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart, selectedStores, userModel.maxDistance);
         userModel.setAlgorithmCart(cheapestSelectedStores);
         setHasCalculatedWithCurAlgo("select-stores");
         setShowLoadingDelivery(true);
@@ -516,7 +517,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
                   <button className="qty-btn" onClick={() => changeQtyACB(cartItem, 1)} aria-label="Öka antal">+</button>
                 </div>
                 <p className="item-store">{algorithmItem.store_name}</p>
-                <p className="item-distance">{algorithmItem.distance.toFixed(1)} km ifrån</p>
+                <p className="item-distance">{algorithmItem.distance_km.toFixed(1)} km ifrån</p>
               </div>
               <div className="item-price-section">
                 <div className="item-price">{(algorithmItem.price * (algorithmItem.qty || 1)).toFixed(2)} kr</div>
@@ -564,7 +565,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
                 <button className="qty-btn" onClick={() => changeQtyACB(item as unknown as Product, 1)} aria-label="Öka antal">+</button>
               </div>
               <p className="item-store">{item.store_name}</p>
-              <p className="item-distance">{item.distance.toFixed(1)} km ifrån</p>
+              <p className="item-distance">{item.distance_km.toFixed(1)} km ifrån</p>
             </div>
             <div className="item-price-section">
               <div className="item-price">{(item.price * (item.qty || 1)).toFixed(2)} kr</div>
@@ -983,78 +984,32 @@ function getTotalAvgPriceWithinRange(
   return total;
 }
 
+async function findCheapestProducts(lat: number, lon: number, cart: Product[], selected_stores: number[] = [], maxDistanceKm: number = 99999): Promise<StoreProduct[]> {
+  // selected_stores: number[] = [] means no filter selection of stores
 
-function findCheapestStores(
-  data: storePriceData[], 
-  storesData: Map<number, storesData>, 
-  cart: Product[] = [],
-  range?: number
-): StoreProduct[] {
-  
-  const cheapestProducts: Map<string, StoreProduct> = new Map();
-  const cartMap = new Map(cart.map(item => [item.product_key, item]));
+  const productIdToQtyMap = new Map(cart.map(product => [product.product_key, product.qty || 1]));
 
-  for (const storePrice of data) {
-    // If range is provided, check if store is within range
-    if (range !== undefined) {
-      const store = storesData.get(storePrice.store_id);
-      if (!store || store.distance_km > range) {
-        continue; // Skip stores outside range
-      }
+  const response = await supabase.rpc(
+    "find_cheapest_products",
+    {
+      user_lat: lat,
+      user_lon: lon,
+      product_ids: cart.map(product => product.product_key),
+      selected_store_ids: selected_stores.map(String),
+      radius_km: maxDistanceKm
     }
+  );
+  let cheapestProducts = response.data as StoreProduct[];
+  cheapestProducts = cheapestProducts.map(product => ({ // Add quantity to each product based on the cart
+    ...product,
+    qty: productIdToQtyMap.get(product.product_key) || 1
+  }));
 
-    const store = storesData.get(storePrice.store_id);
-    if (!store?.store_name || !store.lat || !store.lon || !store.distance_km) {
-      continue;
-    }
-    // If product not in map yet, add it
-    if (!cheapestProducts.has(storePrice.product_key)) {
-      cheapestProducts.set(
-        storePrice.product_key, 
-        {...cartMap.get(storePrice.product_key), 
-          store_name: store?.store_name || "Okänd butik",
-          lat: store?.lat || 0,
-          lon: store?.lon || 0,
-          price: storePrice.price,
-          distance: store?.distance_km || 0,
-
-        } as StoreProduct
-      );
-    } else {
-      // Compare prices and update if cheaper
-      const current = cheapestProducts.get(storePrice.product_key)!;
-      if (storePrice.price < current.price) {
-        cheapestProducts.set(
-          storePrice.product_key, 
-          {...cartMap.get(storePrice.product_key), 
-            store_name: store?.store_name || "Okänd butik",
-            lat: store?.lat || 0,
-            lon: store?.lon || 0,
-            price: storePrice.price,
-            distance: store?.distance_km || 0,
-
-          } as StoreProduct
-        );
-      }
-      // If prices are equal, prefer the one with shorter distance
-      else if (storePrice.price === current.price && store?.distance_km !== undefined && current.distance !== undefined) {
-        if (store.distance_km < current.distance) {
-          cheapestProducts.set(
-            storePrice.product_key, 
-            {...cartMap.get(storePrice.product_key), 
-              store_name: store?.store_name || "Okänd butik",
-              lat: store?.lat || 0,
-              lon: store?.lon || 0,
-              price: storePrice.price,
-              distance: store?.distance_km || 0,
-            } as StoreProduct
-          );
-        }
-      }
-    }
+  if (response.error) {
+    console.log(response.error);
+    return [] as StoreProduct[];
   }
-
-  return Array.from(cheapestProducts.values());
+  return cheapestProducts
 }
 
 function StopMarkers({ stops }: { stops: LatLng[] }) {

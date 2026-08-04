@@ -20,7 +20,7 @@ export type StoreProduct = {
   lat: number,
   lon: number,
   available: boolean,
-  distance: number, // in km
+  distance_km: number, // in km
 }
 
 class UserModel {
