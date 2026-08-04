@@ -12,6 +12,7 @@ import type { Product } from './DetailsView';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { createPortal } from 'react-dom';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 export type CheckoutViewProps = {
   userModel: userModelType
@@ -989,26 +990,41 @@ async function findCheapestProducts(lat: number, lon: number, cart: Product[], s
 
   const productIdToQtyMap = new Map(cart.map(product => [product.product_key, product.qty || 1]));
 
-  const response = await supabase.rpc(
-    "find_cheapest_products",
-    {
-      user_lat: lat,
-      user_lon: lon,
-      product_ids: cart.map(product => product.product_key),
-      selected_store_ids: selected_stores.map(String),
-      radius_km: maxDistanceKm
+  let cheapestProducts: StoreProduct[] = [];
+
+  const errors: PostgrestError[] = [];
+
+  for (const db of [supabase, coopSupabase]) {
+    const response = await db.rpc(
+      "find_cheapest_products",
+      {
+        user_lat: lat,
+        user_lon: lon,
+        product_ids: cart.map(product => product.product_key),
+        selected_store_ids: selected_stores.map(String),
+        radius_km: maxDistanceKm
+      }
+    );
+
+    if (response.error) {
+      console.log(response.error);
+      errors.push(response.error);
+      continue;
     }
-  );
-  let cheapestProducts = response.data as StoreProduct[];
+
+    cheapestProducts.push(...response.data as StoreProduct[]);
+  }
+
   cheapestProducts = cheapestProducts.map(product => ({ // Add quantity to each product based on the cart
     ...product,
-    qty: productIdToQtyMap.get(product.product_key) || 1
+    qty: productIdToQtyMap.get(product.product_key) || 1,
+    product_image_url: product.product_image_url.replace(".tiff", ".jpg")
   }));
 
-  if (response.error) {
-    console.log(response.error);
-    return [] as StoreProduct[];
+  if (errors.length > 0) {
+    console.error("Errors occurred while fetching cheapest products:", errors);
   }
+
   return cheapestProducts
 }
 
