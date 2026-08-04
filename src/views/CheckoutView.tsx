@@ -288,26 +288,29 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
         setShowLoadingDelivery(true);
       }
       if (algorithmMethod === "area") {
+        setShowLoadingDelivery(true);
         const cheapestInArea = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart, [], userModel.maxDistance);
         console.log("Cheapest SQL query:")
         console.log(cheapestInArea);
 
         userModel.setAlgorithmCart(cheapestInArea);
         setHasCalculatedWithCurAlgo("area");
-        setShowLoadingDelivery(true);
+        
       }
       else if (algorithmMethod === "global") {
+        setShowLoadingDelivery(true);
         const cheapestGlobal = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart);
         console.log("Cheapest globally:", cheapestGlobal);
         userModel.setAlgorithmCart(cheapestGlobal);
         setHasCalculatedWithCurAlgo("global");
-        setShowLoadingDelivery(true);
+        
       }
       else if (algorithmMethod === "select-stores") {
+        setShowLoadingDelivery(true);
         const cheapestSelectedStores = await findCheapestProducts(userModel.latitude, userModel.longitude, userModel.cart, selectedStores, userModel.maxDistance);
         userModel.setAlgorithmCart(cheapestSelectedStores);
         setHasCalculatedWithCurAlgo("select-stores");
-        setShowLoadingDelivery(true);
+        
       }
     }
   }
