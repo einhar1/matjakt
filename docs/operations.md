@@ -1,38 +1,32 @@
 # Course operations
 
-## Infrastructure bootstrap
+## Infrastructure and HCP Terraform
 
-Use the existing isolated GCP project `project-d3caac43-e28e-41c8-940`; Terraform does not create or replace the project. Region: `europe-north1`.
+The isolated GCP project is `project-d3caac43-e28e-41c8-940`; region `europe-north1`. Terraform reads the supplied project and manages resources inside it.
+
+Active state and execution: [HCP Terraform workspace](https://app.terraform.io/app/einar-org/workspaces/matjakt-course), organization `einar-org`, workspace `matjakt-course`. The VCS connection tracks `einhar1/matjakt`, branch `main`, working directory `infra`. Changes under that directory trigger a remote plan and **automatic apply** after a successful plan. Pull requests receive speculative plans and cannot apply. Application-only changes do not trigger infrastructure runs.
+
+Google authentication uses HCP dynamic OIDC credentials, restricted to the immutable organization/workspace IDs. The plan service account has read permissions; the apply account manages course resources. No Google service account key is stored in HCP. Environment variables are the four names returned by `terraform -chdir=infra output -json hcp_authentication`, plus `GOOGLE_CLOUD_QUOTA_PROJECT` set to the course project. Terraform variables in HCP are `project_id`, `billing_account_id`, `github_repository_id`, `github_repository`, `region`; currency defaults to SEK. Never set `GOOGLE_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS` manually in HCP.
+
+Normal infrastructure changes use a PR: edit configuration, inspect the speculative plan and CI, then merge. HCP serializes state operations and applies from main automatically. Check its run result before treating infrastructure as ready. GitHub Actions validates configuration with `-backend=false` and needs no HCP token or state access.
+
+For read-only investigation:
 
 ```sh
-gcloud auth login
-gcloud auth application-default login
-gcloud services enable cloudresourcemanager.googleapis.com cloudbilling.googleapis.com --project=project-d3caac43-e28e-41c8-940 --billing-project=project-d3caac43-e28e-41c8-940
-```
-
-Copy `infra/terraform.tfvars.example` to ignored `infra/terraform.tfvars`, set the linked billing account and immutable GitHub repository ID (`gh api repos/einhar1/matjakt --jq .id`).
-
-```sh
+terraform login
 terraform -chdir=infra init
-terraform -chdir=infra fmt -check
-terraform -chdir=infra validate
-terraform -chdir=infra plan -out=course.tfplan
-terraform -chdir=infra apply course.tfplan
-```
-
-Inspect the plan before apply. The first bootstrap uses local state. Copy `backend.tf.example` to `backend.tf` and `backend.gcs.hcl.example` to `backend.gcs.hcl`:
-
-```sh
-terraform -chdir=infra init -migrate-state -backend-config=backend.gcs.hcl
-terraform -chdir=infra plan -detailed-exitcode
 terraform -chdir=infra output -json github_variables
 ```
 
-State has already been migrated to the private versioned GCS bucket. A subsequent plan must exit 0. CI initializes without a backend and cannot apply infrastructure. Infrastructure changes are reviewed and applied locally. Cloud Run scales to zero and allows at most two instances. The runtime identity has no project roles. The deployment identity can update this service, write this registry and act as this runtime identity.
+Do not run a local apply or initialize a second workspace against these resources. HCP VCS-connected workspaces receive configuration through GitHub. Workspace settings and variables are administrative bootstrap configuration; changing them requires updating this runbook as well.
 
-Terraform creates a Google hello container for initial service establishment. The application bootstrap/release replaces it. Terraform ignores the deployed image, revision identifier, traffic and gcloud client metadata so it will not undo a release or rollback. Service, registry and state have destruction protection.
+State was first migrated from local storage to private versioned GCS, then to HCP. Interactive `terraform init` copied the GCS state; resource IDs and entry count were identical afterwards. HCP assigned a new lineage, and the subsequent local verification plan had no changes. A final local bootstrap created HCP's OIDC identities before remote mode was enabled. All later infrastructure changes run in HCP. Ignored local backups and the protected GCS bucket retain historical state; neither is an active backend.
 
-The 50/100 SEK monthly GCP budget alerts are warnings, not a cost cap. The separate Supabase bill is not covered by this GCP budget. Artifact images are retained for recovery; inspect storage and explicitly review retention/cleanup after grading.
+Fresh establishment requires Google ADC and sufficient project permissions for APIs, IAM, registry, service and project budget management. Establish the resources and HCP OIDC trust once, migrate state into the intended HCP workspace, set the variables above, then enable remote execution, VCS and auto-apply. Coordinate migration with no concurrent Terraform operations. Use interactive init, not `-force-copy`.
+
+Cloud Run scales to zero and allows at most two instances. Its runtime identity has no project roles. The deployment identity can update this service, write this registry and act as this runtime identity. Terraform initially establishes a Google hello container; course bootstrap/release replaces it. Terraform ignores release image/revision, traffic and gcloud client metadata, so it cannot undo a release or rollback. Service, registry and the retained GCS backup have destruction protection.
+
+The 50/100 SEK monthly GCP budget alerts warn but do not cap spending. Supabase is billed separately. Artifact images are retained for recovery; inspect storage and review retention/cleanup after grading.
 
 ## Course Supabase
 
@@ -61,7 +55,7 @@ Variables: `COURSE_GCP_PROJECT_ID`, `COURSE_GCP_REGION`, `COURSE_RUN_SERVICE`, `
 
 One environment secret: `COURSE_SUPABASE_DB_URL`, a TLS session-pooler connection with user `postgres.COURSE_REF`, port 5432 and `sslmode=require`. The migration script checks that its ref matches the browser/course configuration. IPv4 pooler connectivity has been verified. A personal Supabase API token and a Google service-account key are unnecessary. Never place the DB URL in a `VITE_` variable.
 
-These settings are configured. Publish implementation through a reviewed PR; commits/pushes remain under the team's control. The unpublished workflow has not yet run on GitHub.
+These settings are configured. PR #1 has demonstrated a failed gate and a corrected green run. The user authorized Codex to merge this setup PR in the course copy after checks pass; normal review protection stays configured. Independent human review is still needed for course hand-in.
 
 ## Release, bootstrap and recovery
 
@@ -95,4 +89,4 @@ Collect an intentional failed PR, corrected green PR, successful Actions release
 
 Retain the course environment for grading. Afterwards explicitly review cleanup; destruction protection must deliberately be removed before a destroy. Delete the separate Supabase project only after grading and team approval.
 
-Sources: [Cloud Run revisions and rollback](https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration), [public Cloud Run configuration](https://docs.cloud.google.com/run/docs/authenticating/public), [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations), [OIDC action](https://github.com/google-github-actions/auth).
+Sources: [HCP state migration](https://developer.hashicorp.com/terraform/cloud-docs/migrate), [HCP execution modes](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings), [Cloud Run revisions and rollback](https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration), [public Cloud Run configuration](https://docs.cloud.google.com/run/docs/authenticating/public), [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations), [OIDC action](https://github.com/google-github-actions/auth).

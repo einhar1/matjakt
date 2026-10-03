@@ -36,7 +36,7 @@ npm run db:stop
 - `src/`: application, existing RPC contracts and browser Supabase client.
 - `supabase/`: local config, ordered migrations, synthetic catalog and pgTAP tests.
 - `tests/`: domain tests and Playwright user journeys.
-- `infra/`: Terraform for Cloud Run, Artifact Registry, IAM/OIDC, GCS state and budget warnings.
+- `infra/`: Terraform for Cloud Run, Artifact Registry, IAM/OIDC, HCP Terraform state and budget warnings.
 - `Dockerfile.course` and `deploy/nginx.conf`: serve the already verified build with an unprivileged, digest-pinned nginx image and SPA fallback.
 - `.github/workflows/ci.yml`: verification and guarded main release; actions pinned to commit SHAs.
 - [Operations](docs/operations.md): bootstrap, configuration, release and recovery.
@@ -60,7 +60,7 @@ flowchart LR
 
 PRs receive no deployment secrets. `CI gate` and one approving review are required on main. After a main push, the same commit is verified, built for the course backend and packaged once. A tagged revision receives preview tests before live traffic moves to that exact revision; live is checked again. Releases are serialized, and obsolete commits are rejected. `/version.json` records the commit and whether a manual build had uncommitted changes.
 
-Terraform owns service configuration, registry, identity and infrastructure. CI owns container revisions and traffic; Terraform explicitly ignores those release fields. Preview/live share the course database and require backward-compatible migrations. Rollback moves traffic to a previous revision and leaves migrations in place.
+Terraform owns service configuration, registry, identity and infrastructure. State is stored and locked in [HCP Terraform](https://app.terraform.io/app/einar-org/workspaces/matjakt-course); HCP runs remote speculative plans for PRs and automatically plans/applies changes under `infra` after a push to `main`, using Google OIDC. CI owns container revisions and traffic; Terraform explicitly ignores those release fields. Preview/live share the course database and require backward-compatible migrations. Rollback moves traffic to a previous revision and leaves migrations in place.
 
 ## Scope and current verification
 

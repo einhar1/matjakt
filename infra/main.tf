@@ -13,6 +13,7 @@ resource "google_project_service" "api" {
   disable_on_destroy = false
 }
 
+# Retained private migration backup; active state is in HCP Terraform.
 resource "google_storage_bucket" "state" {
   name                        = "${var.project_id}-tfstate"
   project                     = var.project_id
@@ -104,6 +105,7 @@ resource "google_cloud_run_v2_service" "course" {
   project              = var.project_id
   name                 = "matjakt-course"
   location             = var.region
+  labels               = { course = "devops-2026" }
   deletion_protection  = true
   ingress              = "INGRESS_TRAFFIC_ALL"
   invoker_iam_disabled = true

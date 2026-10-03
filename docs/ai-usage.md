@@ -19,3 +19,5 @@ Before submission, both authors must inspect and understand generated configurat
 | Pending | Pending | Pending | Pending |
 
 No automated AI code review service is enabled. The AI-assisted implementation and this planning session satisfy the subject of disclosure; the team must keep this record accurate as further tools are used.
+
+- 2026-10-03: At the team's request, Codex created HCP workspace einar-org/matjakt-course and migrated existing GCS state with Terraform init. Following the clarified requirement, it configured VCS-driven remote automatic plan/apply, separate read-only plan and privileged apply identities, and Google OIDC without private keys. A one-time local identity bootstrap preceded remote execution. The user separately authorized a setup merge in this repository copy after green checks.
