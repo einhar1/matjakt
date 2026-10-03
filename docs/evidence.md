@@ -20,8 +20,8 @@ Observed by Codex on **2026-10-03**. Human review is recorded separately in [AI 
 | Hosted manual releases | Two tagged-preview and live smoke-test runs passed |
 | Frontend recovery | Previous app revision received 100% traffic and passed smoke; current revision then restored |
 | Clean source reproduction | Passed: npm ci, fresh matjakt-repro migrations/seed, lint, TypeScript, 9 unit tests, 15 database assertions and 4 browser tests. This is an automated source snapshot, not the second author's independent clone. |
-| Actual GitHub CI / OIDC release | Pending PR publication/run and human-reviewed merge |
-| Intentional failed PR gate | Pending actual GitHub experiment |
+| Actual GitHub CI / OIDC release | [PR #1](https://github.com/einhar1/matjakt/pull/1) published; corrected PR run and automatic main release pending |
+| Intentional failed PR gate | Observed: [failed run](https://github.com/einhar1/matjakt/actions/runs/37128787926) on probe commit 3635e18; expected fuel cost 15 instead of 14 caused unit failure, CI gate failed, course release skipped; assertion restored |
 | Second author's clean clone | Pending independent human verification |
 | Report PDF | English source prepared with three intended pages; built-in compiler unavailable (platform directories error). PDF/page count unverified |
 
@@ -42,3 +42,7 @@ Private local release/rollback metadata is in ignored `output/deployment/`. CI p
 ## Complete before hand-in
 
 Record the PR and Actions URLs once observed. After human approval/merge, verify the automatic main release and exact `/version.json` commit. Demonstrate a failed required check followed by its correction. Have Christopher independently verify a clean clone, record human SQL/IAM review, compile/check the final 2–3 page report and link evidence. The course proposal was already submitted by the team; no new proposal is created here.
+
+## Repository and merge authorization
+
+The user confirmed this repository is a copy of the real project and explicitly authorized Codex to merge the PR when checks pass. Normal main protection remains configured. Any administrator exception for this setup merge is user-authorized and is not evidence of independent human code review.

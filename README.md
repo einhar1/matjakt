@@ -42,7 +42,7 @@ npm run db:stop
 - [Operations](docs/operations.md): bootstrap, configuration, release and recovery.
 - [Evidence](docs/evidence.md): observed checks and outstanding acceptance work.
 - [AI usage](docs/ai-usage.md): assistance and human review responsibilities.
-- [Report source](docs/report.tex): English report draft; author names and final Actions evidence remain to be completed.
+- [Report source](docs/report.tex): English report draft; final Actions evidence and PDF layout remain to be completed.
 
 ## CI/CD
 
@@ -64,6 +64,6 @@ Terraform owns service configuration, registry, identity and infrastructure. CI 
 
 ## Scope and current verification
 
-All local checks, hosted preview/live smoke tests and a no-change Terraform plan have passed. The first hosted release was an explicitly approved **manual bootstrap**, not a GitHub Actions run. Changes are not yet committed or pushed; actual PR/failing-check/release-run evidence and the second author's clean-clone verification remain outstanding.
+All local checks, hosted preview/live smoke tests and a no-change Terraform plan have passed. The first hosted release was an explicitly approved **manual bootstrap**, not a GitHub Actions run. Implementation is published in [PR #1](https://github.com/einhar1/matjakt/pull/1). An intentional wrong fuel-price assertion produced a failing required CI gate, then was corrected. Automatic main release evidence and the second author's clean-clone verification remain outstanding.
 
 Price collection, Kubernetes, self-hosted Supabase and a separate observability system are outside scope. Prices are fictional. See the [2026 course criteria](https://github.com/KTH/devops-course/blob/2026/grading-criteria.md#project).
