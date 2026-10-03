@@ -51,7 +51,7 @@ describe('cart and discounts', () => {
 });
 describe('price calculation', () => {
   it('converts route metres to litres and SEK', () => {
-    expect(calculateFuelCost({ distance: 10000 }, 'petrol', new Map([['petrol', 20]]), .07)).toBeCloseTo(14);
+    expect(calculateFuelCost({ distance: 10000 }, 'petrol', new Map([['petrol', 20]]), .07)).toBeCloseTo(15); // Intentional PR gate demonstration; correct result is 14 SEK.
     expect(calculateFuelCost(undefined, 'petrol', new Map(), .07)).toBe(0);
     expect(calculateFuelCost({ distance: 10000 }, 'none', new Map(), .07)).toBe(0);
   });
