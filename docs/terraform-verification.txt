@@ -1,11 +1,13 @@
 Matjakt course infrastructure verification
 Date: 2026-10-03
-Terraform: 1.15.2
-Command: terraform -chdir=infra plan -detailed-exitcode -input=false -no-color
-Backend: private GCS, versioning enabled
-Timing: after Cloud Run app deployment and traffic promotion
-Exit code: 0
-Output (resource/account identifiers removed):
-No changes. Your infrastructure matches the configuration.
-Terraform has compared your real infrastructure against your configuration
-and found no differences, so no changes are needed.
+Terraform: 1.15.2, remote linux_amd64 execution
+Backend: HCP Terraform, einar-org/matjakt-course
+VCS commit: 22ca42a338b5e571a9b594b63e81a87e73dd7390
+Automatic VCS apply: run-XNzxH5XxuZUUybFU
+Result: 0 added, 1 changed, 0 destroyed (course Cloud Run service label)
+Follow-up remote read-only plan: run-f6DcdhoHRbTzhJTp
+Status: planned_and_finished; has-changes=false
+Result: 0 to add, 0 to change, 0 to destroy
+Google authentication: HCP dynamic OIDC, separate plan/apply identities
+The first local bootstrap and GCS-to-HCP migration preceded remote execution.
+The protected private GCS bucket retains historical backup state only.

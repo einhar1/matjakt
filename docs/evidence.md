@@ -14,16 +14,21 @@ Observed by Codex on **2026-10-03**. Human review is recorded separately in [AI 
 | Hosted configuration | public/coop Data API, course Auth URLs, email confirmation enabled |
 | Security advisors | No errors; documented warning for public catalog materialized view |
 | Terraform fmt / validate | Passed |
-| Infrastructure / state | Provisioned with Terraform; state migrated to HCP einar-org/matjakt-course; private GCS history retained |
-| No-change plan | Exit 0, both before and after manual Cloud Run releases; [sanitized record](terraform-verification.txt) |
-| GitHub settings | Course variables/secret configured; main requires CI gate, current branch, 1 review and resolved discussions |
+| Infrastructure / state | State migrated to HCP; VCS remote auto-apply enabled for main/infra; private GCS history retained |
+| Automatic HCP plan/apply | [PR speculative plan passed](https://app.terraform.io/app/einar-org/workspaces/matjakt-course/runs/run-LPkj3WXZpJz3f7oS); [main auto-apply passed](https://app.terraform.io/app/einar-org/workspaces/matjakt-course/runs/run-XNzxH5XxuZUUybFU) with 0 added, 1 changed, 0 destroyed; Google OIDC for both phases |
+| No-change plan | Local exit 0 before/after manual releases; [HCP remote plan](https://app.terraform.io/app/einar-org/workspaces/matjakt-course/runs/run-f6DcdhoHRbTzhJTp) finished with 0 add/change/destroy after auto-apply; [sanitized record](terraform-verification.txt) |
+| GitHub settings | Course variables/secret configured; main requires CI gate and HCP plan, current branch, 1 review and resolved discussions; setup merge used the explicitly authorized admin exception and protection was restored |
 | Hosted manual releases | Two tagged-preview and live smoke-test runs passed |
 | Frontend recovery | Previous app revision received 100% traffic and passed smoke; current revision then restored |
 | Clean source reproduction | Passed: npm ci, fresh matjakt-repro migrations/seed, lint, TypeScript, 9 unit tests, 15 database assertions and 4 browser tests. This is an automated source snapshot, not the second author's independent clone. |
-| Actual GitHub CI / OIDC release | [PR #1](https://github.com/einhar1/matjakt/pull/1): [corrected run passed](https://github.com/einhar1/matjakt/actions/runs/37129031015); HCP amendment and automatic main release pending |
+| Actual GitHub CI / OIDC release | [PR #1 merged](https://github.com/einhar1/matjakt/pull/1) after [green final PR checks](https://github.com/einhar1/matjakt/actions/runs/37131393199); [main CI and release passed](https://github.com/einhar1/matjakt/actions/runs/37131650365), preview/live version matches commit 22ca42a338b5e571a9b594b63e81a87e73dd7390 with dirty=false |
 | Intentional failed PR gate | Observed: [failed run](https://github.com/einhar1/matjakt/actions/runs/37128787926) on probe commit 3635e18; expected fuel cost 15 instead of 14 caused unit failure, CI gate failed, course release skipped; assertion restored |
 | Second author's clean clone | Pending independent human verification |
 | Report PDF | English source prepared with three intended pages; built-in compiler unavailable (platform directories error). PDF/page count unverified |
+
+## Automatic release evidence
+
+The VCS main commit 22ca42a338b5e571a9b594b63e81a87e73dd7390 triggered both HCP Terraform and GitHub Actions. HCP applied the service label through its apply identity. Actions applied pending course migrations, published one immutable container, smoke-tested its tagged preview and promoted that same revision to live. Both version endpoints returned the exact commit and dirty=false. No local credentials were used in either remote execution.
 
 ## Hosted manual evidence
 
@@ -41,7 +46,7 @@ Private local release/rollback metadata is in ignored `output/deployment/`. CI p
 
 ## Complete before hand-in
 
-Record the PR and Actions URLs once observed. After human approval/merge, verify the automatic main release and exact `/version.json` commit. Demonstrate a failed required check followed by its correction. Have Christopher independently verify a clean clone, record human SQL/IAM review, compile/check the final 2–3 page report and link evidence. The course proposal was already submitted by the team; no new proposal is created here.
+Automatic infrastructure and app release evidence is linked above. Have Christopher independently verify a clean clone, record human SQL/IAM review, and compile/check the final 2-3 page report. The course proposal was already submitted by the team; no new proposal is created here.
 
 ## Repository and merge authorization
 
