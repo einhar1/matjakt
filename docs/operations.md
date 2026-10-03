@@ -90,3 +90,5 @@ Collect an intentional failed PR, corrected green PR, successful Actions release
 Retain the course environment for grading. Afterwards explicitly review cleanup; destruction protection must deliberately be removed before a destroy. Delete the separate Supabase project only after grading and team approval.
 
 Sources: [HCP state migration](https://developer.hashicorp.com/terraform/cloud-docs/migrate), [HCP execution modes](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings), [Cloud Run revisions and rollback](https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration), [public Cloud Run configuration](https://docs.cloud.google.com/run/docs/authenticating/public), [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations), [OIDC action](https://github.com/google-github-actions/auth).
+
+HCP speculative plans are a required GitHub status alongside CI gate. The setup merge used a user-authorized administrator exception; enforce_admins was immediately restored. Future changes use the normal review requirement.
