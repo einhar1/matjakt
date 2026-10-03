@@ -78,7 +78,7 @@ export function useProductSearch(searchTerm: string, storeFilter: StoreFilter = 
     const maxDistance = userModel.getMaxDistance()*1000;
 
     // TODO: type any
-    const getKey = (pageIndex: number, previousPageData: any) => {
+    const getKey = (pageIndex: number, previousPageData: OfferItem[] | null) => {
         if ((previousPageData && !previousPageData.length) || !searchTerm)  {
             return null  // reached the end
         }

@@ -1,0 +1,5 @@
+project_id = "project-d3caac43-e28e-41c8-940"
+billing_account_id = "000000-000000-000000"
+github_repository = "einhar1/matjakt"
+github_repository_id = "REPLACE_WITH_NUMERIC_REPO_ID"
+billing_currency = "SEK"

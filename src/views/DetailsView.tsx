@@ -83,7 +83,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
           continue;
         }
 
-        if (!!product.product_image_url) {
+        if (product.product_image_url) {
           product.product_image_url = product.product_image_url.replace(".tiff", ".jpg");
 
         }
@@ -106,7 +106,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
         if (storeError) throw storeError;
 
         const priceAndStoreData = [];
-        for (const item of storeData as any[]) {
+        for (const item of storeData as unknown as { store_id: string; price: number; available: boolean; stores: { store_name: string; lat: number; lon: number } }[]) {
           priceAndStoreData.push(
             {
               store_id: item.store_id,
@@ -153,7 +153,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
   }
 
   const storeNames = filteredStoreData?.map(item => item.store_name);
-  const storePrices = filteredStoreData?.map(item => item.price).sort((a, b) => a - b) as any[];
+  const storePrices = filteredStoreData?.map(item => item.price).sort((a, b) => a - b) || [];
   const minPrice = Math.min(...storePrices) as number;
   const maxPrice = Math.max(...storePrices) as number;
   const chartMinPrice = minPrice - Math.round(minPrice * 0.1);
@@ -245,7 +245,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
   return (
     <div className="details-wrapper">
         {
-          !!product ? (
+          product ? (
             <div className="details-container">
               <div className="head-container box-padding">
                 <div className="product-img-wrapper box">
@@ -287,7 +287,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
                       </div>
                     )}
                   </div>
-                  {!!product.ingredients ?
+                  {product.ingredients ?
                     <div className="clickable-section" onClick={() => setIngredientsExpanded(!ingredientsExpanded)}>
                       <h3>Ingredienser</h3>
                       {ingredientsExpanded && (
@@ -296,7 +296,7 @@ const DetailsView = observer(function DetailsView(props: DetailsViewProps) {
                     </div>
                     : ""
                   }
-                  {!!product.product_information ?
+                  {product.product_information ?
                     <div className="clickable-section" onClick={() => setFactExpanded(!factExpanded)}>
                       <h3>Produktfakta</h3>
                       {factExpanded && (

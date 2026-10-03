@@ -1,3 +1,4 @@
+import { calculateFuelCost } from '../utils/pricing';
 import { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import '../checkout.css';
@@ -28,11 +29,11 @@ interface storesData {
 }
 
 interface storePriceData {
-  product_key: any;
-  store_id: any;
-  price: any;
+  product_key: string;
+  store_id: number;
+  price: number;
   stores: {
-      store_name: any;
+      store_name: string;
   };
 }
 
@@ -118,7 +119,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
       if (storesData.length === 0) { return [] };
       const product_keys = userModel.cart.map(item => item.product_key)
 
-      let allStorePrices = [];
+      const allStorePrices = [];
 
       for (const db of [supabase, coopSupabase]) {
         const { data: storePrices, error: storePricesError } = await db
@@ -1080,7 +1081,7 @@ function StoreMarkers({ stores }: { stores: storesData[] }) {
 
 function createGroceryIcon(name: string, isSelected: boolean | undefined, zoom: number = 30) {
 
-  const groceryColor = !!isSelected ? "rgba(252, 255, 46, 0.7)" : "rgba(15, 182, 76, 0.6)";
+  const groceryColor = isSelected ? "rgba(252, 255, 46, 0.7)" : "rgba(15, 182, 76, 0.6)";
 
   const storeText = `
     <div style="
@@ -1166,12 +1167,7 @@ export async function fetchRoute(stops: LatLng[]) : Promise<routeDataType> {
   return routeData;
 }
 
-function calculateFuelCost(routeData: routeDataType | undefined, fuelType: string, fuelMap: Map<string, number>, literPerKm: number = 0.07): number {
-  if (!routeData) return 0;
-  const fuelPrice = fuelMap.get(fuelType) || 0;
-  const totalLiters = (routeData.distance / 1000) * literPerKm;
-  return totalLiters * fuelPrice;
-}
+
 
 export function LoadingDelivery() {
   return (

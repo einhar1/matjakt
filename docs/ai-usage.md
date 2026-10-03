@@ -1,0 +1,21 @@
+# AI-assisted tools
+
+## Recorded assistance
+
+- 2026-10-03: OpenAI Codex assisted with reading the 2026 grading criteria and inspecting Matjakt, then proposed the DevOps design. The team selected Terraform, an isolated course environment, a small cloud budget and synthetic data.
+- 2026-10-03: Codex generated and edited CI/CD workflows, Terraform, a reconstructed course database baseline/RPCs, tests, operating instructions and the report source. It also repaired existing lint issues and extracted fuel-cost calculation for testing.
+- Codex ran available checks and recorded outcomes in `evidence.md`. Tool execution is verification evidence; it is not proof of human review or a successful hosted release.
+
+- 2026-10-03: The team requested Cloud Run instead of Firebase for course hosting and explicitly approved deployment and removal of unused course Firebase IAM. Codex implemented tagged revisions, preview tests and traffic promotion, created the separate Micro project in Adams Org, applied synthetic fixtures, configured GitHub and tested recovery. Existing Matjakt was not modified remotely.
+
+## Provenance and review
+
+The baseline was initially reconstructed from application contracts. After CLI access was restored, Codex exported public/coop schema definitions read-only, compared the app-facing contracts, and added exported search/vector definitions through a new migration. No original data was copied. See schema-provenance.md.
+
+Before submission, both authors must inspect and understand generated configuration, verify the identity trust restriction, read the SQL/RLS policies, review test assertions, reproduce the workflow, and explain limitations. Record human reviews below; leave unfinished work explicitly unfinished.
+
+| Reviewer | Commit/files reviewed | Verification performed | Date |
+|---|---|---|---|
+| Pending | Pending | Pending | Pending |
+
+No automated AI code review service is enabled. The AI-assisted implementation and this planning session satisfy the subject of disclosure; the team must keep this record accurate as further tools are used.

@@ -23,7 +23,7 @@ export type StoreProduct = {
   distance_km: number, // in km
 }
 
-class UserModel {
+export class UserModel {
     userId: string | null = null;
     postalCode: string = '';
     city: string = '';
@@ -153,7 +153,7 @@ class UserModel {
             return false;
         }
 
-        const hasData = data.uses_location || (data.cart && data.cart.length > 0);
+        const hasData = data.uses_location || data.has_senior_discount || (data.cart && data.cart.length > 0);
 
         runInAction(() => {
             if (hasData) {

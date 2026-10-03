@@ -1,0 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { courseEnvironment } from './course-guard.mjs';
+import { releaseCourse } from './release-course.mjs';
+const env = courseEnvironment();
+const version = JSON.parse(readFileSync('dist/version.json','utf8'));
+if (!/^[a-f0-9]{40}$/.test(version.commit)) throw new Error('Build a course artifact with source metadata first.');
+env.GITHUB_SHA = version.commit;
+env.GITHUB_RUN_ID = 'bootstrap-' + Date.now();
+console.log('Manual course bootstrap; this is not evidence of a GitHub Actions release.');
+releaseCourse(env);

@@ -1,3 +1,4 @@
+-- Historical source reference. Establish the course database with supabase/migrations.
 
 /* 
 
@@ -22,8 +23,7 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coop_cp_store_product
   ON coop.current_prices (store_id, product_key)
   INCLUDE (price);
 
-CREATE UNIQUE INDEX idx_mv_deals_unique ON public.mv_active_deals (src, store_id, product_key);
-CREATE INDEX idx_mv_deals_store_rel ON public.mv_active_deals (store_id, relevance DESC);
+-- View indexes are defined once below; course bootstrap uses supabase/migrations.
 
 REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_active_deals;
 

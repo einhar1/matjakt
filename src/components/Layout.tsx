@@ -49,7 +49,7 @@ export const Layout = observer(function Layout(props: LayoutProps) {
         onLoginClick={handleLoginClick}
         onCartClick={() => navigate('/checkout')}
         onAddToCart={handleAddToCart}
-        user={useAuth().user}
+        user={user}
         cartItemCount={userModel.cartItemCount}
       />                                                                                                              
       <AuthModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
