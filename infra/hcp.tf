@@ -6,6 +6,7 @@ resource "google_service_account" "hcp" {
   display_name = "Matjakt HCP Terraform ${each.key}"
   depends_on   = [google_project_service.api]
 }
+# Google provider pool refresh also reads attestation rules.
 resource "google_project_iam_custom_role" "hcp_read" {
   project = var.project_id
   role_id = "matjaktHcpPlan"
