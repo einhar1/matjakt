@@ -15,7 +15,7 @@ resource "google_project_iam_custom_role" "hcp_read" {
     "serviceusage.services.get", "serviceusage.services.list", "serviceusage.services.use",
     "iam.serviceAccounts.get", "iam.serviceAccounts.getIamPolicy",
     "iam.roles.get",
-    "iam.workloadIdentityPools.get", "iam.workloadIdentityPoolProviders.get",
+    "iam.workloadIdentityPools.get", "iam.workloadIdentityPools.getAttestationRules", "iam.workloadIdentityPoolProviders.get",
     "storage.buckets.get", "storage.buckets.getIamPolicy",
     "artifactregistry.repositories.get", "artifactregistry.repositories.getIamPolicy",
     "run.services.get", "run.services.getIamPolicy",
