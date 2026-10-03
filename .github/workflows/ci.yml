@@ -1,0 +1,114 @@
+name: Matjakt DevOps
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'push' && 'course-release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  verify:
+    name: App and database
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run db:start
+      - run: npm run env:local
+      - run: npm run verify
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run test:db
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: verification-${{ github.sha }}
+          path: output/playwright
+          if-no-files-found: ignore
+      - run: npm run db:stop
+        if: always()
+  infrastructure:
+    name: Terraform
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: 1.15.2
+      - run: terraform -chdir=infra fmt -check
+      - run: terraform -chdir=infra init -backend=false -input=false -lockfile=readonly
+      - run: terraform -chdir=infra validate
+  gate:
+    name: CI gate
+    runs-on: ubuntu-24.04
+    needs: [verify, infrastructure]
+    if: always()
+    steps:
+      - name: Require every check to pass
+        env:
+          APP_RESULT: ${{ needs.verify.result }}
+          INFRA_RESULT: ${{ needs.infrastructure.result }}
+        run: test "$APP_RESULT" = success && test "$INFRA_RESULT" = success
+  deploy:
+    name: Course release
+    needs: gate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: course
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      COURSE_GCP_PROJECT_ID: ${{ vars.COURSE_GCP_PROJECT_ID }}
+      COURSE_RUN_SERVICE: ${{ vars.COURSE_RUN_SERVICE }}
+      COURSE_GCP_REGION: ${{ vars.COURSE_GCP_REGION }}
+      COURSE_IMAGE_REPOSITORY: ${{ vars.COURSE_IMAGE_REPOSITORY }}
+      COURSE_SUPABASE_PROJECT_REF: ${{ vars.COURSE_SUPABASE_PROJECT_REF }}
+      VITE_SUPABASE_URL: ${{ vars.COURSE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ vars.COURSE_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Reject an obsolete merge commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: test "$(gh api repos/${{ github.repository }}/commits/main --jq .sha)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: node --input-type=module -e "import {courseEnvironment} from './scripts/course-guard.mjs'; courseEnvironment();"
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Apply course migrations
+        env:
+          COURSE_SUPABASE_DB_URL: ${{ secrets.COURSE_SUPABASE_DB_URL }}
+        run: node scripts/migrate-course.mjs
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.COURSE_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.COURSE_DEPLOY_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.COURSE_GCP_PROJECT_ID }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+        with:
+          version: 586.0.0
+      - run: gcloud auth configure-docker "$COURSE_GCP_REGION-docker.pkg.dev" --quiet
+      - run: npm run deploy:course
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: course-release-${{ github.sha }}
+          path: |
+            output/deployment/release.json
+            output/playwright
+          if-no-files-found: ignore

@@ -67,7 +67,7 @@ const SearchView = observer(function SearchView({ userModel }: SearchViewProps) 
     
     let content
     if (isLoading) content = <LoadingSpinner />
-    else if (error) content = <p>{error.message}</p>
+    else if (error) content = <p role="alert">Det gick inte att hämta produkter. Försök igen senare.</p>
     else if (products && products.length > 0) content = (
         <>
             <div className='search-results-header'>

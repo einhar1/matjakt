@@ -69,7 +69,7 @@ export function useBestLocalDeals() {
     const maxDistance = userModel.usesLocation? userModel.getMaxDistance()*1000 : 5000;
 
     // TODO: type any
-    const getKey = (pageIndex: number, previousPageData: any) => {
+    const getKey = (pageIndex: number, previousPageData: OfferItem[] | null) => {
         if ((previousPageData && !previousPageData.length))  {
             return null  // reached the end
         }

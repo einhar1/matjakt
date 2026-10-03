@@ -1,0 +1,61 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist{nosep}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\title{Matjakt: An Integrated DevOps Workflow}
+\author{Einar Harri (\texttt{eharri@kth.se})\\Christopher Massi (\texttt{cmassi@kth.se})}
+\date{3 October 2026}
+\begin{document}
+\maketitle
+\section*{1. Architecture and development process}
+Matjakt is a React and TypeScript application built with Vite. It compares grocery prices, searches products, manages shopping carts and persists account preferences. The browser communicates directly with Supabase Auth and its PostgreSQL Data API. The course frontend is served by an unprivileged nginx container on Cloud Run; existing Matjakt remains in its original Firebase environment.
+
+The course uses a separate Google Cloud project and a separate Supabase backend in Adams Org. Cloud Run replaced the planned Firebase hosting at the team's request. A small synthetic catalog contains ICA and Coop products, nearby and distant stores, and known prices. Price collection is outside scope. This makes checks repeatable and avoids tests against existing users or scraped data.
+
+Application code, tests, migrations, platform configuration, infrastructure and operating instructions are versioned in one repository. Node and direct dependencies are pinned; npm installs from the lockfile. Local Supabase runs through its Docker-based CLI, with configuration and fixtures committed alongside the frontend.
+
+A pull request runs lint, TypeScript, Vitest, a production build, database tests and Playwright journeys, plus Terraform format and validation checks. The aggregate CI gate fails if any required job fails. Main branch protection requires the gate, up-to-date branches and an approving review. Stale approvals are dismissed and discussions must be resolved. Pull requests receive no deployment credentials.
+
+After a main push, the verified merge commit is built with course backend settings. The release applies course migrations and packages the verified build into a digest-pinned container, without rebuilding it in Docker. It deploys a tagged Cloud Run revision with no live traffic, tests that preview against the real course catalog, and moves traffic to that exact revision. A final smoke test checks live. A static version endpoint records the source commit and whether a manual build had uncommitted changes.
+
+Preview and live share the course database. This simplifies the demonstration while requiring backward-compatible migrations. Release metadata records the image, revision, URLs, previous traffic and promotion/test status. Changes and recovery can therefore be traced through source, tests, infrastructure and runtime.
+\newpage
+\section*{2. Technical choices and observed verification}
+GitHub Actions fits the project's existing collaboration platform. Verification and release share one workflow with an explicit dependency: deployment requires the successful aggregate gate. Releases are serialized and reject obsolete main commits before deployment. Actions are pinned to commit SHAs, with Dependabot proposing updates.
+
+Terraform manages APIs, Cloud Run configuration, Artifact Registry, deployment/runtime identities, Workload Identity Federation, HCP Terraform state/locking, a retained private GCS backup and budget notifications. The Google Cloud project was supplied by the team. State was first moved to GCS, then migrated to HCP organization einar-org, workspace matjakt-course at the team's request. HCP uses VCS-driven remote execution: PRs receive speculative plans; changes under infra merged to main are planned and applied automatically. Separate plan/apply identities authenticate through short-lived Google OIDC, restricted to this workspace. GitHub CI validates without provisioning. Terraform ignores deployment image/revision and traffic fields owned by the release workflow, so an apply does not undo a release or rollback.
+
+Google authentication uses OIDC federation rather than a downloaded service-account key. Trust is restricted by immutable repository ID, repository name, main branch and workflow path. Deployment permissions target this service, registry and runtime identity. The runtime identity has no project roles. Cloud Run scales to zero and permits at most two instances.
+
+A TLS session-pooler database URL belongs only to the course release environment. The migration guard checks that its database ref matches the frontend's course settings. No personal Supabase API token is required. The browser receives a publishable key, with explicit SQL grants and row-level security enforcing access.
+
+Vitest checks geography, postcode lookup, cart quantities, discounts, fuel units and environment boundaries. pgTAP checks search, chain filters, pagination, geographic selection, known prices and profile isolation: user A cannot read or update user B's profile. Playwright exercises search/details/cart calculation, login/profile persistence, empty results and a readable backend error. It uses real local Supabase; OSRM and map tiles are mocked, and the error test deliberately injects a failed backend response.
+
+\textbf{Observed on 3 October 2026:} lint, TypeScript, nine unit tests, fifteen database assertions and four browser journeys passed. npm audit reported zero vulnerabilities. Original schema definitions were exported read-only and compared. Course migrations, fixtures and hosted API/Auth settings were applied. A second Terraform plan exited 0 with no changes.
+
+Two explicitly approved manual releases passed preview and live smoke tests. Recovery moved traffic to the previous application revision, verified it and restored the current revision. Both revisions used the same source artifact: this proves traffic recovery, not recovery from a defective change. GitHub environment settings and branch protection are configured. A clean source snapshot also passed the full local chain using npm ci and a new isolated database. An intentional wrong fuel-cost assertion produced a failed required PR gate and skipped release in run 37128787926; it was then corrected. The corrected PR passed in run 37129031015. The HCP amendment, OIDC main release and the second author's independent verification remain pending. The user explicitly authorized a setup merge in this copy of the real repository; that exception does not count as independent human review.
+\newpage
+\section*{3. Limitations, trade-offs and AI assistance}
+The hosted Supabase project is a documented bootstrap step, rather than a Terraform resource. Schema, grants, functions, triggers and local configuration are versioned. A hosted configuration example records exposed schemas and Auth URLs with diff-before-push instructions. Hosted email confirmation stays enabled; local test accounts bypass it only in the disposable development stack.
+
+The initial baseline was reconstructed from application contracts, then compared with a read-only export once CLI access was restored. Active search/vector definitions come from that export. Course adaptations retain app-facing contracts, harden catalog grants and profile access, and use PostGIS for checkout distance selection. Crawler/history tables and obsolete functions are intentionally excluded; this is not a full production clone.
+
+Preview tests validate the new frontend before promotion but do not isolate migrations from live. Migrations must be additive or otherwise backward compatible. Frontend rollback restores a previous Cloud Run revision; database defects require a forward corrective migration. Hosted reset and reverse migration are not recovery strategies.
+
+The synthetic catalog makes assertions deterministic but does not demonstrate crawler reliability, evolving prices or performance at production scale. The materialized deals view is refreshed after administrative catalog updates. Supabase advisors warn because a materialized view is accessible through the API and does not enforce RLS. This exposure is intentional: the view contains public catalog data only, with no account or profile information.
+
+Budget notifications at 50 and 100 SEK inform the team but do not stop resources. Supabase Micro compute costs approximately USD 10 monthly, outside the Google Cloud budget. Retained container images consume storage; grading and recovery needs must be considered before cleanup. Service, registry and state have destruction protection.
+
+The frontend reports a large bundle. Code splitting and production-scale performance work remain outside this change. Dependency automation proposes updates; a clean audit is a point-in-time result, not proof that future vulnerabilities cannot emerge.
+
+OpenAI Codex assisted with requirement analysis, configuration, SQL, tests, implementation, verification and this report draft. The team selected Terraform, isolated course resources, synthetic data and later Cloud Run. The AI usage log records this work and leaves human review unfinished until performed. Both authors remain responsible for reviewing the code, reproducing checks and explaining decisions.
+
+The current live bootstrap was built from uncommitted source, marked dirty in version metadata. It must not be represented as a committed Actions release. Workflow/PR links and the second author's clean-clone verification must be added before submission. The evidence log distinguishes observed results from pending acceptance work.
+
+\textbf{References.} \href{https://github.com/KTH/devops-course/blob/2026/grading-criteria.md#project}{KTH 2026 project criteria}; \href{https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration}{Cloud Run revisions and recovery}; \href{https://supabase.com/docs/guides/local-development/database-migrations}{Supabase migrations}; \href{https://github.com/google-github-actions/auth}{Google GitHub authentication}.
+\end{document}

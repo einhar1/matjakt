@@ -1,0 +1,11 @@
+Matjakt course infrastructure verification
+Date: 2026-10-03
+Terraform: 1.15.2
+Command: terraform -chdir=infra plan -detailed-exitcode -input=false -no-color
+Backend: private GCS, versioning enabled
+Timing: after Cloud Run app deployment and traffic promotion
+Exit code: 0
+Output (resource/account identifiers removed):
+No changes. Your infrastructure matches the configuration.
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.

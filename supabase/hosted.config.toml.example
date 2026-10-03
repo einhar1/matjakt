@@ -1,0 +1,11 @@
+# Copy to an ignored workdir's supabase/config.toml, substitute course URLs,
+# then run config diff before config push. Undeclared hosted settings stay intact.
+project_id = "matjakt-course"
+[api]
+schemas = ["public", "coop"]
+extra_search_path = ["public", "extensions"]
+[auth]
+site_url = "COURSE_LIVE_URL"
+additional_redirect_urls = ["COURSE_PREVIEW_URL/**"]
+[auth.email]
+enable_confirmations = true

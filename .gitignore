@@ -24,3 +24,20 @@ dist-ssr
 *.sw?
 
 .env
+# DevOps local artifacts and secrets
+.env.*
+!.env.example
+.firebase/
+output/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+gha-creds-*.json
+
+
+infra/backend.tf
+infra/backend.gcs.hcl
+*schema-audit.sql
