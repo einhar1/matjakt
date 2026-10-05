@@ -7,7 +7,7 @@ The app-facing tables and functions were inspected against that export:
 `search_products_dev1_4`, `get_best_local_deals`,
 `get_stores_within_radius`, `find_cheapest_products`, weighted `product_search_vector`, and the new-user trigger.
 
-The course baseline intentionally contains the app-facing subset, rather than crawler ingestion/history tables or obsolete search RPCs. Synthetic prices replace scraped data. Course differences:
+The course baseline intentionally contains the app-facing subset, rather than crawler ingestion/history tables or obsolete search RPCs. Local and CI prices are synthetic; the hosted course database received an approved catalog-only production snapshot on 2026-10-05. Course differences:
 
 - Catalog tables expose read-only access through RLS and explicit grants. Exported broad catalog grants are not copied.
 - Profile authorization is based on Auth user ID. The new-user security-definer trigger is kept in an unexposed private schema with a fixed search path.
@@ -17,3 +17,5 @@ The course baseline intentionally contains the app-facing subset, rather than cr
 - The course materialized deals view includes available catalog prices and is refreshed after seed; its public contents contain no profile/user data.
 
 Migration comments identify the adaptations. Tests prove the retained app-facing behavior on course fixtures; they do not claim crawler or full production-schema parity.
+
+On 2026-10-05, a new compatibility migration relaxed optional product information/ingredients/alcohol and store-coordinate NOT NULL constraints to preserve original catalog NULLs. Keys, price checks, RLS and browser grants remain unchanged. The catalog-only data import completed; hosted verification is recorded separately in [catalog-snapshot.md](catalog-snapshot.md).

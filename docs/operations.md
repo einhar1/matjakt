@@ -78,7 +78,7 @@ Choose a previous revision from release metadata or `gcloud run revisions list`.
 ```sh
 npm run rollback:course
 # Set PLAYWRIGHT_BASE_URL to live and GITHUB_SHA to the restored commit.
-npx playwright test smoke.spec.ts
+SMOKE_SEARCH_TERM=mjölk npx playwright test smoke.spec.ts
 ```
 
 Rollback restores frontend traffic only. Database errors require a forward corrective migration. Coordinate manual operations so they do not overlap a release. Retain old revisions/images until recovery evidence is collected.
@@ -92,3 +92,7 @@ Retain the course environment for grading. Afterwards explicitly review cleanup;
 Sources: [HCP state migration](https://developer.hashicorp.com/terraform/cloud-docs/migrate), [HCP execution modes](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings), [Cloud Run revisions and rollback](https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration), [public Cloud Run configuration](https://docs.cloud.google.com/run/docs/authenticating/public), [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations), [OIDC action](https://github.com/google-github-actions/auth).
 
 HCP speculative plans are a required GitHub status alongside CI gate. The setup merge used a user-authorized administrator exception; enforce_admins was immediately restored. Future changes use the normal review requirement.
+
+## Catalog snapshot
+
+A team-approved one-time production catalog import completed on 2026-10-05 after course disk expansion. See [snapshot status and procedure](catalog-snapshot.md). Local and CI fixtures remain synthetic; no production users are copied.
