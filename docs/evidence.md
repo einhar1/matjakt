@@ -51,3 +51,7 @@ Automatic infrastructure and app release evidence is linked above. Have Christop
 ## Repository and merge authorization
 
 The user confirmed this repository is a copy of the real project and explicitly authorized Codex to merge the PR when checks pass. Normal main protection remains configured. Any administrator exception for this setup merge is user-authorized and is not evidence of independent human code review.
+
+## Catalog snapshot, 2026-10-05
+
+The approved catalog-only snapshot committed at 18:55 UTC after the team expanded disk capacity. Exact table counts, checksums and hosted verification are recorded in [catalog-snapshot.md](catalog-snapshot.md). No accounts/profiles were copied. SQL verified matching counts, zero orphan prices, unchanged course profiles, seven RLS-protected catalog tables, both chain searches as anon, and refreshed deals. Live smoke and the real ICA search/details/cart/checkout journey passed; database price 3.00 SEK matched the UI, and quantity doubling yielded 6.00 SEK. Local lint/types/build, ten unit tests and fifteen pgTAP assertions passed. Three local browser tests passed initially; the profile test failed once and passed on a targeted rerun, so this local run alone is not proof of flake-free CI.

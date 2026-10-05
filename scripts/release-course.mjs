@@ -25,7 +25,7 @@ const save = () => writeFileSync('output/deployment/release.json', JSON.stringif
 save();
 function smoke(url) {
   execFileSync(process.execPath, [resolve('node_modules/@playwright/test/cli.js'), 'test', 'smoke.spec.ts'], {
-    stdio: 'inherit', env: { ...env, PLAYWRIGHT_BASE_URL: url },
+    stdio: 'inherit', env: { ...env, PLAYWRIGHT_BASE_URL: url, SMOKE_SEARCH_TERM: env.SMOKE_SEARCH_TERM || 'mjölk' },
   });
 }
 smoke(preview.url);
