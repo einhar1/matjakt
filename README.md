@@ -1,6 +1,6 @@
 # Matjakt
 
-React/TypeScript grocery price comparison application with Supabase Auth/Postgres. The DevOps course frontend runs on **Cloud Run**; the existing Matjakt Firebase environment remains separate.
+React/TypeScript grocery price comparison application with Supabase Auth/Postgres. This repository builds and deploys the DevOps course frontend on **Cloud Run**. Legacy Firebase Hosting configuration is not included; the original Matjakt environment is managed separately.
 
 Course URL: https://matjakt-course-s6jsqt6gca-lz.a.run.app
 Course Supabase ref: `ixrkepmiwiyqdvckqflt` (Adams Org, Micro, approximately USD 10/month in addition to the organization's plan).
