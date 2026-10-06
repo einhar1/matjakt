@@ -16,6 +16,7 @@ test.beforeEach(async ({ page }) => {
     routes: [{ geometry: { coordinates: [[18.0686,59.3293],[18.07,59.335]] }, distance: 1000, duration: 120 }],
   }}));
 });
+// Kursmjölk is a deterministic local fixture from supabase/seed.sql, not a hosted product.
 test('search, details, cart and cheapest local price', async ({ page }) => {
   await page.goto('/#/search?q=Kursmjölk&store=ica');
   await expect(page.locator('.offer-card')).toHaveCount(1);

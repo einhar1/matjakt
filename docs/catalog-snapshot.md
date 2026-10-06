@@ -41,7 +41,7 @@ prepare consumes the two completed local dumps and writes staged-import.sql plus
 
 Private unlogged staging tables enforce destination NOT NULL/CHECK constraints; primary/unique keys and references are validated before catalog deletion. Destination table objects, RLS and grants remain intact. The transaction replaces only the catalog, checks final counts and unchanged course profiles, refreshes public.mv_active_deals, analyzes tables and removes staging. Any failure aborts the transaction; completedAt is recorded only after a successful commit. PANIC/connection loss requires verifying database recovery before retrying.
 
-After commit, compare manifest counts with SQL counts, verify orphan-free prices/RLS, and run the hosted smoke test with SMOKE_SEARCH_TERM=mjölk. Local/CI seed remains synthetic. Hosted releases select mjölk through release-course.mjs; local smoke defaults to Kursmjölk.
+After commit, compare manifest counts with SQL counts, verify orphan-free prices/RLS, and run the hosted smoke test with SMOKE_SEARCH_TERM=mjölk. Local/CI seed remains synthetic. Smoke tests default to mjölk for both local fixtures and the hosted catalog; SMOKE_SEARCH_TERM can override the search term.
 
 To recover the old catalog, use course-before.sql in a guarded single transaction with foreign-key-safe deletion of only these catalog tables, restore COPY data, and refresh the materialized view. Verify the destination project and profile count first. Do not reset the hosted project or restore an entire production database.
 
