@@ -10,7 +10,7 @@ export function validateSupabaseEnvironment(url: string | undefined, key: string
       if (payload.role === 'service_role') throw new Error('A Supabase service-role key must never be used in the browser.');
     } catch (error) {
       if (error instanceof Error && error.message.includes('service-role')) throw error;
-      throw new Error('Invalid Supabase legacy key.');
+      throw new Error('Invalid Supabase legacy key.', { cause: error });
     }
   }
   return { url, key };

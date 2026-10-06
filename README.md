@@ -29,6 +29,8 @@ npm run test:e2e
 npm run db:stop
 ```
 
+Lint, type checking and both builds use the single pinned TypeScript version **6.0.3**. TypeScript 7 is excluded because `typescript-eslint` **8.71.1** requires TypeScript below 6.1.
+
 `verify` runs lint, TypeScript, Vitest and a production build. E2E runs the built app at port 4173 against real local Supabase. OSRM and map tiles are mocked; the backend-error journey deliberately injects a failed response. To deliberately clear **local course data** and reapply migrations/fixtures: `npm run db:reset`.
 
 ## Architecture and repository

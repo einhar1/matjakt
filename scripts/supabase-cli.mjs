@@ -7,6 +7,7 @@ export function supabase(args) {
     });
   } catch (error) {
     // Child-process error objects include stdout/arguments, potentially credentials.
+    // eslint-disable-next-line preserve-caught-error -- Deliberately omit the original error to avoid exposing credentials.
     throw new Error('Supabase CLI failed (exit ' + (error.status ?? 'unknown') + '). See stderr above.');
   }
 }

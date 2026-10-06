@@ -360,7 +360,7 @@ const CheckoutView = observer(function CheckoutView(props: CheckoutViewProps) {
     const hasDiscount = userModel.hasSeniorDiscount && userModel.seniorDiscountPercent > 0;
     const discountAmount = hasDiscount ? subtotal * (userModel.seniorDiscountPercent / 100) : 0;
     const totalAfterDiscount = subtotal - discountAmount;
-    let algoName = "";
+    let algoName: string;
     if (hasCalculatedWithCurAlgo === "area") {
       algoName = "närmaste område";
     }

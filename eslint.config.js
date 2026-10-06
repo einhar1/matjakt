@@ -14,6 +14,7 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'react-refresh/only-export-components': ['error', {
         allowConstantExport: true,
+        extraHOCs: ['observer'],
         allowExportNames: ['SORT_OPTIONS', 'STORE_FILTER_OPTIONS', 'useAuth', 'useToast', 'offerItemToCartProduct', 'fetchRoute'],
       }],
     },
