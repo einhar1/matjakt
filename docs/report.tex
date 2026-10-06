@@ -17,7 +17,7 @@ Matjakt is a React and TypeScript application built with Vite. It compares groce
 
 The course uses a separate Google Cloud project and a separate Supabase backend in Adams Org. Cloud Run replaced the planned Firebase hosting at the team's request. A small synthetic catalog contains ICA and Coop products, nearby and distant stores, and known prices. Price collection is outside scope. This makes checks repeatable and avoids tests against existing users or scraped data.
 
-Application code, tests, migrations, platform configuration, infrastructure and operating instructions are versioned in one repository. Node and direct dependencies are pinned; npm installs from the lockfile. Local Supabase runs through its Docker-based CLI, with configuration and fixtures committed alongside the frontend.
+Application code, tests, migrations, platform configuration, infrastructure and operating instructions are versioned in one repository. Node, pnpm and direct dependencies are pinned; pnpm installs from its frozen lockfile. Local Supabase runs through its Docker-based CLI, with configuration and fixtures committed alongside the frontend.
 
 A pull request runs lint, TypeScript, Vitest, a production build, database tests and Playwright journeys, plus a Terraform format check. HCP Terraform validates and plans infrastructure through its GitHub integration. The aggregate CI gate fails if any required job fails. Main rulesets require the gate, an up-to-date branch, the HCP Terraform status and configured security checks. Pull requests receive no deployment credentials.
 

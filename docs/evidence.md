@@ -8,7 +8,7 @@ Observed by Codex on **2026-10-03**. Human review is recorded separately in [AI 
 | Vitest | 9 tests passed |
 | Database tests | 15 pgTAP assertions passed; A cannot read/update B's profile |
 | Playwright | 4 local tests passed against real Supabase |
-| Dependency audit | Full npm audit: 0 vulnerabilities |
+| Dependency audit | Full npm audit: 0 vulnerabilities (historical npm verification) |
 | Original schema comparison | public/coop definitions exported read-only; no data copied; [provenance](schema-provenance.md) |
 | Course database | All 3 migrations and synthetic fixtures applied; local/remote migration histories match |
 | Hosted configuration | public/coop Data API, course Auth URLs, email confirmation enabled |
@@ -20,7 +20,7 @@ Observed by Codex on **2026-10-03**. Human review is recorded separately in [AI 
 | GitHub settings | Course variables/secret configured; main requires CI gate and HCP plan, current branch, 1 review and resolved discussions; setup merge used the explicitly authorized admin exception and protection was restored |
 | Hosted manual releases | Two tagged-preview and live smoke-test runs passed |
 | Frontend recovery | Previous app revision received 100% traffic and passed smoke; current revision then restored |
-| Clean source reproduction | Passed: npm ci, fresh matjakt-repro migrations/seed, lint, TypeScript, 9 unit tests, 15 database assertions and 4 browser tests. This is an automated source snapshot, not the second author's independent clone. |
+| Clean source reproduction | Historical npm verification passed: npm ci, fresh matjakt-repro migrations/seed, lint, TypeScript, 9 unit tests, 15 database assertions and 4 browser tests. This is an automated source snapshot, not the second author's independent clone. |
 | Actual GitHub CI / OIDC release | [PR #1 merged](https://github.com/einhar1/matjakt/pull/1) after [green final PR checks](https://github.com/einhar1/matjakt/actions/runs/37131393199); [main CI and release passed](https://github.com/einhar1/matjakt/actions/runs/37131650365), preview/live version matches commit 22ca42a338b5e571a9b594b63e81a87e73dd7390 with dirty=false |
 | Intentional failed PR gate | Observed: [failed run](https://github.com/einhar1/matjakt/actions/runs/37128787926) on probe commit 3635e18; expected fuel cost 15 instead of 14 caused unit failure, CI gate failed, course release skipped; assertion restored |
 | Second author's clean clone | Pending independent human verification |

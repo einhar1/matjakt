@@ -37,8 +37,8 @@ The original schema was exported **read-only**, without data, and compared with 
 Use `supabase/hosted.config.toml.example` in an ignored workdir, substituting live/preview URLs, then inspect:
 
 ```sh
-npx supabase config diff --project-ref COURSE_REF --workdir PRIVATE_WORKDIR
-npx supabase config push --project-ref COURSE_REF --workdir PRIVATE_WORKDIR --yes
+pnpm exec supabase config diff --project-ref COURSE_REF --workdir PRIVATE_WORKDIR
+pnpm exec supabase config push --project-ref COURSE_REF --workdir PRIVATE_WORKDIR --yes
 ```
 
 Hosted Data API exposes `public, coop`, search path `public, extensions`; Auth points to the course live URL and tagged preview, with email confirmation enabled. Undeclared hosted properties stay intact. Local confirmation is disabled only for disposable test users.
@@ -67,8 +67,8 @@ For explicitly approved manual bootstrap, keep the course environment in ignored
 
 ```sh
 gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
-npm run build:course
-npm run bootstrap:course
+pnpm run build:course
+pnpm run bootstrap:course
 ```
 
 This uses local credentials and is **not** proof of an Actions deployment. The version file marks uncommitted local source as dirty.
@@ -76,9 +76,9 @@ This uses local credentials and is **not** proof of an Actions deployment. The v
 Choose a previous revision from release metadata or `gcloud run revisions list`. Set `COURSE_GCP_PROJECT_ID`, `COURSE_GCP_REGION`, `COURSE_RUN_SERVICE` and `ROLLBACK_REVISION`, then:
 
 ```sh
-npm run rollback:course
+pnpm run rollback:course
 # Set PLAYWRIGHT_BASE_URL to live and GITHUB_SHA to the restored commit.
-SMOKE_SEARCH_TERM=mjölk npx playwright test smoke.spec.ts
+SMOKE_SEARCH_TERM=mjölk pnpm exec playwright test smoke.spec.ts
 ```
 
 Rollback restores frontend traffic only. Database errors require a forward corrective migration. Coordinate manual operations so they do not overlap a release. Retain old revisions/images until recovery evidence is collected.

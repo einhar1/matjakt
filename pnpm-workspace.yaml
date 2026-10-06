@@ -1,0 +1,22 @@
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - '@bramus/specificity@2.4.3'
+  - electron-to-chromium@1.5.445
+  - '@lottiefiles/dotlottie-react@0.20.0'
+  - '@lottiefiles/dotlottie-web@0.81.0'
+  - '@typescript-eslint/eslint-plugin@8.71.1'
+  - '@typescript-eslint/parser@8.71.1'
+  - '@typescript-eslint/project-service@8.71.1'
+  - '@typescript-eslint/scope-manager@8.71.1'
+  - '@typescript-eslint/tsconfig-utils@8.71.1'
+  - '@typescript-eslint/type-utils@8.71.1'
+  - '@typescript-eslint/types@8.71.1'
+  - '@typescript-eslint/typescript-estree@8.71.1'
+  - '@typescript-eslint/utils@8.71.1'
+  - '@typescript-eslint/visitor-keys@8.71.1'
+  - typescript-eslint@8.71.1
+  - vite@8.3.3
+
+# Native file watching on macOS; no other dependency build scripts are allowed.
+allowBuilds:
+  fsevents: true

@@ -1,5 +1,5 @@
 export function validateSupabaseEnvironment(url: string | undefined, key: string | undefined) {
-  if (!url || !key) throw new Error('Supabase configuration missing. Run npm run env:local or set the VITE_SUPABASE variables.');
+  if (!url || !key) throw new Error('Supabase configuration missing. Run pnpm run env:local or set the VITE_SUPABASE variables.');
   const parsed = new URL(url);
   if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Supabase URL must use HTTP or HTTPS.');
   if (key.startsWith('sb_secret_')) throw new Error('A Supabase secret key must never be used in the browser.');

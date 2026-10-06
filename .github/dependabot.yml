@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # GitHub uses the npm ecosystem for pnpm-lock.yaml as well.
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }

@@ -9,29 +9,29 @@ The course schema was reconstructed from application contracts, then compared wi
 
 ## Run from a clean clone
 
-Requirements: Node **24.15.0**, npm and a running Docker engine.
+Requirements: Node **24.15.0**, pnpm **10.34.6** and a running Docker engine. Install the pinned package manager with `npm install --global pnpm@10.34.6` if needed. The `packageManager` field pins the same version for local development and CI. pnpm 10 is used to retain documented Dependabot support; Dependabot continues to use the `npm` ecosystem setting.
 
 ```sh
-npm ci
-npm run db:start
-npm run env:local
-npm run dev
+pnpm install --frozen-lockfile
+pnpm run db:start
+pnpm run env:local
+pnpm run dev
 ```
 
 Supabase starts an isolated stack called `matjakt-course`, applies migrations and seeds synthetic products. API: `http://127.0.0.1:55321`; PostgreSQL: 55322. `env:local` writes only browser-safe credentials to ignored `.env.local`. No cloud credentials are needed.
 
 ```sh
-npm run verify
-npm audit --audit-level=high
-npm run test:db
-npx playwright install chromium
-npm run test:e2e
-npm run db:stop
+pnpm run verify
+pnpm audit --audit-level=high
+pnpm run test:db
+pnpm exec playwright install chromium
+pnpm run test:e2e
+pnpm run db:stop
 ```
 
 Lint, type checking and both builds use the single pinned TypeScript version **6.0.3**. TypeScript 7 is excluded because `typescript-eslint` **8.71.1** requires TypeScript below 6.1.
 
-`verify` runs lint, TypeScript, Vitest and a production build. E2E runs the built app at port 4173 against real local Supabase. OSRM and map tiles are mocked; the backend-error journey deliberately injects a failed response. To deliberately clear **local course data** and reapply migrations/fixtures: `npm run db:reset`.
+`verify` runs lint, TypeScript, Vitest and a production build. E2E runs the built app at port 4173 against real local Supabase. OSRM and map tiles are mocked; the backend-error journey deliberately injects a failed response. To deliberately clear **local course data** and reapply migrations/fixtures: `pnpm run db:reset`.
 
 ## Architecture and repository
 
