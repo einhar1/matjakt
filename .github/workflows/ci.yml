@@ -35,29 +35,27 @@ jobs:
           if-no-files-found: ignore
       - run: npm run db:stop
         if: always()
-  infrastructure:
-    name: Terraform
+  terraform_format:
+    name: Terraform format
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: 1.15.2
       - run: terraform -chdir=infra fmt -check
-      - run: terraform -chdir=infra init -backend=false -input=false -lockfile=readonly
-      - run: terraform -chdir=infra validate
   gate:
     name: CI gate
     runs-on: ubuntu-24.04
-    needs: [verify, infrastructure]
+    needs: [verify, terraform_format]
     if: always()
     steps:
       - name: Require every check to pass
         env:
           APP_RESULT: ${{ needs.verify.result }}
-          INFRA_RESULT: ${{ needs.infrastructure.result }}
-        run: test "$APP_RESULT" = success && test "$INFRA_RESULT" = success
+          FORMAT_RESULT: ${{ needs.terraform_format.result }}
+        run: test "$APP_RESULT" = success && test "$FORMAT_RESULT" = success
   deploy:
     name: Course release
     needs: gate

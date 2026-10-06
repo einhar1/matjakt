@@ -48,7 +48,7 @@ npm run db:stop
 
 ```mermaid
 flowchart LR
-  PR[Pull request] --> CI[Lint, TypeScript, unit, database, browser and Terraform checks]
+  PR[Pull request] --> CI[Lint, TypeScript, unit, database, browser and Terraform format checks]
   CI --> Review[Required approval and merge]
   Review --> Main[Verify main commit]
   Main --> DB[Course migrations]
@@ -58,9 +58,9 @@ flowchart LR
   Smoke --> Live[Move traffic to the tested revision]
 ```
 
-PRs receive no deployment secrets. `CI gate` and one approving review are required on main. After a main push, the same commit is verified, built for the course backend and packaged once. A tagged revision receives preview tests before live traffic moves to that exact revision; live is checked again. Releases are serialized, and obsolete commits are rejected. `/version.json` records the commit and whether a manual build had uncommitted changes.
+PRs receive no deployment secrets. `CI gate`, the HCP Terraform status and configured security checks are required before merging to main. After a main push, the same commit is verified, built for the course backend and packaged once. A tagged revision receives preview tests before live traffic moves to that exact revision; live is checked again. Releases are serialized, and obsolete commits are rejected. `/version.json` records the commit and whether a manual build had uncommitted changes.
 
-Terraform owns service configuration, registry, identity and infrastructure. State is stored and locked in [HCP Terraform](https://app.terraform.io/app/einar-org/workspaces/matjakt-course); HCP runs remote speculative plans for PRs and automatically plans/applies changes under `infra` after a push to `main`, using Google OIDC. CI owns container revisions and traffic; Terraform explicitly ignores those release fields. Preview/live share the course database and require backward-compatible migrations. Rollback moves traffic to a previous revision and leaves migrations in place.
+Terraform owns service configuration, registry, identity and infrastructure. State is stored and locked in [HCP Terraform](https://app.terraform.io/app/einar-org/workspaces/matjakt-course); HCP runs remote speculative plans for PRs and automatically plans/applies changes under `infra` after a push to `main`, using Google OIDC. GitHub Actions checks Terraform formatting; HCP Terraform validates and plans the configuration, and its aggregated GitHub status is required before merge. CI owns container revisions and traffic; Terraform explicitly ignores those release fields. Preview/live share the course database and require backward-compatible migrations. Rollback moves traffic to a previous revision and leaves migrations in place.
 
 ## Scope and current verification
 

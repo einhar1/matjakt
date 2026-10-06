@@ -8,7 +8,7 @@ Active state and execution: [HCP Terraform workspace](https://app.terraform.io/a
 
 Google authentication uses HCP dynamic OIDC credentials, restricted to the immutable organization/workspace IDs. The plan service account has read permissions; the apply account manages course resources. No Google service account key is stored in HCP. Environment variables are the four names returned by `terraform -chdir=infra output -json hcp_authentication`, plus `GOOGLE_CLOUD_QUOTA_PROJECT` set to the course project. Terraform variables in HCP are `project_id`, `billing_account_id`, `github_repository_id`, `github_repository`, `region`; currency defaults to SEK. Never set `GOOGLE_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS` manually in HCP.
 
-Normal infrastructure changes use a PR: edit configuration, inspect the speculative plan and CI, then merge. HCP serializes state operations and applies from main automatically. Check its run result before treating infrastructure as ready. GitHub Actions validates configuration with `-backend=false` and needs no HCP token or state access.
+Normal infrastructure changes use a PR: edit configuration, inspect the speculative plan and CI, then merge. HCP serializes state operations and applies from main automatically. Check its run result before treating infrastructure as ready. GitHub Actions runs only `terraform -chdir=infra fmt -check`; HCP Terraform performs initialization, validation and planning through the GitHub App. Actions needs no HCP token or state access.
 
 For read-only investigation:
 
@@ -49,7 +49,7 @@ Catalog tables grant browser reads only. Profiles grant authenticated users sele
 
 ## GitHub setup
 
-Environment `course` is restricted to protected branches; the workflow and OIDC trust permit main only. Main requires an up-to-date `CI gate`, one approval, dismissed stale reviews and resolved conversations. Force pushes and deletion are disabled, including for administrators.
+Environment `course` is restricted to protected branches; the workflow and OIDC trust permit main only. Main rulesets require an up-to-date `CI gate`, the HCP Terraform status and configured code-scanning/quality checks. Force pushes and deletion are disabled, including for administrators.
 
 Variables: `COURSE_GCP_PROJECT_ID`, `COURSE_GCP_REGION`, `COURSE_RUN_SERVICE`, `COURSE_IMAGE_REPOSITORY`, `COURSE_WORKLOAD_IDENTITY_PROVIDER`, `COURSE_DEPLOY_SERVICE_ACCOUNT`, `COURSE_SUPABASE_PROJECT_REF`, `COURSE_SUPABASE_URL`, `COURSE_SUPABASE_PUBLISHABLE_KEY`.
 
@@ -91,7 +91,7 @@ Retain the course environment for grading. Afterwards explicitly review cleanup;
 
 Sources: [HCP state migration](https://developer.hashicorp.com/terraform/cloud-docs/migrate), [HCP execution modes](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings), [Cloud Run revisions and rollback](https://docs.cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration), [public Cloud Run configuration](https://docs.cloud.google.com/run/docs/authenticating/public), [Supabase migrations](https://supabase.com/docs/guides/local-development/database-migrations), [OIDC action](https://github.com/google-github-actions/auth).
 
-HCP speculative plans are a required GitHub status alongside CI gate. The setup merge used a user-authorized administrator exception; enforce_admins was immediately restored. Future changes use the normal review requirement.
+The required HCP GitHub status is `Terraform Cloud/einar-org/repo-id-xYJjys86WtdnrsLN`, supplied by the Terraform Cloud GitHub App (integration ID `39328`). This is the aggregated status for the current repository connection; the old workspace-specific status is not required. HCP posts a successful aggregated status for application-only pull requests that do not trigger an infrastructure plan. If the VCS connection or aggregation mode changes, inspect a recent PR and update the ruleset to the actual status name. The GitHub Actions `CI gate` includes application verification and Terraform formatting; HCP planning is enforced independently by the GitHub ruleset. A passing PR plan does not prove that the post-merge apply succeeded.
 
 ## Catalog snapshot
 
