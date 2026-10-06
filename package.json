@@ -29,7 +29,7 @@
     "boring-avatars": "2.0.4",
     "chart.js": "4.5.1",
     "leaflet": "1.9.4",
-    "mobx": "6.15.0",
+    "mobx": "7.0.6",
     "mobx-react-lite": "4.1.1",
     "react": "19.2.5",
     "react-chartjs-2": "5.3.1",
