@@ -33,16 +33,18 @@ Ensure disk space covers staging, indexes, final tables, sort files and WAL, rat
 Then run:
 
 ```sh
-node scripts/import-course-catalog.mjs prepare
-node scripts/import-course-catalog.mjs apply
+node scripts/import-catalog.mjs prepare
+node scripts/import-catalog.mjs apply
 ```
 
-prepare consumes the two completed local dumps and writes staged-import.sql plus a checksum/count manifest. It refuses to overwrite an existing prepared import. Archive the previous staged-import.sql before preparing again. apply accepts COURSE_SUPABASE_DB_URL or the ignored output/course-db-url.local, verifies the exact course ref/TLS/session port, and checks all three checksums. It runs psql with --single-transaction and ON_ERROR_STOP.
+prepare consumes the two completed local dumps and writes staged-import.sql plus a checksum/count manifest. It refuses to overwrite an existing prepared import. Archive the previous staged-import.sql before preparing again. apply accepts SUPABASE_DB_URL or the ignored output/db-url.local, verifies the exact course ref/TLS/session port, and checks all three checksums. It runs psql with --single-transaction and ON_ERROR_STOP.
 
 Private unlogged staging tables enforce destination NOT NULL/CHECK constraints; primary/unique keys and references are validated before catalog deletion. Destination table objects, RLS and grants remain intact. The transaction replaces only the catalog, checks final counts and unchanged course profiles, refreshes public.mv_active_deals, analyzes tables and removes staging. Any failure aborts the transaction; completedAt is recorded only after a successful commit. PANIC/connection loss requires verifying database recovery before retrying.
 
 After commit, compare manifest counts with SQL counts, verify orphan-free prices/RLS, and run the hosted smoke test with SMOKE_SEARCH_TERM=mjölk. Local/CI seed remains synthetic. Smoke tests default to mjölk for both local fixtures and the hosted catalog; SMOKE_SEARCH_TERM can override the search term.
 
-To recover the old catalog, use course-before.sql in a guarded single transaction with foreign-key-safe deletion of only these catalog tables, restore COPY data, and refresh the materialized view. Verify the destination project and profile count first. Do not reset the hosted project or restore an entire production database.
+To recover the old catalog, use the original retained course-before.sql backup in a guarded single transaction with foreign-key-safe deletion of only these catalog tables, restore COPY data, and refresh the materialized view. Verify the destination project and profile count first. Do not reset the hosted project or restore an entire production database.
 
 Sources: [Supabase backup/restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), [disk usage](https://supabase.com/docs/guides/platform/database-size).
+
+New imports use `output/catalog-copy/target-before.sql` for the destination backup and `SUPABASE_DB_URL` or `output/db-url.local` for the connection. Historical `course-before.sql` and `output/course-db-url.local` files are preserved as local artifacts but are no longer discovered automatically. Copy an old backup to the neutral name only if intentionally reusing that snapshot, and verify the checksum against its existing manifest.

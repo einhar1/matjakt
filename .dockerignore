@@ -3,4 +3,4 @@
 !dist/**
 !deploy/
 !deploy/nginx.conf
-!Dockerfile.course
+!Dockerfile

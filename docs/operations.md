@@ -63,20 +63,20 @@ CI verifies the actual main commit, builds with course browser variables, applie
 
 `output/deployment/release.json` records commit, image, revision, URLs, previous traffic and promotion/test status. CI retains this and Playwright artifacts. A failed preview leaves live traffic unchanged. A live test failure still leaves recorded recovery information.
 
-For explicitly approved manual bootstrap, keep the course environment in ignored `.env.course.local`, configure Docker auth, then:
+For explicitly approved manual bootstrap, keep the course environment in ignored `.env.deployment.local`, configure Docker auth, then:
 
 ```sh
 gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
-pnpm run build:course
-pnpm run bootstrap:course
+pnpm run build:production
+pnpm run bootstrap
 ```
 
 This uses local credentials and is **not** proof of an Actions deployment. The version file marks uncommitted local source as dirty.
 
-Choose a previous revision from release metadata or `gcloud run revisions list`. Set `COURSE_GCP_PROJECT_ID`, `COURSE_GCP_REGION`, `COURSE_RUN_SERVICE` and `ROLLBACK_REVISION`, then:
+Choose a previous revision from release metadata or `gcloud run revisions list`. Set `GCP_PROJECT_ID`, `GCP_REGION`, `RUN_SERVICE` and `ROLLBACK_REVISION`, then:
 
 ```sh
-pnpm run rollback:course
+pnpm run rollback
 # Set PLAYWRIGHT_BASE_URL to live and GITHUB_SHA to the restored commit.
 SMOKE_SEARCH_TERM=mjölk pnpm exec playwright test smoke.spec.ts
 ```
@@ -96,3 +96,38 @@ The required HCP GitHub status is `Terraform Cloud/einar-org/repo-id-xYJjys86Wtd
 ## Catalog snapshot
 
 A team-approved one-time production catalog import completed on 2026-10-05 after course disk expansion. See [snapshot status and procedure](catalog-snapshot.md). Local and CI fixtures remain synthetic; no production users are copied.
+
+## Project naming and compatibility
+
+Project scripts use ordinary names: `deploy`, `rollback`, `bootstrap`, `build:production`, `scripts/deployment-guard.mjs` and `Dockerfile`. Bootstrap reads ignored `.env.deployment.local`; deployment variables there use the names below without `COURSE_`. The workflow maps existing GitHub variables and secrets to these neutral script names.
+
+| Script variable | Existing GitHub binding |
+| --- | --- |
+| GCP_PROJECT_ID | COURSE_GCP_PROJECT_ID |
+| GCP_REGION | COURSE_GCP_REGION |
+| RUN_SERVICE | COURSE_RUN_SERVICE |
+| IMAGE_REPOSITORY | COURSE_IMAGE_REPOSITORY |
+| SUPABASE_PROJECT_REF | COURSE_SUPABASE_PROJECT_REF |
+| SUPABASE_DB_URL | COURSE_SUPABASE_DB_URL (secret) |
+| VITE_SUPABASE_URL | COURSE_SUPABASE_URL |
+| VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY | COURSE_SUPABASE_PUBLISHABLE_KEY |
+
+The protected GitHub environment `course`, its variables/secret names, HCP workspace `matjakt-course`, deployed Cloud Run service, Artifact Registry repository and service-account IDs remain external bindings. The `course-preview` tag is retained because its URL is registered in hosted Auth redirects. Renaming these source values alone would disconnect authentication, secrets or state, or replace resources. Their course names are necessary compatibility references. Terraform output keys use neutral script names; when updating the existing GitHub configuration, map them to the bindings above. `COURSE_WORKLOAD_IDENTITY_PROVIDER` and `COURSE_DEPLOY_SERVICE_ACCOUNT` remain existing GitHub bindings too.
+
+Terraform resource addresses now describe their roles. `infra/moved.tf` retains old addresses to let HCP migrate state without replacing resources. Review the speculative plan before merge; this source change does not itself apply infrastructure.
+
+Already applied migration filenames, their timestamps and executable SQL remain unchanged, including the historical `course-fixture` default, to preserve migration history. Documentation still explains the course and cloned repository. Local catalog fixtures and current tests use `Testmjölk`, `Testkaffe` and `Testbröd`.
+
+The importer uses `target-before.sql` and `output/db-url.local` (or `SUPABASE_DB_URL`). There are no fallbacks for older course-specific filenames. Historical local backups, connection files and manifests remain preserved; an existing backup can be copied to the neutral filename before reuse, with its checksum verified.
+
+Local Supabase now uses project ID `matjakt`. If an old `matjakt-course` stack is running, stop it with the old configuration before starting the renamed stack. Docker volumes are not deleted by this change; do not remove them without checking whether their data is needed.
+
+The local deployment file uses `.env.deployment.local` rather than a Vite automatically loaded filename. `build:production` explicitly loads it with Node, while normal `build`/`verify` continue to use the local backend written by `env:local`. This keeps local browser journeys on their synthetic catalog.
+
+Terraform state renaming follows [HashiCorp moved-block guidance](https://developer.hashicorp.com/terraform/language/modules/develop/refactoring).
+
+## Script entry points
+
+`scripts/database.mjs` handles `start`, `env` and `migrate`. Local startup also writes the browser environment, so CI and first-time setup need only `pnpm run db:start`. `pnpm run env:local` remains available to regenerate it. Hosted migrations use `pnpm run db:migrate` and retain the target/TLS guards.
+
+`scripts/release.mjs` handles the verified main-push release and the explicit `--bootstrap` mode. `pnpm run deploy` uses CI checks; `pnpm run bootstrap` explicitly selects manual mode and loads `.env.deployment.local`. Normal deployment does not fall back to bootstrap when GitHub metadata is absent.

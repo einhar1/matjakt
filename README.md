@@ -14,11 +14,10 @@ Requirements: Node **24.15.0**, pnpm **10.34.6** and a running Docker engine. In
 ```sh
 pnpm install --frozen-lockfile
 pnpm run db:start
-pnpm run env:local
 pnpm run dev
 ```
 
-Supabase starts an isolated stack called `matjakt-course`, applies migrations and seeds synthetic products. API: `http://127.0.0.1:55321`; PostgreSQL: 55322. `env:local` writes only browser-safe credentials to ignored `.env.local`. No cloud credentials are needed.
+Supabase starts an isolated stack called `matjakt`, applies migrations and seeds synthetic products. API: `http://127.0.0.1:55321`; PostgreSQL: 55322. `db:start` also writes browser-safe credentials to ignored `.env.local`; `env:local` regenerates that file when needed. No cloud credentials are needed.
 
 ```sh
 pnpm run verify
@@ -39,7 +38,7 @@ Lint, type checking and both builds use the single pinned TypeScript version **6
 - `supabase/`: local config, ordered migrations, synthetic catalog and pgTAP tests.
 - `tests/`: domain tests and Playwright user journeys.
 - `infra/`: Terraform for Cloud Run, Artifact Registry, IAM/OIDC, HCP Terraform state and budget warnings.
-- `Dockerfile.course` and `deploy/nginx.conf`: serve the already verified build with an unprivileged, digest-pinned nginx image and SPA fallback.
+- `Dockerfile` and `deploy/nginx.conf`: serve the already verified build with an unprivileged, digest-pinned nginx image and SPA fallback.
 - `.github/workflows/ci.yml`: verification and guarded main release; actions pinned to commit SHAs.
 - [Operations](docs/operations.md): bootstrap, configuration, release and recovery.
 - [Evidence](docs/evidence.md): observed checks and outstanding acceptance work.

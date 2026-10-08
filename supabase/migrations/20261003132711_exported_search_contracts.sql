@@ -1,5 +1,5 @@
 -- App-facing definitions derived from original Matjakt schema export, 2026-10-03.
--- Course-only: no crawler/history objects and no production data or broad grants.
+-- Application scope: no crawler/history objects and no production data or broad grants.
 set search_path = public, extensions;
 CREATE OR REPLACE FUNCTION "public"."product_search_vector"("product_name" "text", "product_brand" "text", "product_type" "text", "product_information" "text", "ingredients" "text") RETURNS "tsvector"
     LANGUAGE "plpgsql" IMMUTABLE

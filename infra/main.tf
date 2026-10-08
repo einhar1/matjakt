@@ -1,5 +1,5 @@
 # The user has already created this project. Manage resources inside it only.
-data "google_project" "course" { project_id = var.project_id }
+data "google_project" "app" { project_id = var.project_id }
 
 resource "google_project_service" "api" {
   for_each = toset([
@@ -29,7 +29,7 @@ resource "google_storage_bucket" "state" {
 resource "google_service_account" "deploy" {
   project      = var.project_id
   account_id   = "matjakt-course-deploy"
-  display_name = "Matjakt course GitHub deployment"
+  display_name = "Matjakt GitHub deployment"
   depends_on   = [google_project_service.api]
 }
 
@@ -43,7 +43,7 @@ resource "google_project_iam_member" "deploy" {
 resource "google_iam_workload_identity_pool" "github" {
   project                   = var.project_id
   workload_identity_pool_id = "matjakt-github"
-  display_name              = "Matjakt course GitHub"
+  display_name              = "Matjakt GitHub"
   depends_on                = [google_project_service.api]
 }
 
@@ -67,11 +67,11 @@ resource "google_service_account_iam_member" "github" {
   depends_on         = [google_iam_workload_identity_pool_provider.github]
 }
 
-resource "google_billing_budget" "course" {
+resource "google_billing_budget" "monthly" {
   billing_account = var.billing_account_id
-  display_name    = "Matjakt course: 50 and 100 SEK warnings"
+  display_name    = "Matjakt: 50 and 100 SEK warnings"
   budget_filter {
-    projects        = ["projects/${data.google_project.course.number}"]
+    projects        = ["projects/${data.google_project.app.number}"]
     calendar_period = "MONTH"
   }
   amount {
@@ -85,12 +85,12 @@ resource "google_billing_budget" "course" {
   depends_on = [google_project_service.api]
 }
 
-resource "google_artifact_registry_repository" "course" {
+resource "google_artifact_registry_repository" "frontend" {
   project       = var.project_id
   location      = var.region
   repository_id = "matjakt-course"
   format        = "DOCKER"
-  description   = "Immutable Matjakt course release images"
+  description   = "Immutable Matjakt release images"
   docker_config { immutable_tags = true }
   depends_on = [google_project_service.api]
   lifecycle { prevent_destroy = true }
@@ -101,11 +101,11 @@ resource "google_service_account" "runtime" {
   display_name = "Matjakt static frontend (no project roles)"
   depends_on   = [google_project_service.api]
 }
-resource "google_cloud_run_v2_service" "course" {
+resource "google_cloud_run_v2_service" "frontend" {
   project              = var.project_id
   name                 = "matjakt-course"
   location             = var.region
-  labels               = { course = "devops-2026" }
+  labels               = { app = "matjakt" }
   deletion_protection  = true
   ingress              = "INGRESS_TRAFFIC_ALL"
   invoker_iam_disabled = true
@@ -141,14 +141,14 @@ resource "google_cloud_run_v2_service" "course" {
 resource "google_cloud_run_v2_service_iam_member" "deploy" {
   project  = var.project_id
   location = var.region
-  name     = google_cloud_run_v2_service.course.name
+  name     = google_cloud_run_v2_service.frontend.name
   role     = "roles/run.developer"
   member   = "serviceAccount:${google_service_account.deploy.email}"
 }
 resource "google_artifact_registry_repository_iam_member" "deploy" {
   project    = var.project_id
   location   = var.region
-  repository = google_artifact_registry_repository.course.name
+  repository = google_artifact_registry_repository.frontend.name
   role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:${google_service_account.deploy.email}"
 }

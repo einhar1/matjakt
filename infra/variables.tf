@@ -1,7 +1,7 @@
 variable "project_id" {
   type        = string
   default     = "project-d3caac43-e28e-41c8-940"
-  description = "Existing, isolated course project. Terraform does not create or replace it."
+  description = "Existing, isolated deployment project. Terraform does not create or replace it."
   validation {
     condition     = var.project_id != "matjakt-27b7f"
     error_message = "The existing Matjakt hosting project must not be used."
@@ -9,7 +9,7 @@ variable "project_id" {
 }
 variable "billing_account_id" {
   type        = string
-  description = "Billing account associated with the course project, e.g. 000000-000000-000000."
+  description = "Billing account associated with the deployment project, e.g. 000000-000000-000000."
 }
 variable "billing_currency" {
   type        = string

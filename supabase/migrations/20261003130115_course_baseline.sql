@@ -1,4 +1,4 @@
--- Course-only baseline reconstructed from checked-in application contracts.
+-- Application baseline reconstructed from checked-in application contracts.
 -- NOT an export of the existing Matjakt database. Never apply to that project.
 create schema if not exists extensions;
 create extension if not exists postgis with schema extensions;

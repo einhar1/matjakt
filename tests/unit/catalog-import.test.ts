@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, sep } from 'node:path';
 import { test, expect } from 'vitest';
-import { copyLines } from '../../scripts/import-course-catalog.mjs';
+import { copyLines } from '../../scripts/import-catalog.mjs';
 
 test('COPY rows preserve Unicode line separators and multibyte text across stream chunks', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'matjakt-copy-'));

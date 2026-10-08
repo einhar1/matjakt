@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.event_name == 'push' && 'course-release' || github.ref }}
+  group: ${{ github.event_name == 'push' && 'release' || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   verify:
@@ -25,7 +25,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm run db:start
-      - run: pnpm run env:local
       - run: pnpm run verify
       - run: pnpm audit --prod --audit-level=high
       - run: pnpm run test:db
@@ -61,7 +60,7 @@ jobs:
           FORMAT_RESULT: ${{ needs.terraform_format.result }}
         run: test "$APP_RESULT" = success && test "$FORMAT_RESULT" = success
   deploy:
-    name: Course release
+    name: Release
     needs: gate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
@@ -71,11 +70,11 @@ jobs:
       contents: read
       id-token: write
     env:
-      COURSE_GCP_PROJECT_ID: ${{ vars.COURSE_GCP_PROJECT_ID }}
-      COURSE_RUN_SERVICE: ${{ vars.COURSE_RUN_SERVICE }}
-      COURSE_GCP_REGION: ${{ vars.COURSE_GCP_REGION }}
-      COURSE_IMAGE_REPOSITORY: ${{ vars.COURSE_IMAGE_REPOSITORY }}
-      COURSE_SUPABASE_PROJECT_REF: ${{ vars.COURSE_SUPABASE_PROJECT_REF }}
+      GCP_PROJECT_ID: ${{ vars.COURSE_GCP_PROJECT_ID }}
+      RUN_SERVICE: ${{ vars.COURSE_RUN_SERVICE }}
+      GCP_REGION: ${{ vars.COURSE_GCP_REGION }}
+      IMAGE_REPOSITORY: ${{ vars.COURSE_IMAGE_REPOSITORY }}
+      SUPABASE_PROJECT_REF: ${{ vars.COURSE_SUPABASE_PROJECT_REF }}
       VITE_SUPABASE_URL: ${{ vars.COURSE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ vars.COURSE_SUPABASE_PUBLISHABLE_KEY }}
     steps:
@@ -93,13 +92,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: node --input-type=module -e "import {courseEnvironment} from './scripts/course-guard.mjs'; courseEnvironment();"
+      - run: node --input-type=module -e "import {deploymentEnvironment} from './scripts/deployment-guard.mjs'; deploymentEnvironment();"
       - run: pnpm run build
       - run: pnpm exec playwright install --with-deps chromium
-      - name: Apply course migrations
+      - name: Apply database migrations
         env:
-          COURSE_SUPABASE_DB_URL: ${{ secrets.COURSE_SUPABASE_DB_URL }}
-        run: node scripts/migrate-course.mjs
+          SUPABASE_DB_URL: ${{ secrets.COURSE_SUPABASE_DB_URL }}
+        run: pnpm run db:migrate
       - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
           workload_identity_provider: ${{ vars.COURSE_WORKLOAD_IDENTITY_PROVIDER }}
@@ -108,12 +107,12 @@ jobs:
       - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
         with:
           version: 586.0.0
-      - run: gcloud auth configure-docker "$COURSE_GCP_REGION-docker.pkg.dev" --quiet
-      - run: pnpm run deploy:course
+      - run: gcloud auth configure-docker "$GCP_REGION-docker.pkg.dev" --quiet
+      - run: pnpm run deploy
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: course-release-${{ github.sha }}
+          name: release-${{ github.sha }}
           path: |
             output/deployment/release.json
             output/playwright

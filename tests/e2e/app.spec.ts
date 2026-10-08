@@ -16,11 +16,11 @@ test.beforeEach(async ({ page }) => {
     routes: [{ geometry: { coordinates: [[18.0686,59.3293],[18.07,59.335]] }, distance: 1000, duration: 120 }],
   }}));
 });
-// Kursmjölk is a deterministic local fixture from supabase/seed.sql, not a hosted product.
+// Testmjölk is a deterministic local fixture from supabase/seed.sql, not a hosted product.
 test('search, details, cart and cheapest local price', async ({ page }) => {
-  await page.goto('/#/search?q=Kursmjölk&store=ica');
+  await page.goto('/#/search?q=Testmjölk&store=ica');
   await expect(page.locator('.offer-card')).toHaveCount(1);
-  await page.getByRole('heading', { name: 'Kursmjölk 3%', exact: true }).click();
+  await page.getByRole('heading', { name: 'Testmjölk 3%', exact: true }).click();
   await expect(page).toHaveURL(/details\/ica_milk/);
   await expect(page.getByRole('button', { name: 'Lägg i varukorg', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Lägg i varukorg', exact: true }).click();
@@ -36,7 +36,7 @@ test('search, details, cart and cheapest local price', async ({ page }) => {
 test('sign in, save profile and reload through Supabase', async ({ page }) => {
   const client = createClient(url, key);
   const email = 'e2e-' + randomUUID() + '@example.test';
-  const password = 'Course-local-test-42!';
+  const password = 'Local-test-42!';
   const signup = await client.auth.signUp({ email, password });
   if (signup.data.user) createdUsers.push(signup.data.user.id);
   expect(signup.error).toBeNull();
@@ -69,7 +69,7 @@ test('empty result and a readable backend failure', async ({ page }) => {
   await page.route('**/rest/v1/rpc/search_products_dev1_4', route => route.fulfill({
     status: 503, json: { message: 'backend unavailable', code: 'TEST_FAILURE' },
   }));
-  await page.goto('/#/search?q=Kurskaffe');
+  await page.goto('/#/search?q=Testkaffe');
   await expect(page.getByRole('alert')).toHaveText('Det gick inte att hämta produkter. Försök igen senare.');
 });
 
