@@ -1,6 +1,6 @@
 # Matjakt
 
-Grocery price comparison application built with React/TypeScript, Supabase Auth/PostgreSQL and Cloud Run. This README covers setup, configuration and operations; the separately submitted report explains design decisions, verification results and trade-offs.
+Grocery price comparison application built with React/TypeScript, Supabase Auth/PostgreSQL and Cloud Run. This README covers setup, configuration and operations; the separately submitted [report](https://github.com/einhar1/matjakt/blob/main/Project%20Report%20DevOps.pdf) explains design decisions, verification results and trade-offs.
 
 - [Live application](https://matjakt-course-s6jsqt6gca-lz.a.run.app)
 - [Tagged preview](https://course-preview---matjakt-course-s6jsqt6gca-lz.a.run.app)
