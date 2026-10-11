@@ -13,18 +13,13 @@ resource "google_project_service" "api" {
   disable_on_destroy = false
 }
 
-# Temporary decommissioning step: apply force_destroy=true to the existing state
-# before removing this resource in a second HCP apply. Active state is in HCP.
-resource "google_storage_bucket" "state" {
-  name                        = "${var.project_id}-tfstate"
-  project                     = var.project_id
-  location                    = "EU"
-  uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
-  force_destroy               = true
-  versioning { enabled = true }
-  depends_on = [google_project_service.api]
-  lifecycle { prevent_destroy = false }
+# force_destroy=true was applied before this final decommissioning step.
+# Delete the legacy GCS bucket and its objects; active state remains in HCP.
+removed {
+  from = google_storage_bucket.state
+  lifecycle {
+    destroy = true
+  }
 }
 
 resource "google_service_account" "deploy" {
