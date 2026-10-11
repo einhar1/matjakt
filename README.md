@@ -7,8 +7,6 @@ Grocery price comparison application built with React/TypeScript, Supabase Auth/
 - Google Cloud project: `project-d3caac43-e28e-41c8-940`, region `europe-north1`.
 - Supabase project: `ixrkepmiwiyqdvckqflt`, Adams Org, Stockholm region.
 
-The original Supabase project `qzpyabesygoljpohguxw` and Firebase project `matjakt-27b7f` are not deployment targets. Deployment guards reject these original identifiers.
-
 ## Run from a clean clone
 
 Requirements: Node **24.15.0**, pnpm **10.34.6** and a running Docker engine. The package manager is pinned in `package.json`; install it with `npm install --global pnpm@10.34.6` if needed.
@@ -30,7 +28,7 @@ pnpm run test:e2e
 pnpm run db:stop
 ```
 
-`verify` runs lint, TypeScript, unit tests and a production build. Browser tests use the built app on port 4173 and the local database. `pnpm run db:reset` clears local data and reapplies migrations/fixtures; never reset the hosted database.
+`verify` runs lint, TypeScript, unit tests and a production build. Browser tests use the built app on port 4173 and the local database. `pnpm run db:reset` clears local data and reapplies migrations/fixtures.
 
 ## Repository and workflow
 
@@ -110,10 +108,6 @@ pnpm exec supabase config push --project-ref <project-ref> --workdir <private-wo
 ```
 
 The hosted API exposes `public` and `coop`, with search path `public, extensions`. Auth uses the live site and tagged-preview redirect URL, with email confirmation enabled. Local disposable accounts bypass confirmation only in development. `public.mv_active_deals` contains public catalog data, requires refresh after catalog changes and has a documented advisor warning because materialized views do not enforce RLS.
-
-### Retired GCS state bucket
-
-Active state is in HCP Terraform. The `removed` block schedules deletion of `project-d3caac43-e28e-41c8-940-tfstate` with `destroy = true`. Before applying, verify active HCP state and clear all objects and object versions from only this retired bucket: its former `force_destroy = false` blocks deletion while contents remain. Review the HCP plan for deletion of the retired bucket. If the earlier non-destructive removal was already applied, delete the untracked bucket directly in GCS instead. Historical GCS backups are discarded; retention and soft-delete settings may delay final removal.
 
 ## Release and recovery
 
