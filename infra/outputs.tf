@@ -8,5 +8,4 @@ output "github_variables" {
     DEPLOY_SERVICE_ACCOUNT     = google_service_account.deploy.email
   }
 }
-output "state_bucket" { value = google_storage_bucket.state.name }
 output "live_url" { value = google_cloud_run_v2_service.frontend.uri }

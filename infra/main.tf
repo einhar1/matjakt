@@ -13,17 +13,13 @@ resource "google_project_service" "api" {
   disable_on_destroy = false
 }
 
-# Retained private migration backup; active state is in HCP Terraform.
-resource "google_storage_bucket" "state" {
-  name                        = "${var.project_id}-tfstate"
-  project                     = var.project_id
-  location                    = "EU"
-  uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
-  force_destroy               = false
-  versioning { enabled = true }
-  depends_on = [google_project_service.api]
-  lifecycle { prevent_destroy = true }
+# Active state is in HCP Terraform. Delete the retired GCS state bucket.
+# Its former force_destroy=false requires emptying all object versions first.
+removed {
+  from = google_storage_bucket.state
+  lifecycle {
+    destroy = true
+  }
 }
 
 resource "google_service_account" "deploy" {
