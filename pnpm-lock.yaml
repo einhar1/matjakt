@@ -10,16 +10,16 @@ importers:
     dependencies:
       '@lottiefiles/dotlottie-react':
         specifier: 0.20.0
-        version: 0.20.0(react@19.3.0)
+        version: 0.20.0(react@19.3.1)
       '@supabase/supabase-js':
         specifier: 2.117.2
         version: 2.117.2
       '@tanstack/react-query':
         specifier: 5.104.1
-        version: 5.104.1(react@19.3.0)
+        version: 5.104.1(react@19.3.1)
       boring-avatars:
         specifier: 2.0.4
-        version: 2.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 2.0.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1)
       chart.js:
         specifier: 4.5.1
         version: 4.5.1
@@ -31,28 +31,28 @@ importers:
         version: 7.0.6
       mobx-react-lite:
         specifier: 5.1.0
-        version: 5.1.0(mobx@7.0.6)(react@19.3.0)
+        version: 5.1.0(mobx@7.0.6)(react@19.3.1)
       react:
-        specifier: 19.3.0
-        version: 19.3.0
+        specifier: 19.3.1
+        version: 19.3.1
       react-chartjs-2:
         specifier: 5.3.1
-        version: 5.3.1(chart.js@4.5.1)(react@19.3.0)
+        version: 5.3.1(chart.js@4.5.1)(react@19.3.1)
       react-dom:
         specifier: 19.3.0
-        version: 19.3.0(react@19.3.0)
+        version: 19.3.0(react@19.3.1)
       react-icons:
         specifier: 5.7.0
-        version: 5.7.0(react@19.3.0)
+        version: 5.7.0(react@19.3.1)
       react-leaflet:
         specifier: 5.0.0
-        version: 5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.1))(react@19.3.1)
       react-router-dom:
         specifier: 7.18.4
-        version: 7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 7.18.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1)
       swr:
         specifier: 2.5.1
-        version: 2.5.1(react@19.3.0)
+        version: 2.5.1(react@19.3.1)
     devDependencies:
       '@eslint/js':
         specifier: 10.0.1
@@ -1215,8 +1215,8 @@ packages:
       react-dom:
         optional: true
 
-  react@19.3.0:
-    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
+  react@19.3.1:
+    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
     engines: {node: '>=0.10.0'}
 
   require-from-string@2.0.2:
@@ -1725,10 +1725,10 @@ snapshots:
 
   '@kurkle/color@0.3.4': {}
 
-  '@lottiefiles/dotlottie-react@0.20.0(react@19.3.0)':
+  '@lottiefiles/dotlottie-react@0.20.0(react@19.3.1)':
     dependencies:
       '@lottiefiles/dotlottie-web': 0.81.0
-      react: 19.3.0
+      react: 19.3.1
 
   '@lottiefiles/dotlottie-web@0.81.0': {}
 
@@ -1746,11 +1746,11 @@ snapshots:
     dependencies:
       playwright: 1.63.0
 
-  '@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.1))(react@19.3.1)':
     dependencies:
       leaflet: 1.9.4
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
+      react: 19.3.1
+      react-dom: 19.3.0(react@19.3.1)
 
   '@rolldown/binding-android-arm-eabi@1.2.12':
     optional: true
@@ -1857,10 +1857,10 @@ snapshots:
 
   '@tanstack/query-core@5.104.1': {}
 
-  '@tanstack/react-query@5.104.1(react@19.3.0)':
+  '@tanstack/react-query@5.104.1(react@19.3.1)':
     dependencies:
       '@tanstack/query-core': 5.104.1
-      react: 19.3.0
+      react: 19.3.1
 
   '@types/chai@5.2.3':
     dependencies:
@@ -2023,10 +2023,10 @@ snapshots:
     dependencies:
       require-from-string: 2.0.2
 
-  boring-avatars@2.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  boring-avatars@2.0.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1):
     dependencies:
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
+      react: 19.3.1
+      react-dom: 19.3.0(react@19.3.1)
 
   brace-expansion@5.0.12:
     dependencies:
@@ -2387,10 +2387,10 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.12
 
-  mobx-react-lite@5.1.0(mobx@7.0.6)(react@19.3.0):
+  mobx-react-lite@5.1.0(mobx@7.0.6)(react@19.3.1):
     dependencies:
       mobx: 7.0.6
-      react: 19.3.0
+      react: 19.3.1
 
   mobx@7.0.6: {}
 
@@ -2453,42 +2453,42 @@ snapshots:
     dependencies:
       hookified: 2.2.0
 
-  react-chartjs-2@5.3.1(chart.js@4.5.1)(react@19.3.0):
+  react-chartjs-2@5.3.1(chart.js@4.5.1)(react@19.3.1):
     dependencies:
       chart.js: 4.5.1
-      react: 19.3.0
+      react: 19.3.1
 
-  react-dom@19.3.0(react@19.3.0):
+  react-dom@19.3.0(react@19.3.1):
     dependencies:
-      react: 19.3.0
+      react: 19.3.1
       scheduler: 0.28.0
 
-  react-icons@5.7.0(react@19.3.0):
+  react-icons@5.7.0(react@19.3.1):
     dependencies:
-      react: 19.3.0
+      react: 19.3.1
 
-  react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.1))(react@19.3.1):
     dependencies:
-      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.1))(react@19.3.1)
       leaflet: 1.9.4
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
+      react: 19.3.1
+      react-dom: 19.3.0(react@19.3.1)
 
-  react-router-dom@7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  react-router-dom@7.18.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1):
     dependencies:
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-      react-router: 7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react: 19.3.1
+      react-dom: 19.3.0(react@19.3.1)
+      react-router: 7.18.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1)
 
-  react-router@7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  react-router@7.18.4(react-dom@19.3.0(react@19.3.1))(react@19.3.1):
     dependencies:
       cookie: 1.1.1
-      react: 19.3.0
+      react: 19.3.1
       set-cookie-parser: 2.7.2
     optionalDependencies:
-      react-dom: 19.3.0(react@19.3.0)
+      react-dom: 19.3.0(react@19.3.1)
 
-  react@19.3.0: {}
+  react@19.3.1: {}
 
   require-from-string@2.0.2: {}
 
@@ -2549,11 +2549,11 @@ snapshots:
       '@supabase/cli-windows-arm64': 2.119.0
       '@supabase/cli-windows-x64': 2.119.0
 
-  swr@2.5.1(react@19.3.0):
+  swr@2.5.1(react@19.3.1):
     dependencies:
       dequal: 2.0.3
-      react: 19.3.0
-      use-sync-external-store: 1.7.0(react@19.3.0)
+      react: 19.3.1
+      use-sync-external-store: 1.7.0(react@19.3.1)
 
   tinybench@6.2.0: {}
 
@@ -2615,9 +2615,9 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  use-sync-external-store@1.7.0(react@19.3.0):
+  use-sync-external-store@1.7.0(react@19.3.1):
     dependencies:
-      react: 19.3.0
+      react: 19.3.1
 
   vite@8.3.3(@types/node@24.19.1):
     dependencies:
